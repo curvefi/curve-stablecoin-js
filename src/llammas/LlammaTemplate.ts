@@ -418,157 +418,6 @@ export class LlammaTemplate {
         return await this._createLoan(collateral, debt,  N, false) as string;
     }
 
-    // ---------------- ADD COLLATERAL ----------------
-
-    private async _getCurrentN(address = ""): Promise<ethers.BigNumber> {
-        address = _getAddress(address);
-        const _ns: ethers.BigNumber[] = await crvusd.contracts[this.address].contract.read_user_tick_numbers(address, crvusd.constantOptions);
-        return _ns[1].sub(_ns[0]).add(1);
-    }
-
-    private async _addCollateralTicks(collateral: number | string, address = ""): Promise<[ethers.BigNumber, ethers.BigNumber]> {
-        address = _getAddress(address);
-        const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState(address);
-        if (_currentDebt.eq(0)) throw Error(`Loan for ${address} is not created`);
-
-        const N = (await this._getCurrentN(address)).toNumber();
-        const _collateral = _currentCollateral.add(parseUnits(collateral, this.collateralDecimals));
-        const _n1 = await this._calcN1(_collateral, _currentDebt, N);
-        const _n2 = _n1.add(N - 1);
-
-        return [_n1, _n2];
-    }
-
-    public async addCollateralTicks(collateral: number | string, address = ""): Promise<[number, number]> {
-        const [_n1, _n2] = await this._addCollateralTicks(collateral, address);
-
-        return [_n1.toNumber(), _n2.toNumber()];
-    }
-
-    public async addCollateralPrices(collateral: number | string, address = ""): Promise<string[]> {
-        const [_n1, _n2] = await this._addCollateralTicks(collateral, address);
-
-        const contract = crvusd.contracts[this.address].contract
-        return (await Promise.all([
-            contract.p_oracle_up(_n1, crvusd.constantOptions),
-            contract.p_oracle_down(_n2, crvusd.constantOptions),
-        ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
-
-        // TODO switch to multicall
-        // const contract = crvusd.contracts[this.address].multicallContract;
-        // const [_price1, _price2] = await crvusd.multicallProvider.all([
-        //     contract.price_oracle_up(_n1),
-        //     contract.price_oracle_down(_n2),
-        // ]);
-    }
-
-    public async addCollateralIsApproved(collateral: number | string): Promise<boolean> {
-        return await hasAllowance([crvusd.address], [collateral], crvusd.signerAddress, this.controller);
-    }
-
-    private async addCollateralApproveEstimateGas (collateral: number | string): Promise<number> {
-        return await ensureAllowanceEstimateGas([crvusd.address], [collateral], this.controller);
-    }
-
-    public async addCollateralApprove(collateral: number | string): Promise<string[]> {
-        return await ensureAllowance([crvusd.address], [collateral], this.controller);
-    }
-
-    private async _addCollateral(collateral: number | string, address: string, estimateGas: boolean): Promise<string | number> {
-        const { stablecoin, debt: currentDebt } = await this.userState(address);
-        if (Number(currentDebt) === 0) throw Error(`Loan for ${address} is not created`);
-        if (Number(stablecoin) > 0) throw Error(`User ${address} is already in liquidation mode`);
-
-        const _collateral = parseUnits(collateral, this.collateralDecimals);
-        const contract = crvusd.contracts[this.controller].contract;
-        const gas = await contract.estimateGas.add_collateral(_collateral, address, crvusd.constantOptions);
-        if (estimateGas) return gas.toNumber();
-
-        await crvusd.updateFeeData();
-        const gasLimit = gas.mul(130).div(100);
-        return (await contract.add_collateral(_collateral, address, { ...crvusd.options, gasLimit })).hash
-    }
-
-    public async addCollateralEstimateGas(collateral: number | string, address = ""): Promise<number> {
-        address = _getAddress(address);
-        if (!(await this.addCollateralIsApproved(collateral))) throw Error("Approval is needed for gas estimation");
-        return await this._addCollateral(collateral, address, true) as number;
-    }
-
-    public async addCollateral(collateral: number | string, address = ""): Promise<string> {
-        address = _getAddress(address);
-        await this.addCollateralApprove(collateral);
-        return await this._addCollateral(collateral, address, false) as string;
-    }
-
-    // ---------------- WITHDRAW ----------------
-
-    public async withdrawMaxRecv(): Promise<string> {
-        const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
-        const _N = await this._getCurrentN();
-        const _requiredCollateral = await crvusd.contracts[this.controller].contract.min_collateral(_currentDebt, _N, crvusd.constantOptions)
-
-        return ethers.utils.formatUnits(_currentCollateral.sub(_requiredCollateral), this.collateralDecimals);
-    }
-
-    private async _withdrawTicks(collateral: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
-        const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
-        if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
-
-        const N = (await this._getCurrentN()).toNumber();
-        const _collateral = _currentCollateral.sub(parseUnits(collateral, this.collateralDecimals));
-        const _n1 = await this._calcN1(_collateral, _currentDebt, N);
-        const _n2 = _n1.add(N - 1);
-
-        return [_n1, _n2];
-    }
-
-    public async withdrawTicks(collateral: number | string): Promise<[number, number]> {
-        const [_n1, _n2] = await this._withdrawTicks(collateral);
-
-        return [_n1.toNumber(), _n2.toNumber()];
-    }
-
-    public async withdrawPrices(collateral: number | string): Promise<string[]> {
-        const [_n1, _n2] = await this._withdrawTicks(collateral);
-
-        const contract = crvusd.contracts[this.address].contract
-        return (await Promise.all([
-            contract.p_oracle_up(_n1, crvusd.constantOptions),
-            contract.p_oracle_down(_n2, crvusd.constantOptions),
-        ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
-
-        // TODO switch to multicall
-        // const contract = crvusd.contracts[this.address].multicallContract;
-        // const [_price1, _price2] = await crvusd.multicallProvider.all([
-        //     contract.price_oracle_up(_n1),
-        //     contract.price_oracle_down(_n2),
-        // ]);
-    }
-
-    private async _withdraw(collateral: number | string, estimateGas: boolean): Promise<string | number> {
-        const { stablecoin, debt: currentDebt } = await this.userState();
-        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
-        if (Number(stablecoin) > 0) throw Error(`User ${crvusd.signerAddress} is already in liquidation mode`);
-
-        const _collateral = parseUnits(collateral, this.collateralDecimals);
-        const contract = crvusd.contracts[this.controller].contract;
-        const gas = await contract.estimateGas.remove_collateral(_collateral, crvusd.constantOptions);
-        if (estimateGas) return gas.toNumber();
-
-        await crvusd.updateFeeData();
-        const gasLimit = gas.mul(130).div(100);
-        return (await contract.remove_collateral(_collateral, { ...crvusd.options, gasLimit })).hash
-    }
-
-    public async withdrawEstimateGas(collateral: number | string): Promise<number> {
-        return await this._withdraw(collateral, true) as number;
-    }
-
-    public async withdraw(collateral: number | string): Promise<string> {
-        return await this._withdraw(collateral, false) as string;
-    }
-
     // ---------------- BORROW MORE ----------------
 
     public async borrowMoreMaxRecv(collateralAmount: number | string): Promise<string> {
@@ -655,6 +504,157 @@ export class LlammaTemplate {
     public async borrowMore(collateral: number | string, debt: number | string): Promise<string> {
         await this.borrowMoreApprove(collateral);
         return await this._borrowMore(collateral, debt, false) as string;
+    }
+
+    // ---------------- ADD COLLATERAL ----------------
+
+    private async _getCurrentN(address = ""): Promise<ethers.BigNumber> {
+        address = _getAddress(address);
+        const _ns: ethers.BigNumber[] = await crvusd.contracts[this.address].contract.read_user_tick_numbers(address, crvusd.constantOptions);
+        return _ns[1].sub(_ns[0]).add(1);
+    }
+
+    private async _addCollateralTicks(collateral: number | string, address = ""): Promise<[ethers.BigNumber, ethers.BigNumber]> {
+        address = _getAddress(address);
+        const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState(address);
+        if (_currentDebt.eq(0)) throw Error(`Loan for ${address} is not created`);
+
+        const N = (await this._getCurrentN(address)).toNumber();
+        const _collateral = _currentCollateral.add(parseUnits(collateral, this.collateralDecimals));
+        const _n1 = await this._calcN1(_collateral, _currentDebt, N);
+        const _n2 = _n1.add(N - 1);
+
+        return [_n1, _n2];
+    }
+
+    public async addCollateralTicks(collateral: number | string, address = ""): Promise<[number, number]> {
+        const [_n1, _n2] = await this._addCollateralTicks(collateral, address);
+
+        return [_n1.toNumber(), _n2.toNumber()];
+    }
+
+    public async addCollateralPrices(collateral: number | string, address = ""): Promise<string[]> {
+        const [_n1, _n2] = await this._addCollateralTicks(collateral, address);
+
+        const contract = crvusd.contracts[this.address].contract
+        return (await Promise.all([
+            contract.p_oracle_up(_n1, crvusd.constantOptions),
+            contract.p_oracle_down(_n2, crvusd.constantOptions),
+        ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
+
+        // TODO switch to multicall
+        // const contract = crvusd.contracts[this.address].multicallContract;
+        // const [_price1, _price2] = await crvusd.multicallProvider.all([
+        //     contract.price_oracle_up(_n1),
+        //     contract.price_oracle_down(_n2),
+        // ]);
+    }
+
+    public async addCollateralIsApproved(collateral: number | string): Promise<boolean> {
+        return await hasAllowance([crvusd.address], [collateral], crvusd.signerAddress, this.controller);
+    }
+
+    private async addCollateralApproveEstimateGas (collateral: number | string): Promise<number> {
+        return await ensureAllowanceEstimateGas([crvusd.address], [collateral], this.controller);
+    }
+
+    public async addCollateralApprove(collateral: number | string): Promise<string[]> {
+        return await ensureAllowance([crvusd.address], [collateral], this.controller);
+    }
+
+    private async _addCollateral(collateral: number | string, address: string, estimateGas: boolean): Promise<string | number> {
+        const { stablecoin, debt: currentDebt } = await this.userState(address);
+        if (Number(currentDebt) === 0) throw Error(`Loan for ${address} is not created`);
+        if (Number(stablecoin) > 0) throw Error(`User ${address} is already in liquidation mode`);
+
+        const _collateral = parseUnits(collateral, this.collateralDecimals);
+        const contract = crvusd.contracts[this.controller].contract;
+        const gas = await contract.estimateGas.add_collateral(_collateral, address, crvusd.constantOptions);
+        if (estimateGas) return gas.toNumber();
+
+        await crvusd.updateFeeData();
+        const gasLimit = gas.mul(130).div(100);
+        return (await contract.add_collateral(_collateral, address, { ...crvusd.options, gasLimit })).hash
+    }
+
+    public async addCollateralEstimateGas(collateral: number | string, address = ""): Promise<number> {
+        address = _getAddress(address);
+        if (!(await this.addCollateralIsApproved(collateral))) throw Error("Approval is needed for gas estimation");
+        return await this._addCollateral(collateral, address, true) as number;
+    }
+
+    public async addCollateral(collateral: number | string, address = ""): Promise<string> {
+        address = _getAddress(address);
+        await this.addCollateralApprove(collateral);
+        return await this._addCollateral(collateral, address, false) as string;
+    }
+
+    // ---------------- REMOVE COLLATERAL ----------------
+
+    public async maxRemovable(): Promise<string> {
+        const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
+        const _N = await this._getCurrentN();
+        const _requiredCollateral = await crvusd.contracts[this.controller].contract.min_collateral(_currentDebt, _N, crvusd.constantOptions)
+
+        return ethers.utils.formatUnits(_currentCollateral.sub(_requiredCollateral), this.collateralDecimals);
+    }
+
+    private async _removeCollateralTicks(collateral: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
+        const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
+        if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
+
+        const N = (await this._getCurrentN()).toNumber();
+        const _collateral = _currentCollateral.sub(parseUnits(collateral, this.collateralDecimals));
+        const _n1 = await this._calcN1(_collateral, _currentDebt, N);
+        const _n2 = _n1.add(N - 1);
+
+        return [_n1, _n2];
+    }
+
+    public async removeCollateralTicks(collateral: number | string): Promise<[number, number]> {
+        const [_n1, _n2] = await this._removeCollateralTicks(collateral);
+
+        return [_n1.toNumber(), _n2.toNumber()];
+    }
+
+    public async removeCollateralPrices(collateral: number | string): Promise<string[]> {
+        const [_n1, _n2] = await this._removeCollateralTicks(collateral);
+
+        const contract = crvusd.contracts[this.address].contract
+        return (await Promise.all([
+            contract.p_oracle_up(_n1, crvusd.constantOptions),
+            contract.p_oracle_down(_n2, crvusd.constantOptions),
+        ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
+
+        // TODO switch to multicall
+        // const contract = crvusd.contracts[this.address].multicallContract;
+        // const [_price1, _price2] = await crvusd.multicallProvider.all([
+        //     contract.price_oracle_up(_n1),
+        //     contract.price_oracle_down(_n2),
+        // ]);
+    }
+
+    private async _removeCollateral(collateral: number | string, estimateGas: boolean): Promise<string | number> {
+        const { stablecoin, debt: currentDebt } = await this.userState();
+        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
+        if (Number(stablecoin) > 0) throw Error(`User ${crvusd.signerAddress} is already in liquidation mode`);
+
+        const _collateral = parseUnits(collateral, this.collateralDecimals);
+        const contract = crvusd.contracts[this.controller].contract;
+        const gas = await contract.estimateGas.remove_collateral(_collateral, crvusd.constantOptions);
+        if (estimateGas) return gas.toNumber();
+
+        await crvusd.updateFeeData();
+        const gasLimit = gas.mul(130).div(100);
+        return (await contract.remove_collateral(_collateral, { ...crvusd.options, gasLimit })).hash
+    }
+
+    public async removeCollateralEstimateGas(collateral: number | string): Promise<number> {
+        return await this._removeCollateral(collateral, true) as number;
+    }
+
+    public async removeCollateral(collateral: number | string): Promise<string> {
+        return await this._removeCollateral(collateral, false) as string;
     }
 
     // ---------------- REPAY ----------------
