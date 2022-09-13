@@ -381,15 +381,15 @@ export class LlammaTemplate {
     }
 
     public async createLoanIsApproved(collateral: number | string): Promise<boolean> {
-        return await hasAllowance([crvusd.address], [collateral], crvusd.signerAddress, this.controller);
+        return await hasAllowance([this.collateral], [collateral], crvusd.signerAddress, this.controller);
     }
 
     private async createLoanApproveEstimateGas (collateral: number | string): Promise<number> {
-        return await ensureAllowanceEstimateGas([crvusd.address], [collateral], this.controller);
+        return await ensureAllowanceEstimateGas([this.collateral], [collateral], this.controller);
     }
 
     public async createLoanApprove(collateral: number | string): Promise<string[]> {
-        return await ensureAllowance([crvusd.address], [collateral], this.controller);
+        return await ensureAllowance([this.collateral], [collateral], this.controller);
     }
 
     private async _createLoan(collateral: number | string, debt: number | string,  N: number, estimateGas: boolean): Promise<string | number> {
@@ -469,15 +469,15 @@ export class LlammaTemplate {
     }
 
     public async borrowMoreIsApproved(collateral: number | string): Promise<boolean> {
-        return await hasAllowance([crvusd.address], [collateral], crvusd.signerAddress, this.controller);
+        return await hasAllowance([this.collateral], [collateral], crvusd.signerAddress, this.controller);
     }
 
     private async borrowMoreApproveEstimateGas (collateral: number | string): Promise<number> {
-        return await ensureAllowanceEstimateGas([crvusd.address], [collateral], this.controller);
+        return await ensureAllowanceEstimateGas([this.collateral], [collateral], this.controller);
     }
 
     public async borrowMoreApprove(collateral: number | string): Promise<string[]> {
-        return await ensureAllowance([crvusd.address], [collateral], this.controller);
+        return await ensureAllowance([this.collateral], [collateral], this.controller);
     }
 
     private async _borrowMore(collateral: number | string, debt: number | string, estimateGas: boolean): Promise<string | number> {
@@ -551,15 +551,15 @@ export class LlammaTemplate {
     }
 
     public async addCollateralIsApproved(collateral: number | string): Promise<boolean> {
-        return await hasAllowance([crvusd.address], [collateral], crvusd.signerAddress, this.controller);
+        return await hasAllowance([this.collateral], [collateral], crvusd.signerAddress, this.controller);
     }
 
     private async addCollateralApproveEstimateGas (collateral: number | string): Promise<number> {
-        return await ensureAllowanceEstimateGas([crvusd.address], [collateral], this.controller);
+        return await ensureAllowanceEstimateGas([this.collateral], [collateral], this.controller);
     }
 
     public async addCollateralApprove(collateral: number | string): Promise<string[]> {
-        return await ensureAllowance([crvusd.address], [collateral], this.controller);
+        return await ensureAllowance([this.collateral], [collateral], this.controller);
     }
 
     private async _addCollateral(collateral: number | string, address: string, estimateGas: boolean): Promise<string | number> {
