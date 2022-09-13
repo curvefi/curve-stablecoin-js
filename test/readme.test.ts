@@ -76,7 +76,7 @@ const generalTest = async () => {
     const llamma = crvusd.getLlamma('eth');
 
 
-    // --- CREATE LOAN ---
+    console.log("\n--- CREATE LOAN ---\n");
 
     console.log(await llamma.oraclePrice());
     console.log(await llamma.basePrice());
@@ -100,22 +100,7 @@ const generalTest = async () => {
     console.log(await llamma.userPrices());
     console.log(await llamma.userState());
 
-    // --- ADD COLLATERAL ---
-
-    console.log(await llamma.addCollateralTicks(0.2));
-    console.log(await llamma.addCollateralPrices(0.2));
-    console.log(await llamma.addCollateralIsApproved(0.2));
-    console.log(await llamma.addCollateralApprove(0.2));
-    console.log(await llamma.addCollateral(0.2));  // OR await llamma.addCollateral(0.2, forAddress);
-
-    console.log(await llamma.debt());
-    console.log(await llamma.loanExists());
-    console.log(await llamma.health());
-    console.log(await llamma.userTicks());
-    console.log(await llamma.userPrices());
-    console.log(await llamma.userState());
-
-    // --- BORROW MORE ---
+    console.log("\n--- BORROW MORE ---\n");
 
     console.log(await llamma.borrowMoreMaxRecv(0.1));
     console.log(await llamma.borrowMoreTicks(0.1, 500));
@@ -124,20 +109,42 @@ const generalTest = async () => {
     console.log(await llamma.borrowMoreApprove(0.1));
     console.log(await llamma.borrowMore(0.1, 500));
 
-    console.log(await llamma.debt());
-    console.log(await llamma.loanExists());
     console.log(await llamma.health());
     console.log(await llamma.userTicks());
     console.log(await llamma.userPrices());
     console.log(await llamma.userState());
 
-    // --- REPAY ---
+    console.log("\n--- ADD COLLATERAL ---\n");
+
+    console.log(await llamma.addCollateralTicks(0.2));
+    console.log(await llamma.addCollateralPrices(0.2));
+    console.log(await llamma.addCollateralIsApproved(0.2));
+    console.log(await llamma.addCollateralApprove(0.2));
+    console.log(await llamma.addCollateral(0.2));  // OR await llamma.addCollateral(0.2, forAddress);
+
+    console.log(await llamma.health());
+    console.log(await llamma.userTicks());
+    console.log(await llamma.userPrices());
+    console.log(await llamma.userState());
+
+    console.log("\n--- REMOVE COLLATERAL ---\n")
+
+    console.log(await llamma.removeCollateralTicks(0.1));
+    console.log(await llamma.removeCollateralPrices(0.1));
+    console.log(await llamma.removeCollateral(0.1));
+
+    console.log(await llamma.health());
+    console.log(await llamma.userTicks());
+    console.log(await llamma.userPrices());
+    console.log(await llamma.userState());
+
+    console.log("\n--- REPAY ---\n");
 
     console.log(await llamma.wallet.balances());
 
     console.log(await llamma.repayIsApproved(1000));
     console.log(await llamma.repayApprove(1000));
-    // console.log(await llamma.repay(1000));
+    console.log(await llamma.repay(1000));
 
     console.log(await llamma.debt());
     console.log(await llamma.loanExists());
@@ -163,8 +170,6 @@ const swapTest = async () => {
 
     console.log(await llamma.wallet.balances());
 }
-
-swapTest();
 
 const selfLiquidationTest = async () => {
     await crvusd.init('JsonRpc', {});
