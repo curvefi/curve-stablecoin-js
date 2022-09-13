@@ -280,6 +280,27 @@
   {
     "inputs": [
       {
+        "name": "debt",
+        "type": "uint256"
+      },
+      {
+        "name": "N",
+        "type": "uint256"
+      }
+    ],
+    "name": "min_collateral",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
         "name": "collateral",
         "type": "uint256"
       },
@@ -334,6 +355,18 @@
       }
     ],
     "name": "add_collateral",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "collateral",
+        "type": "uint256"
+      }
+    ],
+    "name": "remove_collateral",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"

@@ -15,7 +15,6 @@ import {
     _cutZeros,
     MAX_ALLOWANCE,
 } from "../utils";
-import {IDict} from "../interfaces";
 
 
 export class LlammaTemplate {
@@ -476,9 +475,9 @@ export class LlammaTemplate {
     }
 
     private async _addCollateral(collateral: number | string, address: string, estimateGas: boolean): Promise<string | number> {
-        const { stablecoin, debt: currentDebt } = await this.userState();
-        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
-        if (Number(stablecoin) > 0) throw Error(`User ${crvusd.signerAddress} is already in liquidation mode`);
+        const { stablecoin, debt: currentDebt } = await this.userState(address);
+        if (Number(currentDebt) === 0) throw Error(`Loan for ${address} is not created`);
+        if (Number(stablecoin) > 0) throw Error(`User ${address} is already in liquidation mode`);
 
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const contract = crvusd.contracts[this.controller].contract;
@@ -500,6 +499,74 @@ export class LlammaTemplate {
         address = _getAddress(address);
         await this.addCollateralApprove(collateral);
         return await this._addCollateral(collateral, address, false) as string;
+    }
+
+    // ---------------- WITHDRAW ----------------
+
+    public async withdrawMaxRecv(): Promise<string> {
+        const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
+        const _N = await this._getCurrentN();
+        const _requiredCollateral = await crvusd.contracts[this.controller].contract.min_collateral(_currentDebt, _N, crvusd.constantOptions)
+
+        return ethers.utils.formatUnits(_currentCollateral.sub(_requiredCollateral), this.collateralDecimals);
+    }
+
+    private async _withdrawTicks(collateral: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
+        const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
+        if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
+
+        const N = (await this._getCurrentN()).toNumber();
+        const _collateral = _currentCollateral.sub(parseUnits(collateral, this.collateralDecimals));
+        const _n1 = await this._calcN1(_collateral, _currentDebt, N);
+        const _n2 = _n1.add(N - 1);
+
+        return [_n1, _n2];
+    }
+
+    public async withdrawTicks(collateral: number | string): Promise<[number, number]> {
+        const [_n1, _n2] = await this._withdrawTicks(collateral);
+
+        return [_n1.toNumber(), _n2.toNumber()];
+    }
+
+    public async withdrawPrices(collateral: number | string): Promise<string[]> {
+        const [_n1, _n2] = await this._withdrawTicks(collateral);
+
+        const contract = crvusd.contracts[this.address].contract
+        return (await Promise.all([
+            contract.p_oracle_up(_n1, crvusd.constantOptions),
+            contract.p_oracle_down(_n2, crvusd.constantOptions),
+        ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
+
+        // TODO switch to multicall
+        // const contract = crvusd.contracts[this.address].multicallContract;
+        // const [_price1, _price2] = await crvusd.multicallProvider.all([
+        //     contract.price_oracle_up(_n1),
+        //     contract.price_oracle_down(_n2),
+        // ]);
+    }
+
+    private async _withdraw(collateral: number | string, estimateGas: boolean): Promise<string | number> {
+        const { stablecoin, debt: currentDebt } = await this.userState();
+        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
+        if (Number(stablecoin) > 0) throw Error(`User ${crvusd.signerAddress} is already in liquidation mode`);
+
+        const _collateral = parseUnits(collateral, this.collateralDecimals);
+        const contract = crvusd.contracts[this.controller].contract;
+        const gas = await contract.estimateGas.remove_collateral(_collateral, crvusd.constantOptions);
+        if (estimateGas) return gas.toNumber();
+
+        await crvusd.updateFeeData();
+        const gasLimit = gas.mul(130).div(100);
+        return (await contract.remove_collateral(_collateral, { ...crvusd.options, gasLimit })).hash
+    }
+
+    public async withdrawEstimateGas(collateral: number | string): Promise<number> {
+        return await this._withdraw(collateral, true) as number;
+    }
+
+    public async withdraw(collateral: number | string): Promise<string> {
+        return await this._withdraw(collateral, false) as string;
     }
 
     // ---------------- BORROW MORE ----------------

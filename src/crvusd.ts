@@ -2,9 +2,9 @@ import { ethers, Contract } from "ethers";
 import { Networkish } from "@ethersproject/networks";
 import { Provider as MulticallProvider, Contract as MulticallContract } from 'ethcall';
 import { Icrvusd, IDict, ILlamma } from "./interfaces";
-import ERC20ABI from "./constants/abis/ERC20.json"
-import controllerABI from "./constants/abis/controller.json"
-import llammaABI from "./constants/abis/llamma.json"
+import ERC20ABI from "./constants/abis/ERC20.json";
+import controllerABI from "./constants/abis/controller.json";
+import llammaABI from "./constants/abis/llamma.json";
 import { LLAMMAS } from "./constants/llammas";
 import { COINS } from "./constants/coins";
 import { extractDecimals } from "./constants/utils";
