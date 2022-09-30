@@ -768,7 +768,7 @@ export class LlammaTemplate {
     public async swapApprove(i: number, amount: number | string): Promise<string[]> {
         if (i !== 0 && i !== 1) throw Error("Wrong index");
 
-        return await ensureAllowance([this.coinAddresses[i]], [amount], this.controller);
+        return await ensureAllowance([this.coinAddresses[i]], [amount], this.address);
     }
 
     private async _swap(i: number, j: number, amount: number | string, slippage: number, estimateGas: boolean): Promise<string | number> {
