@@ -470,6 +470,35 @@
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "name": "d_collateral",
+        "type": "int256"
+      },
+      {
+        "name": "d_debt",
+        "type": "int256"
+      },
+      {
+        "name": "full",
+        "type": "bool"
+      }
+    ],
+    "name": "health_calculator",
+    "outputs": [
+      {
+        "name": "",
+        "type": "int256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "amm_price",
     "outputs": [

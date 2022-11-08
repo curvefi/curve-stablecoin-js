@@ -244,7 +244,7 @@ export class LlammaTemplate {
         for (let i = 0; i < max_band - min_band + 1; i++) {
             bands[i] = {
                 stablecoin: ethers.utils.formatUnits(_bands[2 * i]),
-                collateral: ethers.utils.formatUnits(_bands[2 * i + 1], this.collateralDecimals),
+                collateral: ethers.utils.formatUnits(_bands[(2 * i) + 1], this.collateralDecimals),
             }
         }
 
@@ -271,9 +271,9 @@ export class LlammaTemplate {
         return  await crvusd.contracts[this.controller].contract.loan_exists(address, crvusd.constantOptions);
     }
 
-    public async health(address = "", full = false): Promise<string> {
+    public async health(full = true, address = ""): Promise<string> {
         address = _getAddress(address);
-        let _health = await crvusd.contracts[this.controller].contract.health(address, crvusd.constantOptions) as ethers.BigNumber;
+        let _health = await crvusd.contracts[this.controller].contract.health(address, full, crvusd.constantOptions) as ethers.BigNumber;
         _health = _health.mul(100);
 
         return ethers.utils.formatUnits(_health);
@@ -468,6 +468,18 @@ export class LlammaTemplate {
         // ]);
     }
 
+    public async borrowMoreHealth(collateral: number | string, debt: number | string, full = true, address = ""): Promise<string> {
+        address = _getAddress(address);
+        const _collateral = parseUnits(collateral, this.collateralDecimals);
+        const _debt = parseUnits(debt);
+
+        const contract = crvusd.contracts[this.controller].contract;
+        let _health = await contract.health_calculator(address, _collateral, _debt, full, crvusd.constantOptions) as ethers.BigNumber;
+        _health = _health.mul(100);
+
+        return ethers.utils.formatUnits(_health);
+    }
+
     public async borrowMoreIsApproved(collateral: number | string): Promise<boolean> {
         return await hasAllowance([this.collateral], [collateral], crvusd.signerAddress, this.controller);
     }
@@ -548,6 +560,17 @@ export class LlammaTemplate {
         //     contract.price_oracle_up(_n1),
         //     contract.price_oracle_down(_n2),
         // ]);
+    }
+
+    public async addCollateralHealth(collateral: number | string, full = true, address = ""): Promise<string> {
+        address = _getAddress(address);
+        const _collateral = parseUnits(collateral, this.collateralDecimals);
+
+        const contract = crvusd.contracts[this.controller].contract;
+        let _health = await contract.health_calculator(address, _collateral, 0, full, crvusd.constantOptions) as ethers.BigNumber;
+        _health = _health.mul(100);
+
+        return ethers.utils.formatUnits(_health);
     }
 
     public async addCollateralIsApproved(collateral: number | string): Promise<boolean> {
@@ -634,6 +657,17 @@ export class LlammaTemplate {
         // ]);
     }
 
+    public async removeCollateralHealth(collateral: number | string, full = true, address = ""): Promise<string> {
+        address = _getAddress(address);
+        const _collateral = parseUnits(collateral, this.collateralDecimals).mul(-1);
+
+        const contract = crvusd.contracts[this.controller].contract;
+        let _health = await contract.health_calculator(address, _collateral, 0, full, crvusd.constantOptions) as ethers.BigNumber;
+        _health = _health.mul(100);
+
+        return ethers.utils.formatUnits(_health);
+    }
+
     private async _removeCollateral(collateral: number | string, estimateGas: boolean): Promise<string | number> {
         const { stablecoin, debt: currentDebt } = await this.userState();
         if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
@@ -669,6 +703,17 @@ export class LlammaTemplate {
 
     public async repayApprove(debt: number | string): Promise<string[]> {
         return await ensureAllowance([crvusd.address], [debt], this.controller);
+    }
+
+    public async repayHealth(debt: number | string, full = true, address = ""): Promise<string> {
+        address = _getAddress(address);
+        const _debt = parseUnits(debt).mul(-1);
+
+        const contract = crvusd.contracts[this.controller].contract;
+        let _health = await contract.health_calculator(address, 0, _debt, full, crvusd.constantOptions) as ethers.BigNumber;
+        _health = _health.mul(100);
+
+        return ethers.utils.formatUnits(_health);
     }
 
     private async _repay(debt: number | string, address: string, estimateGas: boolean): Promise<string | number> {
