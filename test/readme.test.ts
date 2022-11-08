@@ -4,7 +4,7 @@ const generalMethodsTest = async () => {
     await crvusd.init('JsonRpc', {});
 
     const balances1 = await crvusd.getBalances(['crvusd', 'weth']);
-    // OR const balances1 = await crvusd.getBalances(['0xe0aA552A10d7EC8760Fc6c246D391E698a82dDf9', '0xE7eD6747FaC5360f88a2EFC03E00d25789F69291']);
+    // OR const balances1 = await crvusd.getBalances(['0x3194cBDC3dbcd3E11a07892e7bA5c3394048Cc87', '0xa3B53dDCd2E3fC28e8E130288F2aBD8d5EE37472']);
     console.log(balances1);
     // [ '0.0', '1.0' ]
 
@@ -15,7 +15,7 @@ const generalMethodsTest = async () => {
     // [ '0.0', '0.0' ]
 
 
-    const spender = "0x431e47D68ED6F82534d3af78cC175a54B3fCA89b" // eth llamma address
+    const spender = "0x3897810a334833184Ef7D6B419ba4d78EC2bBF80" // eth llamma address
 
     await crvusd.getAllowance(["crvusd", "weth"], crvusd.signerAddress, spender);
     // [ '0.0', '0.0' ]

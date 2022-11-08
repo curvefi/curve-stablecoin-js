@@ -2,6 +2,6 @@ import { lowerCaseValues } from "./utils";
 
 // TODO change for mainnet
 export const COINS = lowerCaseValues({
-    'weth': '0xE7eD6747FaC5360f88a2EFC03E00d25789F69291',
-    'crvusd': '0xe0aA552A10d7EC8760Fc6c246D391E698a82dDf9',
+    'weth': '0xa3B53dDCd2E3fC28e8E130288F2aBD8d5EE37472',
+    'crvusd': '0x3194cBDC3dbcd3E11a07892e7bA5c3394048Cc87',
 });

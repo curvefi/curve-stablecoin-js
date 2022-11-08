@@ -137,7 +137,7 @@ import crvusd from "@curvefi/stablecoin-api";
     await crvusd.init('JsonRpc', {});
     
     const balances1 = await crvusd.getBalances(['crvusd', 'weth']);
-    // OR const balances1 = await crvusd.getBalances(['0xe0aA552A10d7EC8760Fc6c246D391E698a82dDf9', '0xE7eD6747FaC5360f88a2EFC03E00d25789F69291']);
+    // OR const balances1 = await crvusd.getBalances(['0x3194cBDC3dbcd3E11a07892e7bA5c3394048Cc87', '0xa3B53dDCd2E3fC28e8E130288F2aBD8d5EE37472']);
     console.log(balances1);
     // [ '10000.0', '0.0' ]
 
@@ -148,7 +148,7 @@ import crvusd from "@curvefi/stablecoin-api";
     // [ '0.0', '0.0' ]
 
     
-    const spender = "0x431e47D68ED6F82534d3af78cC175a54B3fCA89b";
+    const spender = "0x3897810a334833184Ef7D6B419ba4d78EC2bBF80";
 
     await crvusd.getAllowance(["crvusd", "weth"], crvusd.signerAddress, spender);
     // [ '0.0', '0.0' ]
@@ -176,15 +176,15 @@ import crvusd from "@curvefi/stablecoin-api";
     llamma.id;
     // eth
     llamma.address;
-    // 0x431e47d68ed6f82534d3af78cc175a54b3fca89b
+    // 0x3897810a334833184Ef7D6B419ba4d78EC2bBF80
     llamma.controller;
-    // 0x8fcc5562719f201220fee35a874867627d653f45
+    // 0x1eF9f7C2abD0E351a8966f00565e1b04765d3f0C
     llamma.collateralDecimals;
     // 18
     llamma.coinAddresses;
     // [
-    //     '0xe0aa552a10d7ec8760fc6c246d391e698a82ddf9',
-    //     '0xe7ed6747fac5360f88a2efc03e00d25789f69291'
+    //     '0x3194cBDC3dbcd3E11a07892e7bA5c3394048Cc87',
+    //     '0xa3B53dDCd2E3fC28e8E130288F2aBD8d5EE37472'
     // ]
     llamma.coinDecimals;
     // [ 18, 18 ]
@@ -487,7 +487,7 @@ import crvusd from "@curvefi/stablecoin-api";
 (async () => {
     await crvusd.init('JsonRpc', {});
     
-    const spender = "0x431e47D68ED6F82534d3af78cC175a54B3fCA89b";
+    const spender = "0x3897810a334833184Ef7D6B419ba4d78EC2bBF80";
     await crvusd.estimateGas.ensureAllowance(["weth"], [1], spender);
     // 94523
     

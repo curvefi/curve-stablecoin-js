@@ -28,7 +28,7 @@ class Crvusd implements Icrvusd {
     };
 
     constructor() {
-        this.address = '0xe0aA552A10d7EC8760Fc6c246D391E698a82dDf9'.toLowerCase();
+        this.address = '0x3194cBDC3dbcd3E11a07892e7bA5c3394048Cc87'.toLowerCase();
         // @ts-ignore
         this.provider = null;
         // @ts-ignore
