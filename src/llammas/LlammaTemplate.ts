@@ -693,6 +693,41 @@ export class LlammaTemplate {
 
     // ---------------- REPAY ----------------
 
+    private async _repayTicks(debt: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
+        const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
+        if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
+
+        const N = (await this._getCurrentN()).toNumber();
+        const _debt = _currentDebt.sub(parseUnits(debt, this.collateralDecimals));
+        const _n1 = await this._calcN1(_currentCollateral, _debt, N);
+        const _n2 = _n1.add(N - 1);
+
+        return [_n1, _n2];
+    }
+
+    public async repayTicks(debt: number | string): Promise<[number, number]> {
+        const [_n1, _n2] = await this._repayTicks(debt);
+
+        return [_n1.toNumber(), _n2.toNumber()];
+    }
+
+    public async repayPrices(debt: number | string): Promise<string[]> {
+        const [_n1, _n2] = await this._repayTicks(debt);
+
+        const contract = crvusd.contracts[this.address].contract
+        return (await Promise.all([
+            contract.p_oracle_up(_n1, crvusd.constantOptions),
+            contract.p_oracle_down(_n2, crvusd.constantOptions),
+        ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
+
+        // TODO switch to multicall
+        // const contract = crvusd.contracts[this.address].multicallContract;
+        // const [_price1, _price2] = await crvusd.multicallProvider.all([
+        //     contract.price_oracle_up(_n1),
+        //     contract.price_oracle_down(_n2),
+        // ]);
+    }
+
     public async repayIsApproved(debt: number | string): Promise<boolean> {
         return await hasAllowance([crvusd.address], [debt], crvusd.signerAddress, this.controller);
     }
