@@ -342,6 +342,21 @@ export class LlammaTemplate {
         return await crvusd.contracts[this.controller].contract.calculate_debt_n1(_collateral, _debt, N, crvusd.constantOptions);
     }
 
+    private async _calcPrices(_n1: ethers.BigNumber, _n2: ethers.BigNumber): Promise<string[]> {
+        const contract = crvusd.contracts[this.address].contract
+        return (await Promise.all([
+            contract.p_oracle_up(_n1, crvusd.constantOptions),
+            contract.p_oracle_down(_n2, crvusd.constantOptions),
+        ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
+
+        // TODO switch to multicall
+        // const contract = crvusd.contracts[this.address].multicallContract;
+        // const [_price1, _price2] = await crvusd.multicallProvider.all([
+        //     contract.price_oracle_up(_n1),
+        //     contract.price_oracle_down(_n2),
+        // ]);
+    }
+
     public async createLoanMaxRecv(collateral: number | string, N: number): Promise<string> {
         if (N < this.minTicks) throw Error(`N must be >= ${this.minTicks}`);
         if (N > this.maxTicks) throw Error(`N must be <= ${this.maxTicks}`);
@@ -366,18 +381,7 @@ export class LlammaTemplate {
     public async createLoanPrices(collateral: number | string, debt: number | string, N: number): Promise<string[]> {
         const [_n1, _n2] = await this._createLoanTicks(collateral, debt, N);
 
-        const contract = crvusd.contracts[this.address].contract
-        return (await Promise.all([
-            contract.p_oracle_up(_n1, crvusd.constantOptions),
-            contract.p_oracle_down(_n2, crvusd.constantOptions),
-        ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
-
-        // TODO switch to multicall
-        // const contract = crvusd.contracts[this.address].multicallContract;
-        // const [_price1, _price2] = await crvusd.multicallProvider.all([
-        //     contract.price_oracle_up(_n1),
-        //     contract.price_oracle_down(_n2),
-        // ]);
+        return await this._calcPrices(_n1, _n2);
     }
 
     public async createLoanIsApproved(collateral: number | string): Promise<boolean> {
@@ -454,18 +458,7 @@ export class LlammaTemplate {
     public async borrowMorePrices(collateral: number | string, debt: number | string): Promise<string[]> {
         const [_n1, _n2] = await this._borrowMoreTicks(collateral, debt);
 
-        const contract = crvusd.contracts[this.address].contract
-        return (await Promise.all([
-            contract.p_oracle_up(_n1, crvusd.constantOptions),
-            contract.p_oracle_down(_n2, crvusd.constantOptions),
-        ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
-
-        // TODO switch to multicall
-        // const contract = crvusd.contracts[this.address].multicallContract;
-        // const [_price1, _price2] = await crvusd.multicallProvider.all([
-        //     contract.price_oracle_up(_n1),
-        //     contract.price_oracle_down(_n2),
-        // ]);
+        return await this._calcPrices(_n1, _n2);
     }
 
     public async borrowMoreHealth(collateral: number | string, debt: number | string, full = true, address = ""): Promise<string> {
@@ -548,18 +541,7 @@ export class LlammaTemplate {
     public async addCollateralPrices(collateral: number | string, address = ""): Promise<string[]> {
         const [_n1, _n2] = await this._addCollateralTicks(collateral, address);
 
-        const contract = crvusd.contracts[this.address].contract
-        return (await Promise.all([
-            contract.p_oracle_up(_n1, crvusd.constantOptions),
-            contract.p_oracle_down(_n2, crvusd.constantOptions),
-        ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
-
-        // TODO switch to multicall
-        // const contract = crvusd.contracts[this.address].multicallContract;
-        // const [_price1, _price2] = await crvusd.multicallProvider.all([
-        //     contract.price_oracle_up(_n1),
-        //     contract.price_oracle_down(_n2),
-        // ]);
+        return await this._calcPrices(_n1, _n2);
     }
 
     public async addCollateralHealth(collateral: number | string, full = true, address = ""): Promise<string> {
@@ -643,18 +625,7 @@ export class LlammaTemplate {
     public async removeCollateralPrices(collateral: number | string): Promise<string[]> {
         const [_n1, _n2] = await this._removeCollateralTicks(collateral);
 
-        const contract = crvusd.contracts[this.address].contract
-        return (await Promise.all([
-            contract.p_oracle_up(_n1, crvusd.constantOptions),
-            contract.p_oracle_down(_n2, crvusd.constantOptions),
-        ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
-
-        // TODO switch to multicall
-        // const contract = crvusd.contracts[this.address].multicallContract;
-        // const [_price1, _price2] = await crvusd.multicallProvider.all([
-        //     contract.price_oracle_up(_n1),
-        //     contract.price_oracle_down(_n2),
-        // ]);
+        return await this._calcPrices(_n1, _n2);
     }
 
     public async removeCollateralHealth(collateral: number | string, full = true, address = ""): Promise<string> {
@@ -714,18 +685,7 @@ export class LlammaTemplate {
     public async repayPrices(debt: number | string): Promise<string[]> {
         const [_n1, _n2] = await this._repayTicks(debt);
 
-        const contract = crvusd.contracts[this.address].contract
-        return (await Promise.all([
-            contract.p_oracle_up(_n1, crvusd.constantOptions),
-            contract.p_oracle_down(_n2, crvusd.constantOptions),
-        ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
-
-        // TODO switch to multicall
-        // const contract = crvusd.contracts[this.address].multicallContract;
-        // const [_price1, _price2] = await crvusd.multicallProvider.all([
-        //     contract.price_oracle_up(_n1),
-        //     contract.price_oracle_down(_n2),
-        // ]);
+        return await this._calcPrices(_n1, _n2);
     }
 
     public async repayIsApproved(debt: number | string): Promise<boolean> {
