@@ -302,8 +302,10 @@ import crvusd from "@curvefi/stablecoin-api";
     // 1000.0
     await llamma.loanExists();
     // true
-    await llamma.health();
+    await llamma.health();  // FULL
     // 45.1912031476161562 %
+    await llamma.health(false);  // NOT FULL
+    // 3.9382535412942379
     await llamma.userTicks();
     // [ 32, 36 ]
     await llamma.userPrices();
@@ -319,13 +321,20 @@ import crvusd from "@curvefi/stablecoin-api";
     // [ 10, 14 ]
     await llamma.borrowMorePrices(0.1, 500);
     // [ '2713.146225026413746', '2580.175063923865968' ]
+    await llamma.borrowMoreHealth(0.1, 500);  // FULL
+    // 15.200984677843693 %
+    await llamma.borrowMoreHealth(0.1, 500, false);  // NOT FULL
+    // 3.7268336789002429 %
+    
     await llamma.borrowMoreIsApproved(0.1);
     // true
     await llamma.borrowMoreApprove(0.1);
     // []
+    
     await llamma.borrowMore(0.1, 500);
 
-    // Health: 15.2009846778436941 %
+    // Full health: 15.200984677843694 %
+    // Not full health: 3.7268336789002439 %
     // Ticks: [ 10, 14 ]
     // Prices: [ '2713.146225026413746', '2580.175063923865968' ]
     // State: { collateral: '0.6', stablecoin: '0.0', debt: '1500.0' }
@@ -336,13 +345,20 @@ import crvusd from "@curvefi/stablecoin-api";
     // [ 39, 43 ]
     await llamma.addCollateralPrices(0.2);
     // [ '2027.187147180850842', '1927.834806254156043' ]
+    await llamma.addCollateralHealth(0.2);  // FULL
+    // 55.2190795613534006
+    await llamma.addCollateralHealth(0.2, false);  // NOT FULL
+    // 3.3357274109987789
+    
     await llamma.addCollateralIsApproved(0.2);
     // true
     await llamma.addCollateralApprove(0.2);
     // []
+    
     await llamma.addCollateral(0.2);  // OR await llamma.addCollateral(0.2, forAddress);
 
-    // Health: 55.2190795613534014 %
+    // Full health: 55.2190795613534014 %
+    // Not full health: 3.3357274109987797 %
     // Ticks: [ 39, 43 ]
     // Prices: [ '2027.187147180850842', '1927.834806254156043' ]
     // State: { collateral: '0.8', stablecoin: '0.0', debt: '1500.0' }
@@ -355,9 +371,15 @@ import crvusd from "@curvefi/stablecoin-api";
     // [ 25, 29 ]
     await llamma.removeCollateralPrices(0.1);
     // [ '2333.46407819744091', '2219.101120164841944' ]
+    await llamma.removeCollateralHealth(0.1);  // FULL
+    // 35.1846612411492316
+    await llamma.removeCollateralHealth(0.1, false);  // NOT FULL
+    // 4.0796515570298074
+    
     await llamma.removeCollateral(0.1);
 
-    // Health: 35.1846612411492326 %
+    // Full health: 35.1846612411492326 %
+    // Not full health: 4.0796515570298084 %
     // Ticks: [ 25, 29 ]
     // Prices: [ '2333.46407819744091', '2219.101120164841944' ]
     // State: { collateral: '0.7', stablecoin: '0.0', debt: '1500.0' }
@@ -367,13 +389,19 @@ import crvusd from "@curvefi/stablecoin-api";
     await llamma.wallet.balances();
     // { stablecoin: '1500.0', collateral: '0.3' }
 
+    await llamma.repayHealth(1000);  // FULL
+    // 315.2178906180373138
+    await llamma.repayHealth(1000, false);  // NOT FULL
+    // 3.3614254588945566
+    
     await llamma.repayIsApproved(1000);
     // true
     await llamma.repayApprove(1000);
     // []
     await llamma.repay(1000);
 
-    // Health: 315.2178906180373149 %
+    // Full health: 315.2178906180373149 %
+    // Not full health: 3.3614254588945577 %
     // Ticks: [ 135, 139 ]
     // Prices: [ '772.453820291837448', '734.595897104762463' ]
     // State: { collateral: '0.7', stablecoin: '0.0', debt: '500.0' }
