@@ -290,6 +290,11 @@ import crvusd from "@curvefi/stablecoin-api";
     // [ 32, 36 ]
     await llamma.createLoanPrices(0.5, 1000, 5);
     // [ '2174.941007873561634', '2068.347257607234777' ]
+    await llamma.createLoanHealth(0.5, 1000, 5);  // FULL
+    // 45.191203147616155
+    await llamma.createLoanHealth(0.5, 1000, 5, false);  // NOT FULL
+    // 3.9382535412942367
+    
     await llamma.createLoanIsApproved(0.5);
     // false
     await llamma.createLoanApprove(0.5);

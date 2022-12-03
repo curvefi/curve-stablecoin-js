@@ -85,6 +85,9 @@ const generalTest = async () => {
     console.log(await llamma.createLoanMaxRecv(0.5, 5));
     console.log(await llamma.createLoanTicks(0.5, 1000, 5));
     console.log(await llamma.createLoanPrices(0.5, 1000, 5));
+    console.log(await llamma.createLoanHealth(0.5, 1000, 5));  // FULL
+    console.log(await llamma.createLoanHealth(0.5, 1000, 5, false));  // NOT FULL
+
     console.log(await llamma.createLoanIsApproved(0.5));
     // false
     console.log(await llamma.createLoanApprove(0.5));
