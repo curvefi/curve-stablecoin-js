@@ -909,9 +909,11 @@ export class LlammaTemplate {
 
         const rateBN = outputBN.div(amountBN);
         const smallRateBN = smallOutputBN.div(smallAmountBN);
+        if (rateBN.gt(smallRateBN)) return "0";
+
         const slippageBN = BN(1).minus(rateBN.div(smallRateBN)).times(100);
 
-        return _cutZeros(slippageBN.toFixed(6)).replace('-', '')
+        return _cutZeros(slippageBN.toFixed(6));
     }
 
     public async swapIsApproved(i: number, amount: number | string): Promise<boolean> {
