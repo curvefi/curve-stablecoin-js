@@ -405,16 +405,16 @@ export class LlammaTemplate {
         }
         const _amounts = await Promise.all(calls) as ethers.BigNumber[];
 
-        const res: { [index: number]: string } = {};
-        for (let N = 5; N <= 50; N++) {
-            res[N] = ethers.utils.formatUnits(_amounts[N - 5]);
-        }
-
         // TODO switch to multicall
         // for (let N = 5; N <= 50; N++) {
         //     calls.push(crvusd.contracts[this.controller].multicallContract.max_borrowable(_collateral, N));
         // }
         // const _amounts = await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
+
+        const res: { [index: number]: string } = {};
+        for (let N = 5; N <= 50; N++) {
+            res[N] = ethers.utils.formatUnits(_amounts[N - 5]);
+        }
 
         return res;
     }
