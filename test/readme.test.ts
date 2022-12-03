@@ -41,6 +41,7 @@ const llammaFieldsTest = async () => {
     console.log(llamma.coinDecimals);
     console.log(llamma.minTicks);
     console.log(llamma.maxTicks);
+    console.log(llamma.defaultTicks);
 }
 
 const walletBalancesTest = async () => {

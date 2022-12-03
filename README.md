@@ -192,6 +192,8 @@ import crvusd from "@curvefi/stablecoin-api";
     // 5
     llamma.maxTicks;
     // 50
+    llamma.defaultTicks;
+    // 20
 })()
 ````
 

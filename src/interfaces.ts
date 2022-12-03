@@ -12,6 +12,7 @@ export interface ILlamma {
     collateral_decimals: number,
     min_ticks: number,
     max_ticks: number,
+    default_ticks: number,
 }
 
 export interface Icrvusd {

@@ -10,5 +10,6 @@ export const LLAMMAS: IDict<ILlamma> = lowerCaseLlammasAddresses({
         collateral_decimals: 18,
         min_ticks: 5,
         max_ticks: 50,
+        default_ticks: 20,
     },
 });
