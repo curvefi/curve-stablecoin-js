@@ -266,7 +266,7 @@ export class LlammaTemplate {
         return ethers.utils.formatUnits(debt);
     }
 
-    public async loanExists(address = ""): Promise<string> {
+    public async loanExists(address = ""): Promise<boolean> {
         address = _getAddress(address);
         return  await crvusd.contracts[this.controller].contract.loan_exists(address, crvusd.constantOptions);
     }
@@ -384,6 +384,18 @@ export class LlammaTemplate {
         return await this._calcPrices(_n1, _n2);
     }
 
+    public async createLoanHealth(collateral: number | string, debt: number | string, N: number, full = true, address = ""): Promise<string> {
+        address = _getAddress(address);
+        const _collateral = parseUnits(collateral, this.collateralDecimals);
+        const _debt = parseUnits(debt);
+
+        const contract = crvusd.contracts[this.controller].contract;
+        let _health = await contract.health_calculator(address, _collateral, _debt, full, N, crvusd.constantOptions) as ethers.BigNumber;
+        _health = _health.mul(100);
+
+        return ethers.utils.formatUnits(_health);
+    }
+
     public async createLoanIsApproved(collateral: number | string): Promise<boolean> {
         return await hasAllowance([this.collateral], [collateral], crvusd.signerAddress, this.controller);
     }
@@ -467,7 +479,7 @@ export class LlammaTemplate {
         const _debt = parseUnits(debt);
 
         const contract = crvusd.contracts[this.controller].contract;
-        let _health = await contract.health_calculator(address, _collateral, _debt, full, crvusd.constantOptions) as ethers.BigNumber;
+        let _health = await contract.health_calculator(address, _collateral, _debt, full, 0, crvusd.constantOptions) as ethers.BigNumber;
         _health = _health.mul(100);
 
         return ethers.utils.formatUnits(_health);
@@ -549,7 +561,7 @@ export class LlammaTemplate {
         const _collateral = parseUnits(collateral, this.collateralDecimals);
 
         const contract = crvusd.contracts[this.controller].contract;
-        let _health = await contract.health_calculator(address, _collateral, 0, full, crvusd.constantOptions) as ethers.BigNumber;
+        let _health = await contract.health_calculator(address, _collateral, 0, full, 0, crvusd.constantOptions) as ethers.BigNumber;
         _health = _health.mul(100);
 
         return ethers.utils.formatUnits(_health);
@@ -633,7 +645,7 @@ export class LlammaTemplate {
         const _collateral = parseUnits(collateral, this.collateralDecimals).mul(-1);
 
         const contract = crvusd.contracts[this.controller].contract;
-        let _health = await contract.health_calculator(address, _collateral, 0, full, crvusd.constantOptions) as ethers.BigNumber;
+        let _health = await contract.health_calculator(address, _collateral, 0, full, 0, crvusd.constantOptions) as ethers.BigNumber;
         _health = _health.mul(100);
 
         return ethers.utils.formatUnits(_health);
@@ -705,7 +717,7 @@ export class LlammaTemplate {
         const _debt = parseUnits(debt).mul(-1);
 
         const contract = crvusd.contracts[this.controller].contract;
-        let _health = await contract.health_calculator(address, 0, _debt, full, crvusd.constantOptions) as ethers.BigNumber;
+        let _health = await contract.health_calculator(address, 0, _debt, full, 0, crvusd.constantOptions) as ethers.BigNumber;
         _health = _health.mul(100);
 
         return ethers.utils.formatUnits(_health);

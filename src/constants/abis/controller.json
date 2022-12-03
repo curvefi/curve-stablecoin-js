@@ -486,7 +486,12 @@
       {
         "name": "full",
         "type": "bool"
+      },
+      {
+        "name": "N",
+        "type": "uint256"
       }
+
     ],
     "name": "health_calculator",
     "outputs": [
