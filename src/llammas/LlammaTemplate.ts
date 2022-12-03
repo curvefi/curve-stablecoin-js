@@ -342,6 +342,20 @@ export class LlammaTemplate {
         return await crvusd.contracts[this.controller].contract.calculate_debt_n1(_collateral, _debt, N, crvusd.constantOptions);
     }
 
+    private async _calcN1AllRanges(_collateral: ethers.BigNumber, _debt: ethers.BigNumber): Promise<ethers.BigNumber[]> {
+        const calls = [];
+        for (let N = 5; N <= 50; N++) {
+            calls.push(crvusd.contracts[this.controller].contract.calculate_debt_n1(_collateral, _debt, N, crvusd.constantOptions));
+        }
+        return await Promise.all(calls) as ethers.BigNumber[];
+
+        // TODO switch to multicall
+        // for (let N = 5; N <= 50; N++) {
+        //     calls.push(crvusd.contracts[this.controller].multicallContract.calculate_debt_n1(_collateral, _debt, N));
+        // }
+        // return await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
+    }
+
     private async _calcPrices(_n1: ethers.BigNumber, _n2: ethers.BigNumber): Promise<string[]> {
         const contract = crvusd.contracts[this.address].contract
         return (await Promise.all([
@@ -374,13 +388,18 @@ export class LlammaTemplate {
         }
         const _amounts = await Promise.all(calls) as ethers.BigNumber[];
 
+        const res: { [index: number]: string } = {};
+        for (let N = 5; N <= 50; N++) {
+            res[N] = ethers.utils.formatUnits(_amounts[N - 5]);
+        }
+
         // TODO switch to multicall
         // for (let N = 5; N <= 50; N++) {
         //     calls.push(crvusd.contracts[this.controller].multicallContract.max_borrowable(_collateral, N));
         // }
         // const _amounts = await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
 
-        return _amounts.map((_a) => ethers.utils.formatUnits(_a));
+        return res;
     }
 
     private async _createLoanTicks(collateral: number | string, debt: number | string, N: number): Promise<[ethers.BigNumber, ethers.BigNumber]> {
@@ -390,10 +409,36 @@ export class LlammaTemplate {
         return [_n1, _n2];
     }
 
+    private async _createLoanTicksAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [ethers.BigNumber, ethers.BigNumber] }> {
+        const _n1_arr = await this._calcN1AllRanges(parseUnits(collateral, this.collateralDecimals), parseUnits(debt));
+        const _n2_arr: ethers.BigNumber[] = [];
+        for (let N = 5; N <= 50; N++) {
+            _n2_arr.push(_n1_arr[N - 5].add(ethers.BigNumber.from(N - 1)));
+        }
+
+        const res: { [index: number]: [ethers.BigNumber, ethers.BigNumber] } = {};
+        for (let N = 5; N <= 50; N++) {
+            res[N] = [_n1_arr[N - 5], _n2_arr[N - 5]];
+        }
+
+        return res;
+    }
+
     public async createLoanTicks(collateral: number | string, debt: number | string, N: number): Promise<[number, number]> {
         const [_n1, _n2] = await this._createLoanTicks(collateral, debt, N);
 
         return [_n1.toNumber(), _n2.toNumber()];
+    }
+
+    public async createLoanTicksAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [number, number] }> {
+        const _ticksAllRanges = await this._createLoanTicksAllRanges(collateral, debt);
+
+        const ticksAllRanges: { [index: number]: [number, number] } = {};
+        for (const N in _ticksAllRanges) {
+            ticksAllRanges[N] = _ticksAllRanges[N].map(Number) as [number, number];
+        }
+
+        return ticksAllRanges;
     }
 
     public async createLoanPrices(collateral: number | string, debt: number | string, N: number): Promise<string[]> {
