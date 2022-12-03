@@ -79,7 +79,6 @@ const generalTest = async () => {
     console.log("\n--- CREATE LOAN ---\n");
 
     console.log(await llamma.oraclePrice());
-    console.log(await llamma.basePrice());
     console.log(await llamma.price());
     console.log(await llamma.wallet.balances());
     console.log(await llamma.createLoanMaxRecv(0.5, 5));

@@ -339,6 +339,46 @@ export class LlammaTemplate {
 
     // ---------------- CREATE LOAN ----------------
 
+    public async createLoanMaxRecv(collateral: number | string, N: number): Promise<string> {
+        if (N < this.minTicks) throw Error(`N must be >= ${this.minTicks}`);
+        if (N > this.maxTicks) throw Error(`N must be <= ${this.maxTicks}`);
+        const _collateral = parseUnits(collateral, this.collateralDecimals);
+
+        return ethers.utils.formatUnits(await crvusd.contracts[this.controller].contract.max_borrowable(_collateral, N, crvusd.constantOptions));
+    }
+
+    public async createLoanMaxRecvAllRanges(collateral: number | string): Promise<{ [index: number]: string }> {
+        const _collateral = parseUnits(collateral, this.collateralDecimals);
+
+        const calls = [];
+        for (let N = 5; N <= 50; N++) {
+            calls.push(crvusd.contracts[this.controller].contract.max_borrowable(_collateral, N, crvusd.constantOptions));
+        }
+        const _amounts = await Promise.all(calls) as ethers.BigNumber[];
+
+        // TODO switch to multicall
+        // for (let N = 5; N <= 50; N++) {
+        //     calls.push(crvusd.contracts[this.controller].multicallContract.max_borrowable(_collateral, N));
+        // }
+        // const _amounts = await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
+
+        const res: { [index: number]: string } = {};
+        for (let N = 5; N <= 50; N++) {
+            res[N] = ethers.utils.formatUnits(_amounts[N - 5]);
+        }
+
+        return res;
+    }
+
+    public async getMaxN(collateral: number | string, debt: number | string): Promise<number> {
+        const maxRecv = await this.createLoanMaxRecvAllRanges(collateral);
+        for (let N = 5; N <= 50; N++) {
+            if (BN(debt).gt(BN(maxRecv[N]))) return N - 1;
+        }
+
+        return 50;
+    }
+
     private async _calcN1(_collateral: ethers.BigNumber, _debt: ethers.BigNumber, N: number): Promise<ethers.BigNumber> {
         if (N < this.minTicks) throw Error(`N must be >= ${this.minTicks}`);
         if (N > this.maxTicks) throw Error(`N must be <= ${this.maxTicks}`);
@@ -346,15 +386,15 @@ export class LlammaTemplate {
         return await crvusd.contracts[this.controller].contract.calculate_debt_n1(_collateral, _debt, N, crvusd.constantOptions);
     }
 
-    private async _calcN1AllRanges(_collateral: ethers.BigNumber, _debt: ethers.BigNumber): Promise<ethers.BigNumber[]> {
+    private async _calcN1AllRanges(_collateral: ethers.BigNumber, _debt: ethers.BigNumber, maxN: number): Promise<ethers.BigNumber[]> {
         const calls = [];
-        for (let N = 5; N <= 50; N++) {
+        for (let N = 5; N <= maxN; N++) {
             calls.push(crvusd.contracts[this.controller].contract.calculate_debt_n1(_collateral, _debt, N, crvusd.constantOptions));
         }
         return await Promise.all(calls) as ethers.BigNumber[];
 
         // TODO switch to multicall
-        // for (let N = 5; N <= 50; N++) {
+        // for (let N = 5; N <= maxN; N++) {
         //     calls.push(crvusd.contracts[this.controller].multicallContract.calculate_debt_n1(_collateral, _debt, N));
         // }
         // return await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
@@ -388,37 +428,6 @@ export class LlammaTemplate {
         ].map(_cutZeros) as [string, string];
     }
 
-    public async createLoanMaxRecv(collateral: number | string, N: number): Promise<string> {
-        if (N < this.minTicks) throw Error(`N must be >= ${this.minTicks}`);
-        if (N > this.maxTicks) throw Error(`N must be <= ${this.maxTicks}`);
-        const _collateral = parseUnits(collateral, this.collateralDecimals);
-
-        return ethers.utils.formatUnits(await crvusd.contracts[this.controller].contract.max_borrowable(_collateral, N, crvusd.constantOptions));
-    }
-
-    public async createLoanMaxRecvAllRanges(collateral: number | string): Promise<{ [index: number]: string }> {
-        const _collateral = parseUnits(collateral, this.collateralDecimals);
-
-        const calls = [];
-        for (let N = 5; N <= 50; N++) {
-            calls.push(crvusd.contracts[this.controller].contract.max_borrowable(_collateral, N, crvusd.constantOptions));
-        }
-        const _amounts = await Promise.all(calls) as ethers.BigNumber[];
-
-        // TODO switch to multicall
-        // for (let N = 5; N <= 50; N++) {
-        //     calls.push(crvusd.contracts[this.controller].multicallContract.max_borrowable(_collateral, N));
-        // }
-        // const _amounts = await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
-
-        const res: { [index: number]: string } = {};
-        for (let N = 5; N <= 50; N++) {
-            res[N] = ethers.utils.formatUnits(_amounts[N - 5]);
-        }
-
-        return res;
-    }
-
     private async _createLoanTicks(collateral: number | string, debt: number | string, N: number): Promise<[ethers.BigNumber, ethers.BigNumber]> {
         const _n1 = await this._calcN1(parseUnits(collateral, this.collateralDecimals), parseUnits(debt), N);
         const _n2 = _n1.add(ethers.BigNumber.from(N - 1));
@@ -427,14 +436,15 @@ export class LlammaTemplate {
     }
 
     private async _createLoanTicksAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [ethers.BigNumber, ethers.BigNumber] }> {
-        const _n1_arr = await this._calcN1AllRanges(parseUnits(collateral, this.collateralDecimals), parseUnits(debt));
+        const maxN = await this.getMaxN(collateral, debt);
+        const _n1_arr = await this._calcN1AllRanges(parseUnits(collateral, this.collateralDecimals), parseUnits(debt), maxN);
         const _n2_arr: ethers.BigNumber[] = [];
-        for (let N = 5; N <= 50; N++) {
+        for (let N = 5; N <= maxN; N++) {
             _n2_arr.push(_n1_arr[N - 5].add(ethers.BigNumber.from(N - 1)));
         }
 
         const res: { [index: number]: [ethers.BigNumber, ethers.BigNumber] } = {};
-        for (let N = 5; N <= 50; N++) {
+        for (let N = 5; N <= maxN; N++) {
             res[N] = [_n1_arr[N - 5], _n2_arr[N - 5]];
         }
 
@@ -447,12 +457,16 @@ export class LlammaTemplate {
         return [_n1.toNumber(), _n2.toNumber()];
     }
 
-    public async createLoanTicksAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [number, number] }> {
+    public async createLoanTicksAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [number, number] | null }> {
         const _ticksAllRanges = await this._createLoanTicksAllRanges(collateral, debt);
 
-        const ticksAllRanges: { [index: number]: [number, number] } = {};
-        for (const N in _ticksAllRanges) {
-            ticksAllRanges[N] = _ticksAllRanges[N].map(Number) as [number, number];
+        const ticksAllRanges: { [index: number]: [number, number] | null } = {};
+        for (let N = 5; N <= 50; N++) {
+            if (_ticksAllRanges[N]) {
+                ticksAllRanges[N] = _ticksAllRanges[N].map(Number) as [number, number];
+            } else {
+                ticksAllRanges[N] = null
+            }
         }
 
         return ticksAllRanges;
@@ -464,12 +478,16 @@ export class LlammaTemplate {
         return await this._calcPrices(_n1, _n2);
     }
 
-    public async createLoanPricesAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [string, string] }> {
+    public async createLoanPricesAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [string, string] | null }> {
         const _ticksAllRanges = await this._createLoanTicksAllRanges(collateral, debt);
 
-        const pricesAllRanges: { [index: number]: [string, string] } = {};
-        for (const N in _ticksAllRanges) {
-            pricesAllRanges[N] = await this._calcPricesApproximately(..._ticksAllRanges[N]);
+        const pricesAllRanges: { [index: number]: [string, string] | null } = {};
+        for (let N = 5; N <= 50; N++) {
+            if (_ticksAllRanges[N]) {
+                pricesAllRanges[N] = await this._calcPricesApproximately(..._ticksAllRanges[N]);
+            } else {
+                pricesAllRanges[N] = null
+            }
         }
 
         return pricesAllRanges;
