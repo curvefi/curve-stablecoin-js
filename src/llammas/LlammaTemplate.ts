@@ -375,6 +375,19 @@ export class LlammaTemplate {
         // ]);
     }
 
+    private async _calcPricesApproximately(_n1: ethers.BigNumber, _n2: ethers.BigNumber): Promise<[string, string]> {
+        const { A, base_price } = (await this.statsParameters());
+        const basePriceBN = BN(base_price);
+        const A_BN = BN(A);
+        const n1BN = toBN(_n1, 0);
+        const n2BN = toBN(_n2, 0);
+
+        return [
+            basePriceBN.times(A_BN.minus(1).div(A_BN).pow(n1BN)).toFixed(18),
+            basePriceBN.times(A_BN.minus(1).div(A_BN).pow(n2BN.plus(1))).toFixed(18),
+        ].map(_cutZeros) as [string, string];
+    }
+
     public async createLoanMaxRecv(collateral: number | string, N: number): Promise<string> {
         if (N < this.minTicks) throw Error(`N must be >= ${this.minTicks}`);
         if (N > this.maxTicks) throw Error(`N must be <= ${this.maxTicks}`);
@@ -449,6 +462,17 @@ export class LlammaTemplate {
         const [_n1, _n2] = await this._createLoanTicks(collateral, debt, N);
 
         return await this._calcPrices(_n1, _n2);
+    }
+
+    public async createLoanPricesAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [string, string] }> {
+        const _ticksAllRanges = await this._createLoanTicksAllRanges(collateral, debt);
+
+        const pricesAllRanges: { [index: number]: [string, string] } = {};
+        for (const N in _ticksAllRanges) {
+            pricesAllRanges[N] = await this._calcPricesApproximately(..._ticksAllRanges[N]);
+        }
+
+        return pricesAllRanges;
     }
 
     public async createLoanHealth(collateral: number | string, debt: number | string, N: number, full = true, address = ""): Promise<string> {
