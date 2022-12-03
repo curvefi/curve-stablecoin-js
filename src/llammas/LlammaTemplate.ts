@@ -365,6 +365,24 @@ export class LlammaTemplate {
         return ethers.utils.formatUnits(await crvusd.contracts[this.controller].contract.max_borrowable(_collateral, N, crvusd.constantOptions));
     }
 
+    public async createLoanMaxRecvAllRanges(collateral: number | string): Promise<{ [index: number]: string }> {
+        const _collateral = parseUnits(collateral, this.collateralDecimals);
+
+        const calls = [];
+        for (let N = 5; N <= 50; N++) {
+            calls.push(crvusd.contracts[this.controller].contract.max_borrowable(_collateral, N, crvusd.constantOptions));
+        }
+        const _amounts = await Promise.all(calls) as ethers.BigNumber[];
+
+        // TODO switch to multicall
+        // for (let N = 5; N <= 50; N++) {
+        //     calls.push(crvusd.contracts[this.controller].multicallContract.max_borrowable(_collateral, N));
+        // }
+        // const _amounts = await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
+
+        return _amounts.map((_a) => ethers.utils.formatUnits(_a));
+    }
+
     private async _createLoanTicks(collateral: number | string, debt: number | string, N: number): Promise<[ethers.BigNumber, ethers.BigNumber]> {
         const _n1 = await this._calcN1(parseUnits(collateral, this.collateralDecimals), parseUnits(debt), N);
         const _n2 = _n1.add(ethers.BigNumber.from(N - 1));
