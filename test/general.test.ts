@@ -26,15 +26,21 @@ const generalTest = (id: string) => {
             const maxRecv = await llamma.createLoanMaxRecv(collateralAmount, N);
             const debtAmount = (Number(maxRecv) / 2).toFixed(6);
             const createLoanPrices = await llamma.createLoanPrices(collateralAmount, debtAmount, N);
+            const createLoanFullHealth = await llamma.createLoanHealth(collateralAmount, debtAmount, N);
+            const createLoanHealth = await llamma.createLoanHealth(collateralAmount, debtAmount, N, false);
 
             await llamma.createLoan(collateralAmount, debtAmount, N);
 
             const balances = await llamma.wallet.balances();
             const state = await llamma.userState();
             const userPrices = await llamma.userPrices();
+            const fullHealth = await llamma.health();
+            const health = await llamma.health(false);
 
             assert.equal(Number(createLoanPrices[0]), Number(userPrices[0]));
             assert.equal(Number(createLoanPrices[1]), Number(userPrices[1]));
+            assert.approximately(Number(createLoanFullHealth), Number(fullHealth), 1e-12);
+            assert.approximately(Number(createLoanHealth), Number(health), 1e-12);
             assert.equal(Number(balances.collateral), Number(initialBalances.collateral) - Number(collateralAmount));
             assert.equal(Number(balances.stablecoin), Number(initialBalances.stablecoin) + Number(debtAmount));
             assert.equal(Number(state.collateral), Number(collateralAmount));
