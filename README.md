@@ -232,6 +232,7 @@ import crvusd from "@curvefi/stablecoin-api";
     //     fee: '0.0',
     //     admin_fee: '0.0',
     //     rate: '0.0',
+    //     base_price: '3000.0',
     //     min_band: '0',
     //     max_band: '15',
     //     active_band: '11',
@@ -277,8 +278,6 @@ import crvusd from "@curvefi/stablecoin-api";
     // --- CREATE LOAN ---
 
     await llamma.oraclePrice();
-    // 3000.0
-    await llamma.basePrice();
     // 3000.0
     await llamma.price();
     // 3045.569137149127502965

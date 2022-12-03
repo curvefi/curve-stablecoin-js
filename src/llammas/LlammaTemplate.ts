@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import memoize from "memoizee";
 import BigNumber from "bignumber.js";
 import { crvusd } from "../crvusd";
 import {
@@ -49,6 +50,7 @@ export class LlammaTemplate {
             fee: string, // %
             admin_fee: string, // %
             rate: string, // %
+            base_price: string,
             min_band: string,
             max_band: string,
             active_band: string,
@@ -106,11 +108,12 @@ export class LlammaTemplate {
 
     // ---------------- STATS ----------------
 
-    private statsParameters = async (): Promise<{
+    private statsParameters = memoize(async (): Promise<{
         A: string,
         fee: string, // %
         admin_fee: string, // %
         rate: string, // %
+        base_price: string,
         min_band: string,
         max_band: string,
         active_band: string,
@@ -127,6 +130,7 @@ export class LlammaTemplate {
             llammaContract.fee(),
             llammaContract.admin_fee(),
             llammaContract.rate(),
+            llammaContract.get_base_price(),
             llammaContract.min_band(),
             llammaContract.max_band(),
             llammaContract.active_band(),
@@ -136,7 +140,7 @@ export class LlammaTemplate {
             controllerContract.loan_discount(),
         ]
 
-        const [_A, _fee, _admin_fee, _rate, _min_band, _max_band, _active_band,
+        const [_A, _fee, _admin_fee, _rate, _base_price, _min_band, _max_band, _active_band,
             _minted, _redeemed, _liquidation_discount, _loan_discount]: ethers.BigNumber[] = await Promise.all(calls);
 
         // TODO switch to multicall
@@ -165,6 +169,7 @@ export class LlammaTemplate {
             fee: ethers.utils.formatUnits(_fee.mul(100)),
             admin_fee: ethers.utils.formatUnits(_admin_fee.mul(100)),
             rate: ethers.utils.formatUnits(_rate.mul(100)),
+            base_price: ethers.utils.formatUnits(_base_price),
             min_band: ethers.utils.formatUnits(_min_band, 0),
             max_band: ethers.utils.formatUnits(_max_band, 0),
             active_band: ethers.utils.formatUnits(_active_band, 0),
@@ -173,7 +178,11 @@ export class LlammaTemplate {
             liquidation_discount: ethers.utils.formatUnits(_liquidation_discount.mul(100)),
             loan_discount: ethers.utils.formatUnits(_loan_discount.mul(100)),
         }
-    }
+    },
+    {
+        promise: true,
+        maxAge: 5 * 60 * 1000, // 5m
+    });
 
     private async statsBalances(): Promise<[string, string]> {
         const crvusdContract = crvusd.contracts[crvusd.address].contract;
@@ -313,11 +322,6 @@ export class LlammaTemplate {
 
     public async oraclePrice(): Promise<string> {
         const _price = await crvusd.contracts[this.address].contract.price_oracle(crvusd.constantOptions) as ethers.BigNumber;
-        return ethers.utils.formatUnits(_price);
-    }
-
-    public async basePrice(): Promise<string> {
-        const _price = await crvusd.contracts[this.address].contract.get_base_price(crvusd.constantOptions) as ethers.BigNumber;
         return ethers.utils.formatUnits(_price);
     }
 
