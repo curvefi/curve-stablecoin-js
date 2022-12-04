@@ -180,6 +180,16 @@ const generalTest = async () => {
     console.log(await llamma.userState());
 }
 
+const createLoanAllRangesTest = async () => {
+    await crvusd.init('JsonRpc', {});
+
+    const llamma = crvusd.getLlamma('eth');
+
+    console.log(await llamma.createLoanMaxRecvAllRanges(1));
+    console.log(await llamma.createLoanTicksAllRanges(1, 2600));
+    console.log(await llamma.createLoanPricesAllRanges(1, 2600));
+}
+
 const swapTest = async () => {
     await crvusd.init('JsonRpc', {});
 
