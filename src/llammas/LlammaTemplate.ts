@@ -349,7 +349,7 @@ export class LlammaTemplate {
         return ethers.utils.formatUnits(await crvusd.contracts[this.controller].contract.max_borrowable(_collateral, N, crvusd.constantOptions));
     }
 
-    public async createLoanMaxRecvAllRanges(collateral: number | string): Promise<{ [index: number]: string }> {
+    public createLoanMaxRecvAllRanges = memoize(async (collateral: number | string): Promise<{ [index: number]: string }> => {
         const _collateral = parseUnits(collateral, this.collateralDecimals);
 
         const calls = [];
@@ -370,7 +370,11 @@ export class LlammaTemplate {
         }
 
         return res;
-    }
+    },
+    {
+        promise: true,
+        maxAge: 5 * 60 * 1000, // 5m
+    });
 
     public async getMaxN(collateral: number | string, debt: number | string): Promise<number> {
         const maxRecv = await this.createLoanMaxRecvAllRanges(collateral);
