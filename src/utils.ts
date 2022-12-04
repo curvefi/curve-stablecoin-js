@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 import BigNumber from 'bignumber.js';
 import { Contract as MulticallContract } from 'ethcall';
 import { IDict, Icrvusd } from "./interfaces";
+import { _getPoolsFromApi } from "./external-api";
 import { crvusd } from "./crvusd";
 
 export const MAX_ALLOWANCE = ethers.BigNumber.from(2).pow(ethers.BigNumber.from(256)).sub(ethers.BigNumber.from(1));
@@ -228,4 +229,40 @@ export const ensureAllowance = async (coins: string[], amounts: (number | string
     const _amounts = amounts.map((a, i) => parseUnits(a, decimals[i]));
 
     return await _ensureAllowance(coinAddresses, _amounts, spender)
+}
+
+export const _getUsdPricesFromApi = async (): Promise<IDict<number>> => {
+    const network = crvusd.constants.NETWORK_NAME;
+    const promises = [
+        _getPoolsFromApi(network, "main"),
+        _getPoolsFromApi(network, "crypto"),
+        _getPoolsFromApi(network, "factory"),
+        _getPoolsFromApi(network, "factory-crypto"),
+    ];
+    const allTypesExtendedPoolData = await Promise.all(promises);
+    const priceDict: IDict<number> = {};
+
+    for (const extendedPoolData of allTypesExtendedPoolData) {
+        for (const pool of extendedPoolData.poolData) {
+            const lpTokenAddress = pool.lpTokenAddress ?? pool.address;
+            const totalSupply = pool.totalSupply / (10 ** 18);
+            priceDict[lpTokenAddress.toLowerCase()] = pool.usdTotal && totalSupply ? pool.usdTotal / totalSupply : 0;
+
+            for (const coin of pool.coins) {
+                if (typeof coin.usdPrice === "number") priceDict[coin.address.toLowerCase()] = coin.usdPrice;
+            }
+
+            for (const coin of pool.gaugeRewards ?? []) {
+                if (typeof coin.tokenPrice === "number") priceDict[coin.tokenAddress.toLowerCase()] = coin.tokenPrice;
+            }
+        }
+    }
+
+    return priceDict
+}
+
+export const getUsdRate = async (coin: string): Promise<number> => {
+    const [coinAddress] = _getCoinAddressesNoCheck([coin]);
+    const pricesFromApi = await _getUsdPricesFromApi()
+    return pricesFromApi[coinAddress.toLowerCase()];
 }

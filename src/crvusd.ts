@@ -25,6 +25,7 @@ class Crvusd implements Icrvusd {
         LLAMMAS: IDict<ILlamma>,
         COINS: IDict<string>,
         DECIMALS: IDict<number>,
+        NETWORK_NAME: "ethereum",
     };
 
     constructor() {
@@ -45,6 +46,7 @@ class Crvusd implements Icrvusd {
             LLAMMAS,
             COINS: {},
             DECIMALS: {},
+            NETWORK_NAME: "ethereum",
         };
     }
 

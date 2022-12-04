@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 import { Networkish } from "@ethersproject/networks";
 import { LlammaTemplate, getLlamma } from "./llammas";
 import { crvusd as _curve } from "./crvusd";
-import { getBalances, getAllowance, hasAllowance, ensureAllowanceEstimateGas, ensureAllowance } from "./utils";
+import { getBalances, getAllowance, hasAllowance, ensureAllowanceEstimateGas, ensureAllowance, getUsdRate } from "./utils";
 
 
 async function init (
@@ -32,6 +32,7 @@ const crvusd = {
     getAllowance,
     hasAllowance,
     ensureAllowance,
+    getUsdRate,
     estimateGas: {
         ensureAllowance: ensureAllowanceEstimateGas,
     },
