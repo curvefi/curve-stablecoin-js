@@ -1,6 +1,6 @@
 {
   "name": "@curvefi/stablecoin-api",
-  "version": "0.2.0-alpha",
+  "version": "0.3.0-alpha",
   "description": "JavaScript library for Curve Stablecoin",
   "main": "lib/index.js",
   "author": "Macket",
