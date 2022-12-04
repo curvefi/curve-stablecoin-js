@@ -26,6 +26,9 @@ const generalMethodsTest = async () => {
     //     '0xb0cada2a2983dc0ed85a26916d32b9caefe45fecde47640bd7d0e214ff22aed3',
     //     '0x00ea7d827b3ad50ce933e96c579810cd7e70d66a034a86ec4e1e10005634d041'
     // ]
+
+    await crvusd.getUsdRate('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
+    // 1257.43
 }
 
 const llammaFieldsTest = async () => {
