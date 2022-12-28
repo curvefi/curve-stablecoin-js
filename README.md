@@ -182,8 +182,12 @@ import crvusd from "@curvefi/stablecoin-api";
     // 0x3897810a334833184Ef7D6B419ba4d78EC2bBF80
     llamma.controller;
     // 0x1eF9f7C2abD0E351a8966f00565e1b04765d3f0C
+    llamma.collateralSymbol;
+    // WETH
     llamma.collateralDecimals;
     // 18
+    llamma.coins;
+    // [ 'crvUSD', 'WETH' ]
     llamma.coinAddresses;
     // [
     //     '0x3194cBDC3dbcd3E11a07892e7bA5c3394048Cc87',
