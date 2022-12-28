@@ -9,6 +9,7 @@ export interface ILlamma {
     amm_address: string,
     controller_address: string,
     collateral_address: string,
+    collateral_symbol: string,
     collateral_decimals: number,
     min_ticks: number,
     max_ticks: number,

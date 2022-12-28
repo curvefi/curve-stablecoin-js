@@ -23,7 +23,9 @@ export class LlammaTemplate {
     address: string;
     controller: string;
     collateral: string;
+    collateralSymbol: string;
     collateralDecimals: number;
+    coins: string[];
     coinAddresses: string[];
     coinDecimals: number[];
     minTicks: number;
@@ -75,7 +77,9 @@ export class LlammaTemplate {
         this.address = llammaData.amm_address;
         this.controller = llammaData.controller_address;
         this.collateral = llammaData.collateral_address;
+        this.collateralSymbol = llammaData.collateral_symbol;
         this.collateralDecimals = llammaData.collateral_decimals;
+        this.coins = ["crvUSD", llammaData.collateral_symbol];
         this.coinAddresses = [crvusd.address, llammaData.collateral_address];
         this.coinDecimals = [18, llammaData.collateral_decimals];
         this.minTicks = llammaData.min_ticks;
