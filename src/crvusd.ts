@@ -29,7 +29,7 @@ class Crvusd implements Icrvusd {
     };
 
     constructor() {
-        this.address = '0x3194cBDC3dbcd3E11a07892e7bA5c3394048Cc87'.toLowerCase();
+        this.address = COINS.crvusd.toLowerCase();
         // @ts-ignore
         this.provider = null;
         // @ts-ignore
