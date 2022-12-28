@@ -332,6 +332,15 @@ export class LlammaTemplate {
         return ethers.utils.formatUnits(_price);
     }
 
+    public async calcTickPrice(n: number): Promise<string> {
+        const { A, base_price } = (await this.statsParameters());
+        const basePriceBN = BN(base_price);
+        const A_BN = BN(A);
+        const nBN = BN(n);
+
+        return _cutZeros(basePriceBN.times(A_BN.minus(1).div(A_BN).pow(nBN)).toFixed(18))
+    }
+
     // ---------------- WALLET BALANCES ----------------
 
     private async walletBalances(address = ""): Promise<{ collateral: string, stablecoin: string }> {
