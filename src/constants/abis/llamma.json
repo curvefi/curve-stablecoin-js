@@ -472,6 +472,60 @@
         "type": "uint256"
       },
       {
+        "name": "out_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "get_dx",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "i",
+        "type": "uint256"
+      },
+      {
+        "name": "j",
+        "type": "uint256"
+      },
+      {
+        "name": "out_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "get_dydx",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      },
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "i",
+        "type": "uint256"
+      },
+      {
+        "name": "j",
+        "type": "uint256"
+      },
+      {
         "name": "in_amount",
         "type": "uint256"
       },
@@ -485,6 +539,35 @@
       {
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "i",
+        "type": "uint256"
+      },
+      {
+        "name": "j",
+        "type": "uint256"
+      },
+      {
+        "name": "out_amount",
+        "type": "uint256"
+      },
+      {
+        "name": "max_amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "exchange_dy",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256[2]"
       }
     ],
     "stateMutability": "nonpayable",

@@ -902,6 +902,15 @@ export class LlammaTemplate {
         return ethers.utils.formatUnits(_expected, outDecimals)
     }
 
+    public async swapRequired(i: number, j: number, outAmount: number | string): Promise<string> {
+        if (!(i === 0 && j === 1) && !(i === 1 && j === 0)) throw Error("Wrong index");
+        const [inDecimals, outDecimals] = this.coinDecimals;
+        const _amount = parseUnits(outAmount, outDecimals);
+        const _expected = await crvusd.contracts[this.address].contract.get_dx(i, j, _amount, crvusd.constantOptions) as ethers.BigNumber;
+
+        return ethers.utils.formatUnits(_expected, inDecimals)
+    }
+
     public async swapPriceImpact(i: number, j: number, amount: number | string): Promise<string> {
         if (!(i === 0 && j === 1) && !(i === 1 && j === 0)) throw Error("Wrong index");
         const [inDecimals, outDecimals] = this.coinDecimals;
