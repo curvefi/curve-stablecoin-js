@@ -203,6 +203,7 @@ const swapTest = async () => {
 
     console.log(await llamma.maxSwappable(0, 1));
     console.log(await llamma.swapExpected(0, 1, 100));
+    console.log(await llamma.swapRequired(0, 1, 100));
     console.log(await llamma.swapPriceImpact(0, 1, 100));
     console.log(await llamma.swapIsApproved(0, 100));
     console.log(await llamma.swapApprove(0, 100));

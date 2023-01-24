@@ -520,8 +520,10 @@ import crvusd from "@curvefi/stablecoin-api";
 
     await llamma.maxSwappable(0, 1);
     // 380.672763174593107707
-    await llamma.swapExpected(0, 1, 100);
-    // 0.03679356627103543
+    await llamma.swapExpected(0, 1, 100);  // 100 - in_amount
+    // 0.03679356627103543 (out_amount)
+    await llamma.swapRequired(0, 1, 0.03679356627103543);  // 0.03679356627103543 - out_amount
+    // 100.000000000000000558 (in_amount)
     await llamma.swapPriceImpact(0, 1, 100);
     // 0.170826
     await llamma.swapIsApproved(0, 100);
