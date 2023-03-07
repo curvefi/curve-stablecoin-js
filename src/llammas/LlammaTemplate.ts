@@ -16,6 +16,7 @@ import {
     _cutZeros,
     MAX_ALLOWANCE,
 } from "../utils";
+import { IDict } from "../interfaces";
 
 
 export class LlammaTemplate {
@@ -324,6 +325,25 @@ export class LlammaTemplate {
             stablecoin: ethers.utils.formatUnits(_stablecoin),
             debt: ethers.utils.formatUnits(_debt),
         };
+    }
+
+    public async userBandsBalances(address = ""): Promise<IDict<{ stablecoin: string, collateral: string }>> {
+        const [n1, n2] = await this.userTicks(address);
+        if (n1 == 0 && n2 == 0) return {};
+
+        address = _getAddress(address);
+        const contract = crvusd.contracts[this.address].contract;
+        const [_stablecoins, _collaterals] = await contract.get_xy(address, crvusd.constantOptions) as [ethers.BigNumber[], ethers.BigNumber[]];
+
+        const res: IDict<{ stablecoin: string, collateral: string }> = {};
+        for (let i = n1; i <= n2; i++) {
+            res[i] = {
+                stablecoin: ethers.utils.formatUnits(_stablecoins[i - n1], 18),
+                collateral: ethers.utils.formatUnits(_collaterals[i - n1], this.collateralDecimals),
+            };
+        }
+
+        return res
     }
 
     public async oraclePrice(): Promise<string> {
