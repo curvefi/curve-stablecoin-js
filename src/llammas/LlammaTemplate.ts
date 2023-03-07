@@ -1030,7 +1030,7 @@ export class LlammaTemplate {
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.repay(address, _minAmount, { ...crvusd.options, gasLimit })).hash
+        return (await contract.liquidate(address, _minAmount, { ...crvusd.options, gasLimit })).hash
     }
 
     public async liquidateEstimateGas(address: string, slippage = 0.5): Promise<number> {
