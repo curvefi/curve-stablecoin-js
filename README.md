@@ -319,7 +319,7 @@ import crvusd from "@curvefi/stablecoin-api";
     // 45.1912031476161562 %
     await llamma.health(false);  // NOT FULL
     // 3.9382535412942379
-    await llamma.userTicks();
+    await llamma.userBands();
     // [ 32, 36 ]
     await llamma.userPrices();
     // [ '2174.941007873561634', '2068.347257607234777' ]

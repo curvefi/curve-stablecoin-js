@@ -295,7 +295,7 @@ export class LlammaTemplate {
         return ethers.utils.formatUnits(_health);
     }
 
-    public async userTicks(address = ""): Promise<number[]> {
+    public async userBands(address = ""): Promise<number[]> {
         address = _getAddress(address);
         const _ticks = await crvusd.contracts[this.address].contract.read_user_tick_numbers(address, crvusd.constantOptions) as ethers.BigNumber[];
 
@@ -328,7 +328,7 @@ export class LlammaTemplate {
     }
 
     public async userBandsBalances(address = ""): Promise<IDict<{ stablecoin: string, collateral: string }>> {
-        const [n1, n2] = await this.userTicks(address);
+        const [n1, n2] = await this.userBands(address);
         if (n1 == 0 && n2 == 0) return {};
 
         address = _getAddress(address);
@@ -373,7 +373,7 @@ export class LlammaTemplate {
         /**
          * Calculates range in terms of price difference %
          * @param  {number} n Number of bands in range
-         * @return {string}  Range in %
+         * @return {string}   Range in %
          */
         const { A } = (await this.statsParameters());
         const A_BN = BN(A);
