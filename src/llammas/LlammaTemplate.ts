@@ -485,14 +485,14 @@ export class LlammaTemplate {
         ].map(_cutZeros) as [string, string];
     }
 
-    private async _createLoanTicks(collateral: number | string, debt: number | string, N: number): Promise<[ethers.BigNumber, ethers.BigNumber]> {
+    private async _createLoanBands(collateral: number | string, debt: number | string, N: number): Promise<[ethers.BigNumber, ethers.BigNumber]> {
         const _n1 = await this._calcN1(parseUnits(collateral, this.collateralDecimals), parseUnits(debt), N);
         const _n2 = _n1.add(ethers.BigNumber.from(N - 1));
 
         return [_n1, _n2];
     }
 
-    private async _createLoanTicksAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [ethers.BigNumber, ethers.BigNumber] }> {
+    private async _createLoanBandsAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [ethers.BigNumber, ethers.BigNumber] }> {
         const maxN = await this.getMaxN(collateral, debt);
         const _n1_arr = await this._calcN1AllRanges(parseUnits(collateral, this.collateralDecimals), parseUnits(debt), maxN);
         const _n2_arr: ethers.BigNumber[] = [];
@@ -508,14 +508,14 @@ export class LlammaTemplate {
         return res;
     }
 
-    public async createLoanTicks(collateral: number | string, debt: number | string, N: number): Promise<[number, number]> {
-        const [_n1, _n2] = await this._createLoanTicks(collateral, debt, N);
+    public async createLoanBands(collateral: number | string, debt: number | string, N: number): Promise<[number, number]> {
+        const [_n1, _n2] = await this._createLoanBands(collateral, debt, N);
 
         return [_n1.toNumber(), _n2.toNumber()];
     }
 
-    public async createLoanTicksAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [number, number] | null }> {
-        const _ticksAllRanges = await this._createLoanTicksAllRanges(collateral, debt);
+    public async createLoanBandsAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [number, number] | null }> {
+        const _ticksAllRanges = await this._createLoanBandsAllRanges(collateral, debt);
 
         const ticksAllRanges: { [index: number]: [number, number] | null } = {};
         for (let N = this.minTicks; N <= this.maxTicks; N++) {
@@ -530,13 +530,13 @@ export class LlammaTemplate {
     }
 
     public async createLoanPrices(collateral: number | string, debt: number | string, N: number): Promise<string[]> {
-        const [_n1, _n2] = await this._createLoanTicks(collateral, debt, N);
+        const [_n1, _n2] = await this._createLoanBands(collateral, debt, N);
 
         return await this._calcPrices(_n1, _n2);
     }
 
     public async createLoanPricesAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [string, string] | null }> {
-        const _ticksAllRanges = await this._createLoanTicksAllRanges(collateral, debt);
+        const _ticksAllRanges = await this._createLoanBandsAllRanges(collateral, debt);
 
         const pricesAllRanges: { [index: number]: [string, string] | null } = {};
         for (let N = this.minTicks; N <= this.maxTicks; N++) {

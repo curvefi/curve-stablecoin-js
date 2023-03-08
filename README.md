@@ -294,7 +294,7 @@ import crvusd from "@curvefi/stablecoin-api";
     // { stablecoin: '0.0', collateral: '1.0' }
     await llamma.createLoanMaxRecv(0.5, 5);
     // 1375.74670276529114147
-    await llamma.createLoanTicks(0.5, 1000, 5);
+    await llamma.createLoanBands(0.5, 1000, 5);
     // [ 32, 36 ]
     await llamma.createLoanPrices(0.5, 1000, 5);
     // [ '2174.941007873561634', '2068.347257607234777' ]
@@ -463,7 +463,7 @@ import crvusd from "@curvefi/stablecoin-api";
     //     '50': '2217.556229455652339229'
     // }
 
-    await llamma.createLoanTicksAllRanges(1, 2600);
+    await llamma.createLoanBandsAllRanges(1, 2600);
     // {
     //     '5': [ 6, 10 ],
     //     '6': [ 6, 11 ],

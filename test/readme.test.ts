@@ -87,7 +87,7 @@ const generalTest = async () => {
     console.log(await llamma.price());
     console.log(await llamma.wallet.balances());
     console.log(await llamma.createLoanMaxRecv(0.5, 5));
-    console.log(await llamma.createLoanTicks(0.5, 1000, 5));
+    console.log(await llamma.createLoanBands(0.5, 1000, 5));
     console.log(await llamma.createLoanPrices(0.5, 1000, 5));
     console.log(await llamma.createLoanHealth(0.5, 1000, 5));  // FULL
     console.log(await llamma.createLoanHealth(0.5, 1000, 5, false));  // NOT FULL
@@ -191,7 +191,7 @@ const createLoanAllRangesTest = async () => {
     const llamma = crvusd.getLlamma('eth');
 
     console.log(await llamma.createLoanMaxRecvAllRanges(1));
-    console.log(await llamma.createLoanTicksAllRanges(1, 2600));
+    console.log(await llamma.createLoanBandsAllRanges(1, 2600));
     console.log(await llamma.createLoanPricesAllRanges(1, 2600));
 }
 
