@@ -362,7 +362,7 @@ import crvusd from "@curvefi/stablecoin-api";
 
     // --- ADD COLLATERAL ---
 
-    await llamma.addCollateralTicks(0.2);
+    await llamma.addCollateralBands(0.2);
     // [ 39, 43 ]
     await llamma.addCollateralPrices(0.2);
     // [ '2027.187147180850842', '1927.834806254156043' ]

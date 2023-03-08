@@ -697,7 +697,7 @@ export class LlammaTemplate {
         return _ns[1].sub(_ns[0]).add(1);
     }
 
-    private async _addCollateralTicks(collateral: number | string, address = ""): Promise<[ethers.BigNumber, ethers.BigNumber]> {
+    private async _addCollateralBands(collateral: number | string, address = ""): Promise<[ethers.BigNumber, ethers.BigNumber]> {
         address = _getAddress(address);
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState(address);
         if (_currentDebt.eq(0)) throw Error(`Loan for ${address} is not created`);
@@ -710,14 +710,14 @@ export class LlammaTemplate {
         return [_n1, _n2];
     }
 
-    public async addCollateralTicks(collateral: number | string, address = ""): Promise<[number, number]> {
-        const [_n1, _n2] = await this._addCollateralTicks(collateral, address);
+    public async addCollateralBands(collateral: number | string, address = ""): Promise<[number, number]> {
+        const [_n1, _n2] = await this._addCollateralBands(collateral, address);
 
         return [_n1.toNumber(), _n2.toNumber()];
     }
 
     public async addCollateralPrices(collateral: number | string, address = ""): Promise<string[]> {
-        const [_n1, _n2] = await this._addCollateralTicks(collateral, address);
+        const [_n1, _n2] = await this._addCollateralBands(collateral, address);
 
         return await this._calcPrices(_n1, _n2);
     }

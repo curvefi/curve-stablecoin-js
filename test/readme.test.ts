@@ -130,7 +130,7 @@ const generalTest = async () => {
 
     console.log("\n--- ADD COLLATERAL ---\n");
 
-    console.log(await llamma.addCollateralTicks(0.2));
+    console.log(await llamma.addCollateralBands(0.2));
     console.log(await llamma.addCollateralPrices(0.2));
     console.log(await llamma.addCollateralHealth(0.2));  // FULL
     console.log(await llamma.addCollateralHealth(0.2, false));  // NOT FULL
