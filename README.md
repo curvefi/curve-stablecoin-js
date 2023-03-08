@@ -325,6 +325,14 @@ import crvusd from "@curvefi/stablecoin-api";
     // [ '2174.941007873561634', '2068.347257607234777' ]
     await llamma.userState();
     // { collateral: '0.5', stablecoin: '0.0', debt: '1000.0' }
+    await llamma.userBandsBalances();
+    // {
+    //     '32': { stablecoin: '0.0', collateral: '0.1' },
+    //     '33': { stablecoin: '0.0', collateral: '0.1' },
+    //     '34': { stablecoin: '0.0', collateral: '0.1' },
+    //     '35': { stablecoin: '0.0', collateral: '0.1' },
+    //     '36': { stablecoin: '0.0', collateral: '0.1' }
+    // }
 
     // --- BORROW MORE ---
 

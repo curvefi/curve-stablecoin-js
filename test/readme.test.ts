@@ -107,6 +107,7 @@ const generalTest = async () => {
     console.log(await llamma.userTicks());
     console.log(await llamma.userPrices());
     console.log(await llamma.userState());
+    console.log(await llamma.userBandsBalances());
 
     console.log("\n--- BORROW MORE ---\n");
 
