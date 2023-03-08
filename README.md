@@ -338,7 +338,7 @@ import crvusd from "@curvefi/stablecoin-api";
 
     await llamma.borrowMoreMaxRecv(0.1);
     // 650.896043318349376298
-    await llamma.borrowMoreTicks(0.1, 500);
+    await llamma.borrowMoreBands(0.1, 500);
     // [ 10, 14 ]
     await llamma.borrowMorePrices(0.1, 500);
     // [ '2713.146225026413746', '2580.175063923865968' ]

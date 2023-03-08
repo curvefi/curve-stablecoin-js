@@ -613,7 +613,7 @@ export class LlammaTemplate {
         return ethers.utils.formatUnits(_debt.sub(_currentDebt));
     }
 
-    private async _borrowMoreTicks(collateral: number | string, debt: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
+    private async _borrowMoreBands(collateral: number | string, debt: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
         if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
 
@@ -627,14 +627,14 @@ export class LlammaTemplate {
         return [_n1, _n2];
     }
 
-    public async borrowMoreTicks(collateral: number | string, debt: number | string): Promise<[number, number]> {
-        const [_n1, _n2] = await this._borrowMoreTicks(collateral, debt);
+    public async borrowMoreBands(collateral: number | string, debt: number | string): Promise<[number, number]> {
+        const [_n1, _n2] = await this._borrowMoreBands(collateral, debt);
 
         return [_n1.toNumber(), _n2.toNumber()];
     }
 
     public async borrowMorePrices(collateral: number | string, debt: number | string): Promise<string[]> {
-        const [_n1, _n2] = await this._borrowMoreTicks(collateral, debt);
+        const [_n1, _n2] = await this._borrowMoreBands(collateral, debt);
 
         return await this._calcPrices(_n1, _n2);
     }

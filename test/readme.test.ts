@@ -112,7 +112,7 @@ const generalTest = async () => {
     console.log("\n--- BORROW MORE ---\n");
 
     console.log(await llamma.borrowMoreMaxRecv(0.1));
-    console.log(await llamma.borrowMoreTicks(0.1, 500));
+    console.log(await llamma.borrowMoreBands(0.1, 500));
     console.log(await llamma.borrowMorePrices(0.1, 500));
     console.log(await llamma.borrowMoreHealth(0.1, 500));  // FULL
     console.log(await llamma.borrowMoreHealth(0.1, 500, false));  // NOT FULL
