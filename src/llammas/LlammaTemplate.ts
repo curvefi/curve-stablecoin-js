@@ -369,6 +369,20 @@ export class LlammaTemplate {
         return [await this.calcTickPrice(n), await this.calcTickPrice(n + 1)]
     }
 
+    public async calcRangePct(n: number): Promise<string> {
+        /**
+         * Calculates range in terms of price difference %
+         * @param  {number} n Number of bands in range
+         * @return {string}  Range in %
+         */
+        const { A } = (await this.statsParameters());
+        const A_BN = BN(A);
+        const startBN = BN(1);
+        const endBN = A_BN.minus(1).div(A_BN).pow(n);
+
+        return startBN.minus(endBN).times(100).toString()
+    }
+
     // ---------------- WALLET BALANCES ----------------
 
     private async walletBalances(address = ""): Promise<{ collateral: string, stablecoin: string }> {
