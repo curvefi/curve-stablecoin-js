@@ -365,6 +365,10 @@ export class LlammaTemplate {
         return _cutZeros(basePriceBN.times(A_BN.minus(1).div(A_BN).pow(nBN)).toFixed(18))
     }
 
+    public async calcBandPrices(n: number): Promise<[string, string]> {
+        return [await this.calcTickPrice(n), await this.calcTickPrice(n + 1)]
+    }
+
     // ---------------- WALLET BALANCES ----------------
 
     private async walletBalances(address = ""): Promise<{ collateral: string, stablecoin: string }> {
