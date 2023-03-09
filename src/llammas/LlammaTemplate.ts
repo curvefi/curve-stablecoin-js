@@ -302,6 +302,12 @@ export class LlammaTemplate {
         return _bands.map((_t) => _t.toNumber());
     }
 
+    public async userRange(address = ""): Promise<number> {
+        const [n1, n2] = await this.userBands(address);
+        if (n1 == n2) return 0;
+        return n2 - n1 + 1;
+    }
+
     public async userPrices(address = ""): Promise<string[]> {
         address = _getAddress(address);
         const _prices = await crvusd.contracts[this.controller].contract.user_prices(address, crvusd.constantOptions) as ethers.BigNumber[];
@@ -603,15 +609,9 @@ export class LlammaTemplate {
 
     // ---------------- BORROW MORE ----------------
 
-    public async getCurrentN(address = ""): Promise<number> {
-        const [n1, n2] = await this.userBands(address);
-        if (n1 == n2) return 0;
-        return n2 - n1 + 1;
-    }
-
     public async borrowMoreMaxRecv(collateralAmount: number | string): Promise<string> {
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
-        const N = await this.getCurrentN();
+        const N = await this.userRange();
         const _collateral = _currentCollateral.add(parseUnits(collateralAmount, this.collateralDecimals));
 
         const contract = crvusd.contracts[this.controller].contract;
@@ -624,7 +624,7 @@ export class LlammaTemplate {
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
         if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
 
-        const N = await this.getCurrentN();
+        const N = await this.userRange();
         const _collateral = _currentCollateral.add(parseUnits(collateral, this.collateralDecimals));
         const _debt = _currentDebt.add(parseUnits(debt, this.collateralDecimals));
 
@@ -703,7 +703,7 @@ export class LlammaTemplate {
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState(address);
         if (_currentDebt.eq(0)) throw Error(`Loan for ${address} is not created`);
 
-        const N = await this.getCurrentN(address);
+        const N = await this.userRange(address);
         const _collateral = _currentCollateral.add(parseUnits(collateral, this.collateralDecimals));
         const _n1 = await this._calcN1(_collateral, _currentDebt, N);
         const _n2 = _n1.add(N - 1);
@@ -777,7 +777,7 @@ export class LlammaTemplate {
 
     public async maxRemovable(): Promise<string> {
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
-        const N = await this.getCurrentN();
+        const N = await this.userRange();
         const _requiredCollateral = await crvusd.contracts[this.controller].contract.min_collateral(_currentDebt, N, crvusd.constantOptions)
 
         return ethers.utils.formatUnits(_currentCollateral.sub(_requiredCollateral), this.collateralDecimals);
@@ -787,7 +787,7 @@ export class LlammaTemplate {
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
         if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
 
-        const N = await this.getCurrentN();
+        const N = await this.userRange();
         const _collateral = _currentCollateral.sub(parseUnits(collateral, this.collateralDecimals));
         const _n1 = await this._calcN1(_collateral, _currentDebt, N);
         const _n2 = _n1.add(N - 1);
@@ -847,7 +847,7 @@ export class LlammaTemplate {
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
         if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
 
-        const N = await this.getCurrentN();
+        const N = await this.userRange();
         const _debt = _currentDebt.sub(parseUnits(debt, this.collateralDecimals));
         const _n1 = await this._calcN1(_currentCollateral, _debt, N);
         const _n2 = _n1.add(N - 1);
