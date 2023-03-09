@@ -32,6 +32,7 @@ export class LlammaTemplate {
     minBands: number;
     maxBands: number;
     defaultBands: number;
+    A: number;
     estimateGas: {
         createLoanApprove: (collateral: number | string) => Promise<number>,
         createLoan: (collateral: number | string, debt: number | string, range: number) => Promise<number>,
@@ -50,7 +51,6 @@ export class LlammaTemplate {
     };
     stats: {
         parameters: () => Promise<{
-            A: string,
             fee: string, // %
             admin_fee: string, // %
             rate: string, // %
@@ -86,6 +86,7 @@ export class LlammaTemplate {
         this.minBands = llammaData.min_bands;
         this.maxBands = llammaData.max_bands;
         this.defaultBands = llammaData.default_bands;
+        this.A = llammaData.A;
         this.estimateGas = {
             createLoanApprove: this.createLoanApproveEstimateGas.bind(this),
             createLoan: this.createLoanEstimateGas.bind(this),
@@ -116,7 +117,6 @@ export class LlammaTemplate {
     // ---------------- STATS ----------------
 
     private statsParameters = memoize(async (): Promise<{
-        A: string,
         fee: string, // %
         admin_fee: string, // %
         rate: string, // %
@@ -133,7 +133,6 @@ export class LlammaTemplate {
         const controllerContract = crvusd.contracts[this.controller].contract;
 
         const calls = [
-            llammaContract.A(),
             llammaContract.fee(),
             llammaContract.admin_fee(),
             llammaContract.rate(),
@@ -147,7 +146,7 @@ export class LlammaTemplate {
             controllerContract.loan_discount(),
         ]
 
-        const [_A, _fee, _admin_fee, _rate, _base_price, _min_band, _max_band, _active_band,
+        const [_fee, _admin_fee, _rate, _base_price, _min_band, _max_band, _active_band,
             _minted, _redeemed, _liquidation_discount, _loan_discount]: ethers.BigNumber[] = await Promise.all(calls);
 
         // TODO switch to multicall
@@ -155,10 +154,10 @@ export class LlammaTemplate {
         // const controllerContract = crvusd.contracts[this.controller].multicallContract;
 
         // const calls = [
-        //     llammaContract.A(),
         //     llammaContract.fee(),
         //     llammaContract.admin_fee(),
         //     llammaContract.rate(),
+        //     llammaContract.get_base_price()
         //     llammaContract.min_band(),
         //     llammaContract.max_band(),
         //     llammaContract.active_band(),
@@ -168,11 +167,10 @@ export class LlammaTemplate {
         //     controllerContract.loan_discount(),
         // ]
 
-        // const [_A, _fee, _admin_fee, _rate, _min_band, _max_band,
+        // const [_fee, _admin_fee, _rate, _base_price, _min_band, _max_band,
         //     _active_band, _minted, _redeemed, _liquidation_discount, _loan_discount]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
 
         return {
-            A: ethers.utils.formatUnits(_A, 0),
             fee: ethers.utils.formatUnits(_fee.mul(100)),
             admin_fee: ethers.utils.formatUnits(_admin_fee.mul(100)),
             rate: ethers.utils.formatUnits(_rate.mul(100)),
@@ -364,9 +362,9 @@ export class LlammaTemplate {
     }
 
     public async calcTickPrice(n: number): Promise<string> {
-        const { A, base_price } = (await this.statsParameters());
+        const { base_price } = (await this.statsParameters());
         const basePriceBN = BN(base_price);
-        const A_BN = BN(A);
+        const A_BN = BN(this.A);
         const nBN = BN(n);
 
         return _cutZeros(basePriceBN.times(A_BN.minus(1).div(A_BN).pow(nBN)).toFixed(18))
@@ -376,14 +374,13 @@ export class LlammaTemplate {
         return [await this.calcTickPrice(n + 1), await this.calcTickPrice(n)]
     }
 
-    public async calcRangePct(range: number): Promise<string> {
+    public calcRangePct(range: number): string {
         /**
          * Calculates range in terms of price difference %
          * @param  {number} range Number of bands in range
          * @return {string}       Range in %
          */
-        const { A } = (await this.statsParameters());
-        const A_BN = BN(A);
+        const A_BN = BN(this.A);
         const startBN = BN(1);
         const endBN = A_BN.minus(1).div(A_BN).pow(range);
 
@@ -482,9 +479,9 @@ export class LlammaTemplate {
     }
 
     private async _calcPricesApproximately(_n2: ethers.BigNumber, _n1: ethers.BigNumber): Promise<[string, string]> {
-        const { A, base_price } = (await this.statsParameters());
+        const { base_price } = (await this.statsParameters());
         const basePriceBN = BN(base_price);
-        const A_BN = BN(A);
+        const A_BN = BN(this.A);
         const n1BN = toBN(_n1, 0);
         const n2BN = toBN(_n2, 0);
 

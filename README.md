@@ -201,6 +201,8 @@ import crvusd from "@curvefi/stablecoin-api";
     // 50
     llamma.defaultBands;
     // 20
+    llamma.A;
+    // 100
 })()
 ````
 
@@ -237,7 +239,6 @@ import crvusd from "@curvefi/stablecoin-api";
 
     await llamma.stats.parameters();
     // {
-    //     A: '100',
     //     fee: '0.0',
     //     admin_fee: '0.0',
     //     rate: '0.0',

@@ -14,6 +14,7 @@ export interface ILlamma {
     min_bands: number,
     max_bands: number,
     default_bands: number,
+    A: number,
 }
 
 export interface Icrvusd {

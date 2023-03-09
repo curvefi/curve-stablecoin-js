@@ -46,6 +46,7 @@ const llammaFieldsTest = async () => {
     console.log(llamma.minBands);
     console.log(llamma.maxBands);
     console.log(llamma.defaultBands);
+    console.log(llamma.A);
 }
 
 const walletBalancesTest = async () => {
