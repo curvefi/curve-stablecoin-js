@@ -104,6 +104,7 @@ const generalTest = async () => {
     console.log(await llamma.loanExists());
     console.log(await llamma.health());  // FULL
     console.log(await llamma.health(false));  // NOT FULL
+    console.log(await llamma.getCurrentN());
     console.log(await llamma.userBands());
     console.log(await llamma.userPrices());
     console.log(await llamma.userState());
