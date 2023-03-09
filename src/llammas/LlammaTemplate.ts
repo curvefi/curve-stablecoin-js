@@ -427,7 +427,7 @@ export class LlammaTemplate {
         maxAge: 5 * 60 * 1000, // 5m
     });
 
-    public async getMaxN(collateral: number | string, debt: number | string): Promise<number> {
+    public async getMaxRange(collateral: number | string, debt: number | string): Promise<number> {
         const maxRecv = await this.createLoanMaxRecvAllRanges(collateral);
         for (let N = this.minBands; N <= this.maxBands; N++) {
             if (BN(debt).gt(BN(maxRecv[N]))) return N - 1;
@@ -493,7 +493,7 @@ export class LlammaTemplate {
     }
 
     private async _createLoanBandsAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [ethers.BigNumber, ethers.BigNumber] }> {
-        const maxN = await this.getMaxN(collateral, debt);
+        const maxN = await this.getMaxRange(collateral, debt);
         const _n1_arr = await this._calcN1AllRanges(parseUnits(collateral, this.collateralDecimals), parseUnits(debt), maxN);
         const _n2_arr: ethers.BigNumber[] = [];
         for (let N = this.minBands; N <= maxN; N++) {
