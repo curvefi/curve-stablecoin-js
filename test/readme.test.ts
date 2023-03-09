@@ -149,7 +149,7 @@ const generalTest = async () => {
     console.log("\n--- REMOVE COLLATERAL ---\n")
 
     console.log(await llamma.maxRemovable());
-    console.log(await llamma.removeCollateralTicks(0.1));
+    console.log(await llamma.removeCollateralBands(0.1));
     console.log(await llamma.removeCollateralPrices(0.1));
     console.log(await llamma.removeCollateralHealth(0.1));  // FULL
     console.log(await llamma.removeCollateralHealth(0.1, false));  // NOT FULL

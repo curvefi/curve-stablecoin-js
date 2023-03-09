@@ -782,7 +782,7 @@ export class LlammaTemplate {
         return ethers.utils.formatUnits(_currentCollateral.sub(_requiredCollateral), this.collateralDecimals);
     }
 
-    private async _removeCollateralTicks(collateral: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
+    private async _removeCollateralBands(collateral: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
         if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
 
@@ -794,14 +794,14 @@ export class LlammaTemplate {
         return [_n1, _n2];
     }
 
-    public async removeCollateralTicks(collateral: number | string): Promise<[number, number]> {
-        const [_n1, _n2] = await this._removeCollateralTicks(collateral);
+    public async removeCollateralBands(collateral: number | string): Promise<[number, number]> {
+        const [_n1, _n2] = await this._removeCollateralBands(collateral);
 
         return [_n1.toNumber(), _n2.toNumber()];
     }
 
     public async removeCollateralPrices(collateral: number | string): Promise<string[]> {
-        const [_n1, _n2] = await this._removeCollateralTicks(collateral);
+        const [_n1, _n2] = await this._removeCollateralBands(collateral);
 
         return await this._calcPrices(_n1, _n2);
     }

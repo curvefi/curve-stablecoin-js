@@ -388,7 +388,7 @@ import crvusd from "@curvefi/stablecoin-api";
 
     await llamma.maxRemovable()
     // 0.254841506439755199
-    await llamma.removeCollateralTicks(0.1);
+    await llamma.removeCollateralBands(0.1);
     // [ 25, 29 ]
     await llamma.removeCollateralPrices(0.1);
     // [ '2333.46407819744091', '2219.101120164841944' ]
