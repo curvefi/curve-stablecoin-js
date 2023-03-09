@@ -410,7 +410,7 @@ import crvusd from "@curvefi/stablecoin-api";
     await llamma.wallet.balances();
     // { stablecoin: '1500.0', collateral: '0.3' }
 
-    await llamma.repayTicks(1000);
+    await llamma.repayBands(1000);
     // [ 135, 139 ]
     await llamma.repayPrices(1000);
     // [ '772.453820291837448', '734.595897104762463' ]

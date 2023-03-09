@@ -166,7 +166,7 @@ const generalTest = async () => {
 
     console.log(await llamma.wallet.balances());
 
-    console.log(await llamma.repayTicks(1000));
+    console.log(await llamma.repayBands(1000));
     console.log(await llamma.repayPrices(1000));
     console.log(await llamma.repayHealth(1000));  // FULL
     console.log(await llamma.repayHealth(1000, false));  // NOT FULL

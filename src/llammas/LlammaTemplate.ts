@@ -842,7 +842,7 @@ export class LlammaTemplate {
 
     // ---------------- REPAY ----------------
 
-    private async _repayTicks(debt: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
+    private async _repayBands(debt: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
         if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
 
@@ -854,14 +854,14 @@ export class LlammaTemplate {
         return [_n1, _n2];
     }
 
-    public async repayTicks(debt: number | string): Promise<[number, number]> {
-        const [_n1, _n2] = await this._repayTicks(debt);
+    public async repayBands(debt: number | string): Promise<[number, number]> {
+        const [_n1, _n2] = await this._repayBands(debt);
 
         return [_n1.toNumber(), _n2.toNumber()];
     }
 
     public async repayPrices(debt: number | string): Promise<string[]> {
-        const [_n1, _n2] = await this._repayTicks(debt);
+        const [_n1, _n2] = await this._repayBands(debt);
 
         return await this._calcPrices(_n1, _n2);
     }
