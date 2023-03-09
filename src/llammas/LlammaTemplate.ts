@@ -34,7 +34,7 @@ export class LlammaTemplate {
     defaultBands: number;
     estimateGas: {
         createLoanApprove: (collateral: number | string) => Promise<number>,
-        createLoan: (collateral: number | string, debt: number | string,  N: number) => Promise<number>,
+        createLoan: (collateral: number | string, debt: number | string, range: number) => Promise<number>,
         addCollateralApprove: (collateral: number | string) => Promise<number>,
         addCollateral: (collateral: number | string, address?: string) => Promise<number>,
         borrowMoreApprove: (collateral: number | string) => Promise<number>,
@@ -392,12 +392,12 @@ export class LlammaTemplate {
 
     // ---------------- CREATE LOAN ----------------
 
-    public async createLoanMaxRecv(collateral: number | string, N: number): Promise<string> {
-        if (N < this.minBands) throw Error(`N must be >= ${this.minBands}`);
-        if (N > this.maxBands) throw Error(`N must be <= ${this.maxBands}`);
+    public async createLoanMaxRecv(collateral: number | string, range: number): Promise<string> {
+        if (range < this.minBands) throw Error(`range must be >= ${this.minBands}`);
+        if (range > this.maxBands) throw Error(`range must be <= ${this.maxBands}`);
         const _collateral = parseUnits(collateral, this.collateralDecimals);
 
-        return ethers.utils.formatUnits(await crvusd.contracts[this.controller].contract.max_borrowable(_collateral, N, crvusd.constantOptions));
+        return ethers.utils.formatUnits(await crvusd.contracts[this.controller].contract.max_borrowable(_collateral, range, crvusd.constantOptions));
     }
 
     public createLoanMaxRecvAllRanges = memoize(async (collateral: number | string): Promise<{ [index: number]: string }> => {
@@ -485,9 +485,9 @@ export class LlammaTemplate {
         ].map(_cutZeros) as [string, string];
     }
 
-    private async _createLoanBands(collateral: number | string, debt: number | string, N: number): Promise<[ethers.BigNumber, ethers.BigNumber]> {
-        const _n1 = await this._calcN1(parseUnits(collateral, this.collateralDecimals), parseUnits(debt), N);
-        const _n2 = _n1.add(ethers.BigNumber.from(N - 1));
+    private async _createLoanBands(collateral: number | string, debt: number | string, range: number): Promise<[ethers.BigNumber, ethers.BigNumber]> {
+        const _n1 = await this._calcN1(parseUnits(collateral, this.collateralDecimals), parseUnits(debt), range);
+        const _n2 = _n1.add(ethers.BigNumber.from(range - 1));
 
         return [_n1, _n2];
     }
@@ -508,8 +508,8 @@ export class LlammaTemplate {
         return res;
     }
 
-    public async createLoanBands(collateral: number | string, debt: number | string, N: number): Promise<[number, number]> {
-        const [_n1, _n2] = await this._createLoanBands(collateral, debt, N);
+    public async createLoanBands(collateral: number | string, debt: number | string, range: number): Promise<[number, number]> {
+        const [_n1, _n2] = await this._createLoanBands(collateral, debt, range);
 
         return [_n1.toNumber(), _n2.toNumber()];
     }
@@ -529,8 +529,8 @@ export class LlammaTemplate {
         return bandsAllRanges;
     }
 
-    public async createLoanPrices(collateral: number | string, debt: number | string, N: number): Promise<string[]> {
-        const [_n1, _n2] = await this._createLoanBands(collateral, debt, N);
+    public async createLoanPrices(collateral: number | string, debt: number | string, range: number): Promise<string[]> {
+        const [_n1, _n2] = await this._createLoanBands(collateral, debt, range);
 
         return await this._calcPrices(_n1, _n2);
     }
@@ -550,13 +550,13 @@ export class LlammaTemplate {
         return pricesAllRanges;
     }
 
-    public async createLoanHealth(collateral: number | string, debt: number | string, N: number, full = true, address = ""): Promise<string> {
+    public async createLoanHealth(collateral: number | string, debt: number | string, range: number, full = true, address = ""): Promise<string> {
         address = _getAddress(address);
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const _debt = parseUnits(debt);
 
         const contract = crvusd.contracts[this.controller].contract;
-        let _health = await contract.health_calculator(address, _collateral, _debt, full, N, crvusd.constantOptions) as ethers.BigNumber;
+        let _health = await contract.health_calculator(address, _collateral, _debt, full, range, crvusd.constantOptions) as ethers.BigNumber;
         _health = _health.mul(100);
 
         return ethers.utils.formatUnits(_health);
@@ -574,30 +574,30 @@ export class LlammaTemplate {
         return await ensureAllowance([this.collateral], [collateral], this.controller);
     }
 
-    private async _createLoan(collateral: number | string, debt: number | string,  N: number, estimateGas: boolean): Promise<string | number> {
+    private async _createLoan(collateral: number | string, debt: number | string, range: number, estimateGas: boolean): Promise<string | number> {
         if (await this.loanExists()) throw Error("Loan already created");
-        if (N < this.minBands) throw Error(`N must be >= ${this.minBands}`);
-        if (N > this.maxBands) throw Error(`N must be <= ${this.maxBands}`);
+        if (range < this.minBands) throw Error(`range must be >= ${this.minBands}`);
+        if (range > this.maxBands) throw Error(`range must be <= ${this.maxBands}`);
 
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const _debt = parseUnits(debt);
         const contract = crvusd.contracts[this.controller].contract;
-        const gas = await contract.estimateGas.create_loan(_collateral, _debt, N, crvusd.constantOptions);
+        const gas = await contract.estimateGas.create_loan(_collateral, _debt, range, crvusd.constantOptions);
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.create_loan(_collateral, _debt, N, { ...crvusd.options, gasLimit })).hash
+        return (await contract.create_loan(_collateral, _debt, range, { ...crvusd.options, gasLimit })).hash
     }
 
-    public async createLoanEstimateGas(collateral: number | string, debt: number | string,  N: number): Promise<number> {
+    public async createLoanEstimateGas(collateral: number | string, debt: number | string, range: number): Promise<number> {
         if (!(await this.createLoanIsApproved(collateral))) throw Error("Approval is needed for gas estimation");
-        return await this._createLoan(collateral, debt,  N, true) as number;
+        return await this._createLoan(collateral, debt,  range, true) as number;
     }
 
-    public async createLoan(collateral: number | string, debt: number | string,  N: number): Promise<string> {
+    public async createLoan(collateral: number | string, debt: number | string, range: number): Promise<string> {
         await this.createLoanApprove(collateral);
-        return await this._createLoan(collateral, debt,  N, false) as string;
+        return await this._createLoan(collateral, debt, range, false) as string;
     }
 
     // ---------------- BORROW MORE ----------------
