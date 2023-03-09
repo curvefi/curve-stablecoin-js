@@ -375,11 +375,11 @@ export class LlammaTemplate {
         return [await this.calcTickPrice(n), await this.calcTickPrice(n + 1)]
     }
 
-    public async calcRangePct(n: number): Promise<string> {
+    public async calcRangePct(range: number): Promise<string> {
         /**
          * Calculates range in terms of price difference %
-         * @param  {number} n Number of bands in range
-         * @return {string}   Range in %
+         * @param  {number} range Number of bands in range
+         * @return {string}       Range in %
          */
         const { A } = (await this.statsParameters());
         const A_BN = BN(A);
