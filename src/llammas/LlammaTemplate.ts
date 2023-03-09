@@ -300,11 +300,11 @@ export class LlammaTemplate {
         address = _getAddress(address);
         const _bands = await crvusd.contracts[this.address].contract.read_user_tick_numbers(address, crvusd.constantOptions) as ethers.BigNumber[];
 
-        return _bands.map((_t) => _t.toNumber());
+        return _bands.map((_t) => _t.toNumber()).reverse();
     }
 
     public async userRange(address = ""): Promise<number> {
-        const [n1, n2] = await this.userBands(address);
+        const [n2, n1] = await this.userBands(address);
         if (n1 == n2) return 0;
         return n2 - n1 + 1;
     }
@@ -313,7 +313,7 @@ export class LlammaTemplate {
         address = _getAddress(address);
         const _prices = await crvusd.contracts[this.controller].contract.user_prices(address, crvusd.constantOptions) as ethers.BigNumber[];
 
-        return _prices.map((_p) =>ethers.utils.formatUnits(_p));
+        return _prices.map((_p) =>ethers.utils.formatUnits(_p)).reverse();
     }
 
     public async _userState(address = ""): Promise<{ _collateral: ethers.BigNumber, _stablecoin: ethers.BigNumber, _debt: ethers.BigNumber }> {
@@ -335,7 +335,7 @@ export class LlammaTemplate {
     }
 
     public async userBandsBalances(address = ""): Promise<IDict<{ stablecoin: string, collateral: string }>> {
-        const [n1, n2] = await this.userBands(address);
+        const [n2, n1] = await this.userBands(address);
         if (n1 == 0 && n2 == 0) return {};
 
         address = _getAddress(address);
@@ -373,7 +373,7 @@ export class LlammaTemplate {
     }
 
     public async calcBandPrices(n: number): Promise<[string, string]> {
-        return [await this.calcTickPrice(n), await this.calcTickPrice(n + 1)]
+        return [await this.calcTickPrice(n + 1), await this.calcTickPrice(n)]
     }
 
     public async calcRangePct(range: number): Promise<string> {
@@ -466,22 +466,22 @@ export class LlammaTemplate {
         // return await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
     }
 
-    private async _calcPrices(_n1: ethers.BigNumber, _n2: ethers.BigNumber): Promise<string[]> {
+    private async _calcPrices(_n2: ethers.BigNumber, _n1: ethers.BigNumber): Promise<string[]> {
         const contract = crvusd.contracts[this.address].contract
         return (await Promise.all([
-            contract.p_oracle_up(_n1, crvusd.constantOptions),
             contract.p_oracle_down(_n2, crvusd.constantOptions),
+            contract.p_oracle_up(_n1, crvusd.constantOptions),
         ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
 
         // TODO switch to multicall
         // const contract = crvusd.contracts[this.address].multicallContract;
         // const [_price1, _price2] = await crvusd.multicallProvider.all([
-        //     contract.price_oracle_up(_n1),
-        //     contract.price_oracle_down(_n2),
+        //     contract.price_oracle_up(_n2),
+        //     contract.price_oracle_down(_n1),
         // ]);
     }
 
-    private async _calcPricesApproximately(_n1: ethers.BigNumber, _n2: ethers.BigNumber): Promise<[string, string]> {
+    private async _calcPricesApproximately(_n2: ethers.BigNumber, _n1: ethers.BigNumber): Promise<[string, string]> {
         const { A, base_price } = (await this.statsParameters());
         const basePriceBN = BN(base_price);
         const A_BN = BN(A);
@@ -489,8 +489,8 @@ export class LlammaTemplate {
         const n2BN = toBN(_n2, 0);
 
         return [
-            basePriceBN.times(A_BN.minus(1).div(A_BN).pow(n1BN)).toFixed(18),
             basePriceBN.times(A_BN.minus(1).div(A_BN).pow(n2BN.plus(1))).toFixed(18),
+            basePriceBN.times(A_BN.minus(1).div(A_BN).pow(n1BN)).toFixed(18),
         ].map(_cutZeros) as [string, string];
     }
 
@@ -498,7 +498,7 @@ export class LlammaTemplate {
         const _n1 = await this._calcN1(parseUnits(collateral, this.collateralDecimals), parseUnits(debt), range);
         const _n2 = _n1.add(ethers.BigNumber.from(range - 1));
 
-        return [_n1, _n2];
+        return [_n2, _n1];
     }
 
     private async _createLoanBandsAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [ethers.BigNumber, ethers.BigNumber] }> {
@@ -511,16 +511,16 @@ export class LlammaTemplate {
 
         const res: { [index: number]: [ethers.BigNumber, ethers.BigNumber] } = {};
         for (let N = this.minBands; N <= maxN; N++) {
-            res[N] = [_n1_arr[N - this.minBands], _n2_arr[N - this.minBands]];
+            res[N] = [_n2_arr[N - this.minBands], _n1_arr[N - this.minBands]];
         }
 
         return res;
     }
 
     public async createLoanBands(collateral: number | string, debt: number | string, range: number): Promise<[number, number]> {
-        const [_n1, _n2] = await this._createLoanBands(collateral, debt, range);
+        const [_n2, _n1] = await this._createLoanBands(collateral, debt, range);
 
-        return [_n1.toNumber(), _n2.toNumber()];
+        return [_n2.toNumber(), _n1.toNumber()];
     }
 
     public async createLoanBandsAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [number, number] | null }> {
@@ -539,9 +539,9 @@ export class LlammaTemplate {
     }
 
     public async createLoanPrices(collateral: number | string, debt: number | string, range: number): Promise<string[]> {
-        const [_n1, _n2] = await this._createLoanBands(collateral, debt, range);
+        const [_n2, _n1] = await this._createLoanBands(collateral, debt, range);
 
-        return await this._calcPrices(_n1, _n2);
+        return await this._calcPrices(_n2, _n1);
     }
 
     public async createLoanPricesAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [string, string] | null }> {
@@ -632,19 +632,19 @@ export class LlammaTemplate {
         const _n1 = await this._calcN1(_collateral, _debt, N);
         const _n2 = _n1.add(N - 1);
 
-        return [_n1, _n2];
+        return [_n2, _n1];
     }
 
     public async borrowMoreBands(collateral: number | string, debt: number | string): Promise<[number, number]> {
-        const [_n1, _n2] = await this._borrowMoreBands(collateral, debt);
+        const [_n2, _n1] = await this._borrowMoreBands(collateral, debt);
 
-        return [_n1.toNumber(), _n2.toNumber()];
+        return [_n2.toNumber(), _n1.toNumber()];
     }
 
     public async borrowMorePrices(collateral: number | string, debt: number | string): Promise<string[]> {
-        const [_n1, _n2] = await this._borrowMoreBands(collateral, debt);
+        const [_n2, _n1] = await this._borrowMoreBands(collateral, debt);
 
-        return await this._calcPrices(_n1, _n2);
+        return await this._calcPrices(_n2, _n1);
     }
 
     public async borrowMoreHealth(collateral: number | string, debt: number | string, full = true, address = ""): Promise<string> {
@@ -709,19 +709,19 @@ export class LlammaTemplate {
         const _n1 = await this._calcN1(_collateral, _currentDebt, N);
         const _n2 = _n1.add(N - 1);
 
-        return [_n1, _n2];
+        return [_n2, _n1];
     }
 
     public async addCollateralBands(collateral: number | string, address = ""): Promise<[number, number]> {
-        const [_n1, _n2] = await this._addCollateralBands(collateral, address);
+        const [_n2, _n1] = await this._addCollateralBands(collateral, address);
 
-        return [_n1.toNumber(), _n2.toNumber()];
+        return [_n2.toNumber(), _n1.toNumber()];
     }
 
     public async addCollateralPrices(collateral: number | string, address = ""): Promise<string[]> {
-        const [_n1, _n2] = await this._addCollateralBands(collateral, address);
+        const [_n2, _n1] = await this._addCollateralBands(collateral, address);
 
-        return await this._calcPrices(_n1, _n2);
+        return await this._calcPrices(_n2, _n1);
     }
 
     public async addCollateralHealth(collateral: number | string, full = true, address = ""): Promise<string> {
@@ -793,19 +793,19 @@ export class LlammaTemplate {
         const _n1 = await this._calcN1(_collateral, _currentDebt, N);
         const _n2 = _n1.add(N - 1);
 
-        return [_n1, _n2];
+        return [_n2, _n1];
     }
 
     public async removeCollateralBands(collateral: number | string): Promise<[number, number]> {
-        const [_n1, _n2] = await this._removeCollateralBands(collateral);
+        const [_n2, _n1] = await this._removeCollateralBands(collateral);
 
-        return [_n1.toNumber(), _n2.toNumber()];
+        return [_n2.toNumber(), _n1.toNumber()];
     }
 
     public async removeCollateralPrices(collateral: number | string): Promise<string[]> {
-        const [_n1, _n2] = await this._removeCollateralBands(collateral);
+        const [_n2, _n1] = await this._removeCollateralBands(collateral);
 
-        return await this._calcPrices(_n1, _n2);
+        return await this._calcPrices(_n2, _n1);
     }
 
     public async removeCollateralHealth(collateral: number | string, full = true, address = ""): Promise<string> {
@@ -853,19 +853,19 @@ export class LlammaTemplate {
         const _n1 = await this._calcN1(_currentCollateral, _debt, N);
         const _n2 = _n1.add(N - 1);
 
-        return [_n1, _n2];
+        return [_n2, _n1];
     }
 
     public async repayBands(debt: number | string): Promise<[number, number]> {
-        const [_n1, _n2] = await this._repayBands(debt);
+        const [_n2, _n1] = await this._repayBands(debt);
 
-        return [_n1.toNumber(), _n2.toNumber()];
+        return [_n2.toNumber(), _n1.toNumber()];
     }
 
     public async repayPrices(debt: number | string): Promise<string[]> {
-        const [_n1, _n2] = await this._repayBands(debt);
+        const [_n2, _n1] = await this._repayBands(debt);
 
-        return await this._calcPrices(_n1, _n2);
+        return await this._calcPrices(_n2, _n1);
     }
 
     public async repayIsApproved(debt: number | string): Promise<boolean> {

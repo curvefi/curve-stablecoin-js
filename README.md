@@ -254,17 +254,6 @@ import crvusd from "@curvefi/stablecoin-api";
     // [ '300.0', '0.402268776965776345' ]
     await llamma.stats.bandBalances();
     // {
-    //     '0': { stablecoin: '0.0', collateral: '0.0' },
-    //     '1': { stablecoin: '0.0', collateral: '0.0' },
-    //     '2': { stablecoin: '0.0', collateral: '0.0' },
-    //     '3': { stablecoin: '0.0', collateral: '0.0' },
-    //     '4': { stablecoin: '0.0', collateral: '0.0' },
-    //     '5': { stablecoin: '0.0', collateral: '0.0' },
-    //     '6': { stablecoin: '0.0', collateral: '0.0' },
-    //     '7': { stablecoin: '0.0', collateral: '0.0' },
-    //     '8': { stablecoin: '0.0', collateral: '0.0' },
-    //     '9': { stablecoin: '0.0', collateral: '0.0' },
-    //     '10': { stablecoin: '0.0', collateral: '0.0' },
     //     '11': { stablecoin: '300.0', collateral: '0.002268776965776345' },
     //     '12': { stablecoin: '0.0', collateral: '0.1' },
     //     '13': { stablecoin: '0.0', collateral: '0.1' },
@@ -295,9 +284,9 @@ import crvusd from "@curvefi/stablecoin-api";
     await llamma.createLoanMaxRecv(0.5, 5);
     // 1375.74670276529114147
     await llamma.createLoanBands(0.5, 1000, 5);
-    // [ 32, 36 ]
+    // [ 36, 32 ]
     await llamma.createLoanPrices(0.5, 1000, 5);
-    // [ '2174.941007873561634', '2068.347257607234777' ]
+    // [ '2068.347257607234777', '2174.941007873561634' ]
     await llamma.createLoanHealth(0.5, 1000, 5);  // FULL
     // 45.191203147616155
     await llamma.createLoanHealth(0.5, 1000, 5, false);  // NOT FULL
@@ -322,9 +311,9 @@ import crvusd from "@curvefi/stablecoin-api";
     await llamma.userRange()
     // 5
     await llamma.userBands();
-    // [ 32, 36 ]
+    // [ 36, 32 ]
     await llamma.userPrices();
-    // [ '2174.941007873561634', '2068.347257607234777' ]
+    // [ '2068.347257607234777', '2174.941007873561634' ]
     await llamma.userState();
     // { collateral: '0.5', stablecoin: '0.0', debt: '1000.0' }
     await llamma.userBandsBalances();
@@ -341,9 +330,9 @@ import crvusd from "@curvefi/stablecoin-api";
     await llamma.borrowMoreMaxRecv(0.1);
     // 650.896043318349376298
     await llamma.borrowMoreBands(0.1, 500);
-    // [ 10, 14 ]
+    // [ 14, 10 ]
     await llamma.borrowMorePrices(0.1, 500);
-    // [ '2713.146225026413746', '2580.175063923865968' ]
+    // [ '2580.175063923865968', '2713.146225026413746' ]
     await llamma.borrowMoreHealth(0.1, 500);  // FULL
     // 15.200984677843693 %
     await llamma.borrowMoreHealth(0.1, 500, false);  // NOT FULL
@@ -358,16 +347,16 @@ import crvusd from "@curvefi/stablecoin-api";
 
     // Full health: 15.200984677843694 %
     // Not full health: 3.7268336789002439 %
-    // Bands: [ 10, 14 ]
-    // Prices: [ '2713.146225026413746', '2580.175063923865968' ]
+    // Bands: [ 14, 10 ]
+    // Prices: [ '2580.175063923865968', '2713.146225026413746' ]
     // State: { collateral: '0.6', stablecoin: '0.0', debt: '1500.0' }
 
     // --- ADD COLLATERAL ---
 
     await llamma.addCollateralBands(0.2);
-    // [ 39, 43 ]
+    // [ 43, 39 ]
     await llamma.addCollateralPrices(0.2);
-    // [ '2027.187147180850842', '1927.834806254156043' ]
+    // [ '1927.834806254156043', '2027.187147180850842' ]
     await llamma.addCollateralHealth(0.2);  // FULL
     // 55.2190795613534006
     await llamma.addCollateralHealth(0.2, false);  // NOT FULL
@@ -382,8 +371,8 @@ import crvusd from "@curvefi/stablecoin-api";
 
     // Full health: 55.2190795613534014 %
     // Not full health: 3.3357274109987797 %
-    // Bands: [ 39, 43 ]
-    // Prices: [ '2027.187147180850842', '1927.834806254156043' ]
+    // Bands: [ 43, 39 ]
+    // Prices: [ '1927.834806254156043', '2027.187147180850842' ]
     // State: { collateral: '0.8', stablecoin: '0.0', debt: '1500.0' }
 
     // --- REMOVE COLLATERAL ---
@@ -391,9 +380,9 @@ import crvusd from "@curvefi/stablecoin-api";
     await llamma.maxRemovable()
     // 0.254841506439755199
     await llamma.removeCollateralBands(0.1);
-    // [ 25, 29 ]
+    // [ 29, 25 ]
     await llamma.removeCollateralPrices(0.1);
-    // [ '2333.46407819744091', '2219.101120164841944' ]
+    // [ '2219.101120164841944', '2333.46407819744091' ]
     await llamma.removeCollateralHealth(0.1);  // FULL
     // 35.1846612411492316
     await llamma.removeCollateralHealth(0.1, false);  // NOT FULL
@@ -403,8 +392,8 @@ import crvusd from "@curvefi/stablecoin-api";
 
     // Full health: 35.1846612411492326 %
     // Not full health: 4.0796515570298084 %
-    // Bands: [ 25, 29 ]
-    // Prices: [ '2333.46407819744091', '2219.101120164841944' ]
+    // Bands: [ 29, 25 ]
+    // Prices: [ '2219.101120164841944', '2333.46407819744091', ]
     // State: { collateral: '0.7', stablecoin: '0.0', debt: '1500.0' }
 
     // --- REPAY ---
@@ -413,9 +402,9 @@ import crvusd from "@curvefi/stablecoin-api";
     // { stablecoin: '1500.0', collateral: '0.3' }
 
     await llamma.repayBands(1000);
-    // [ 135, 139 ]
+    // [ 139, 135 ]
     await llamma.repayPrices(1000);
-    // [ '772.453820291837448', '734.595897104762463' ]
+    // [ '734.595897104762463', '772.453820291837448' ]
     await llamma.repayHealth(1000);  // FULL
     // 315.2178906180373138
     await llamma.repayHealth(1000, false);  // NOT FULL
@@ -429,8 +418,8 @@ import crvusd from "@curvefi/stablecoin-api";
 
     // Full health: 315.2178906180373149 %
     // Not full health: 3.3614254588945577 %
-    // Bands: [ 135, 139 ]
-    // Prices: [ '772.453820291837448', '734.595897104762463' ]
+    // Bands: [ 139, 135 ]
+    // Prices: [ '734.595897104762463', '772.453820291837448' ]
     // State: { collateral: '0.7', stablecoin: '0.0', debt: '500.0' }
 })()
 ```
@@ -467,18 +456,18 @@ import crvusd from "@curvefi/stablecoin-api";
 
     await llamma.createLoanBandsAllRanges(1, 2600);
     // {
-    //     '5': [ 6, 10 ],
-    //     '6': [ 6, 11 ],
-    //     '7': [ 5, 11 ],
-    //     '8': [ 5, 12 ],
-    //     '9': [ 4, 12 ],
-    //     '10': [ 4, 13 ],
-    //     '11': [ 3, 13 ],
-    //     '12': [ 3, 14 ],
-    //     '13': [ 2, 14 ],
-    //     '14': [ 2, 15 ],
-    //     '15': [ 1, 15 ],
-    //     '16': [ 1, 16 ],
+    //     '5': [ 10, 6 ],
+    //     '6': [ 11, 6 ],
+    //     '7': [ 11, 5 ],
+    //     '8': [ 12, 5 ],
+    //     '9': [ 12, 4 ],
+    //     '10': [ 13, 4 ],
+    //     '11': [ 13, 3 ],
+    //     '12': [ 14, 3 ],
+    //     '13': [ 14, 2 ],
+    //     '14': [ 15, 2 ],
+    //     '15': [ 15, 1 ],
+    //     '16': [ 16, 1 ],
     //     '17': null,
     //     '18': null,
     //     '19': null,
@@ -491,18 +480,18 @@ import crvusd from "@curvefi/stablecoin-api";
 
     await llamma.createLoanPricesAllRanges(1, 2600);
     // {
-    //     '5': [ '2824.440448203', '2686.01476277614933533' ],
-    //     '6': [ '2824.440448203', '2659.154615148387841976' ],
-    //     '7': [ '2852.9701497', '2659.154615148387841976' ],
-    //     '8': [ '2852.9701497', '2632.563068996903963557' ],
-    //     '9': [ '2881.78803', '2632.563068996903963557' ],
-    //     '10': [ '2881.78803', '2606.237438306934923921' ],
-    //     '11': [ '2910.897', '2606.237438306934923921' ],
-    //     '12': [ '2910.897', '2580.175063923865574682' ],
-    //     '13': [ '2940.3', '2580.175063923865574682' ],
-    //     '14': [ '2940.3', '2554.373313284626918935' ],
-    //     '15': [ '2970', '2554.373313284626918935' ],
-    //     '16': [ '2970', '2528.829580151780649746' ],
+    //     '5': [ '2686.01476277614933533', '2824.440448203' ],
+    //     '6': [ '2659.154615148387841976', '2824.440448203' ],
+    //     '7': [ '2659.154615148387841976', '2852.9701497' ],
+    //     '8': [ '2632.563068996903963557', '2852.9701497' ],
+    //     '9': [ '2632.563068996903963557', '2881.78803' ],
+    //     '10': [ '2606.237438306934923921', '2881.78803' ],
+    //     '11': [ '2606.237438306934923921', '2910.897' ],
+    //     '12': [ '2580.175063923865574682', '2910.897' ],
+    //     '13': [ '2580.175063923865574682', '2940.3' ],
+    //     '14': [ '2554.373313284626918935', '2940.3' ],
+    //     '15': [ '2554.373313284626918935', '2970' ],
+    //     '16': [ '2528.829580151780649746', '2970' ],
     //     '17': null,
     //     '18': null,
     //     '19': null,
