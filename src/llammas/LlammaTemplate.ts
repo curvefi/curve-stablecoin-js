@@ -392,9 +392,13 @@ export class LlammaTemplate {
 
     // ---------------- CREATE LOAN ----------------
 
-    public async createLoanMaxRecv(collateral: number | string, range: number): Promise<string> {
+    private _checkRange(range: number): void {
         if (range < this.minBands) throw Error(`range must be >= ${this.minBands}`);
         if (range > this.maxBands) throw Error(`range must be <= ${this.maxBands}`);
+    }
+
+    public async createLoanMaxRecv(collateral: number | string, range: number): Promise<string> {
+        this._checkRange(range);
         const _collateral = parseUnits(collateral, this.collateralDecimals);
 
         return ethers.utils.formatUnits(await crvusd.contracts[this.controller].contract.max_borrowable(_collateral, range, crvusd.constantOptions));
@@ -436,11 +440,9 @@ export class LlammaTemplate {
         return this.maxBands;
     }
 
-    private async _calcN1(_collateral: ethers.BigNumber, _debt: ethers.BigNumber, N: number): Promise<ethers.BigNumber> {
-        if (N < this.minBands) throw Error(`N must be >= ${this.minBands}`);
-        if (N > this.maxBands) throw Error(`N must be <= ${this.maxBands}`);
-
-        return await crvusd.contracts[this.controller].contract.calculate_debt_n1(_collateral, _debt, N, crvusd.constantOptions);
+    private async _calcN1(_collateral: ethers.BigNumber, _debt: ethers.BigNumber, range: number): Promise<ethers.BigNumber> {
+        this._checkRange(range);
+        return await crvusd.contracts[this.controller].contract.calculate_debt_n1(_collateral, _debt, range, crvusd.constantOptions);
     }
 
     private async _calcN1AllRanges(_collateral: ethers.BigNumber, _debt: ethers.BigNumber, maxN: number): Promise<ethers.BigNumber[]> {
@@ -576,8 +578,7 @@ export class LlammaTemplate {
 
     private async _createLoan(collateral: number | string, debt: number | string, range: number, estimateGas: boolean): Promise<string | number> {
         if (await this.loanExists()) throw Error("Loan already created");
-        if (range < this.minBands) throw Error(`range must be >= ${this.minBands}`);
-        if (range > this.maxBands) throw Error(`range must be <= ${this.maxBands}`);
+        this._checkRange(range);
 
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const _debt = parseUnits(debt);
