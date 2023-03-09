@@ -297,9 +297,9 @@ export class LlammaTemplate {
 
     public async userBands(address = ""): Promise<number[]> {
         address = _getAddress(address);
-        const _ticks = await crvusd.contracts[this.address].contract.read_user_tick_numbers(address, crvusd.constantOptions) as ethers.BigNumber[];
+        const _bands = await crvusd.contracts[this.address].contract.read_user_tick_numbers(address, crvusd.constantOptions) as ethers.BigNumber[];
 
-        return _ticks.map((_t) => _t.toNumber());
+        return _bands.map((_t) => _t.toNumber());
     }
 
     public async userPrices(address = ""): Promise<string[]> {
@@ -515,18 +515,18 @@ export class LlammaTemplate {
     }
 
     public async createLoanBandsAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [number, number] | null }> {
-        const _ticksAllRanges = await this._createLoanBandsAllRanges(collateral, debt);
+        const _bandsAllRanges = await this._createLoanBandsAllRanges(collateral, debt);
 
-        const ticksAllRanges: { [index: number]: [number, number] | null } = {};
+        const bandsAllRanges: { [index: number]: [number, number] | null } = {};
         for (let N = this.minTicks; N <= this.maxTicks; N++) {
-            if (_ticksAllRanges[N]) {
-                ticksAllRanges[N] = _ticksAllRanges[N].map(Number) as [number, number];
+            if (_bandsAllRanges[N]) {
+                bandsAllRanges[N] = _bandsAllRanges[N].map(Number) as [number, number];
             } else {
-                ticksAllRanges[N] = null
+                bandsAllRanges[N] = null
             }
         }
 
-        return ticksAllRanges;
+        return bandsAllRanges;
     }
 
     public async createLoanPrices(collateral: number | string, debt: number | string, N: number): Promise<string[]> {
@@ -536,12 +536,12 @@ export class LlammaTemplate {
     }
 
     public async createLoanPricesAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [string, string] | null }> {
-        const _ticksAllRanges = await this._createLoanBandsAllRanges(collateral, debt);
+        const _bandsAllRanges = await this._createLoanBandsAllRanges(collateral, debt);
 
         const pricesAllRanges: { [index: number]: [string, string] | null } = {};
         for (let N = this.minTicks; N <= this.maxTicks; N++) {
-            if (_ticksAllRanges[N]) {
-                pricesAllRanges[N] = await this._calcPricesApproximately(..._ticksAllRanges[N]);
+            if (_bandsAllRanges[N]) {
+                pricesAllRanges[N] = await this._calcPricesApproximately(..._bandsAllRanges[N]);
             } else {
                 pricesAllRanges[N] = null
             }
