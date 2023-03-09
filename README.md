@@ -203,6 +203,8 @@ import crvusd from "@curvefi/stablecoin-api";
     // 20
     llamma.A;
     // 100
+    llamma.tickSpace;
+    // 1 %
 })()
 ````
 

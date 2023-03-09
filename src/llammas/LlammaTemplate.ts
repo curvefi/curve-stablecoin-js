@@ -33,6 +33,7 @@ export class LlammaTemplate {
     maxBands: number;
     defaultBands: number;
     A: number;
+    tickSpace: number; // %
     estimateGas: {
         createLoanApprove: (collateral: number | string) => Promise<number>,
         createLoan: (collateral: number | string, debt: number | string, range: number) => Promise<number>,
@@ -87,6 +88,7 @@ export class LlammaTemplate {
         this.maxBands = llammaData.max_bands;
         this.defaultBands = llammaData.default_bands;
         this.A = llammaData.A;
+        this.tickSpace = 1 / llammaData.A * 100;
         this.estimateGas = {
             createLoanApprove: this.createLoanApproveEstimateGas.bind(this),
             createLoan: this.createLoanEstimateGas.bind(this),
