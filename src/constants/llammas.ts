@@ -9,8 +9,8 @@ export const LLAMMAS: IDict<ILlamma> = lowerCaseLlammasAddresses({
         collateral_address: '0xb6286fAFd0451320ad6A8143089b216C2152c025',
         collateral_symbol: 'WETH',
         collateral_decimals: 18,
-        min_ticks: 5,
-        max_ticks: 50,
-        default_ticks: 20,
+        min_bands: 5,
+        max_bands: 50,
+        default_bands: 20,
     },
 });

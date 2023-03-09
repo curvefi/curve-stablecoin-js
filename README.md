@@ -195,11 +195,11 @@ import crvusd from "@curvefi/stablecoin-api";
     // ]
     llamma.coinDecimals;
     // [ 18, 18 ]
-    llamma.minTicks;
+    llamma.minBands;
     // 5
-    llamma.maxTicks;
+    llamma.maxBands;
     // 50
-    llamma.defaultTicks;
+    llamma.defaultBands;
     // 20
 })()
 ````
@@ -356,7 +356,7 @@ import crvusd from "@curvefi/stablecoin-api";
 
     // Full health: 15.200984677843694 %
     // Not full health: 3.7268336789002439 %
-    // Ticks: [ 10, 14 ]
+    // Bands: [ 10, 14 ]
     // Prices: [ '2713.146225026413746', '2580.175063923865968' ]
     // State: { collateral: '0.6', stablecoin: '0.0', debt: '1500.0' }
 
@@ -380,7 +380,7 @@ import crvusd from "@curvefi/stablecoin-api";
 
     // Full health: 55.2190795613534014 %
     // Not full health: 3.3357274109987797 %
-    // Ticks: [ 39, 43 ]
+    // Bands: [ 39, 43 ]
     // Prices: [ '2027.187147180850842', '1927.834806254156043' ]
     // State: { collateral: '0.8', stablecoin: '0.0', debt: '1500.0' }
 
@@ -401,7 +401,7 @@ import crvusd from "@curvefi/stablecoin-api";
 
     // Full health: 35.1846612411492326 %
     // Not full health: 4.0796515570298084 %
-    // Ticks: [ 25, 29 ]
+    // Bands: [ 25, 29 ]
     // Prices: [ '2333.46407819744091', '2219.101120164841944' ]
     // State: { collateral: '0.7', stablecoin: '0.0', debt: '1500.0' }
 
@@ -427,7 +427,7 @@ import crvusd from "@curvefi/stablecoin-api";
 
     // Full health: 315.2178906180373149 %
     // Not full health: 3.3614254588945577 %
-    // Ticks: [ 135, 139 ]
+    // Bands: [ 135, 139 ]
     // Prices: [ '772.453820291837448', '734.595897104762463' ]
     // State: { collateral: '0.7', stablecoin: '0.0', debt: '500.0' }
 })()

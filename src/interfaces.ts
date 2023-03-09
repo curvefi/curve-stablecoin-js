@@ -11,9 +11,9 @@ export interface ILlamma {
     collateral_address: string,
     collateral_symbol: string,
     collateral_decimals: number,
-    min_ticks: number,
-    max_ticks: number,
-    default_ticks: number,
+    min_bands: number,
+    max_bands: number,
+    default_bands: number,
 }
 
 export interface Icrvusd {
