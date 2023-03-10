@@ -73,9 +73,12 @@ const statsTest = async () => {
 
     console.log(await llamma.stats.parameters());
     console.log(await llamma.stats.balances());
+    console.log(await llamma.stats.maxMinBands());
     console.log(await llamma.stats.bandsBalances());
     console.log(await llamma.stats.totalDebt());
 }
+
+statsTest();
 
 const generalTest = async () => {
     await crvusd.init('JsonRpc', {});

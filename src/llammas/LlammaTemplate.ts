@@ -55,8 +55,6 @@ export class LlammaTemplate {
             fee: string, // %
             admin_fee: string, // %
             rate: string, // %
-            min_band: string,    // TODO bandsInfo()
-            max_band: string,    // TODO bandsInfo()
             active_band: string, // TODO bandsInfo()
             minted: string,      // TODO supplyInfo()
             redeemed: string,    // TODO supplyInfo()
@@ -65,6 +63,7 @@ export class LlammaTemplate {
             loan_discount: string, // %
         }>,
         balances: () => Promise<[string, string]>,
+        maxMinBands: () => Promise<[number, number]>,
         bandsBalances: () => Promise<{ [index: number]: { stablecoin: string, collateral: string } }>,
         totalDebt: () => Promise<string>,
     };
@@ -108,6 +107,7 @@ export class LlammaTemplate {
         this.stats = {
             parameters: this.statsParameters.bind(this),
             balances: this.statsBalances.bind(this),
+            maxMinBands: this.statsMaxMinBands.bind(this),
             bandsBalances: this.statsBandsBalances.bind(this),
             totalDebt: this.statsTotalDebt.bind(this),
         }
@@ -122,8 +122,6 @@ export class LlammaTemplate {
         fee: string, // %
         admin_fee: string, // %
         rate: string, // %
-        min_band: string,
-        max_band: string,
         active_band: string,
         minted: string,
         redeemed: string,
@@ -137,8 +135,6 @@ export class LlammaTemplate {
             llammaContract.fee(),
             llammaContract.admin_fee(),
             llammaContract.rate(),
-            llammaContract.min_band(),
-            llammaContract.max_band(),
             llammaContract.active_band(),
             controllerContract.minted(),
             controllerContract.redeemed(),
@@ -146,7 +142,7 @@ export class LlammaTemplate {
             controllerContract.loan_discount(),
         ]
 
-        const [_fee, _admin_fee, _rate, _min_band, _max_band, _active_band,
+        const [_fee, _admin_fee, _rate, _active_band,
             _minted, _redeemed, _liquidation_discount, _loan_discount]: ethers.BigNumber[] = await Promise.all(calls);
 
         // TODO switch to multicall
@@ -157,8 +153,6 @@ export class LlammaTemplate {
         //     llammaContract.fee(),
         //     llammaContract.admin_fee(),
         //     llammaContract.rate(),
-        //     llammaContract.min_band(),
-        //     llammaContract.max_band(),
         //     llammaContract.active_band(),
         //     controllerContract.minted(),
         //     controllerContract.redeemed(),
@@ -166,15 +160,13 @@ export class LlammaTemplate {
         //     controllerContract.loan_discount(),
         // ]
 
-        // const [_fee, _admin_fee, _rate, _min_band, _max_band,
+        // const [_fee, _admin_fee, _rate,
         //     _active_band, _minted, _redeemed, _liquidation_discount, _loan_discount]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
 
         return {
             fee: ethers.utils.formatUnits(_fee.mul(100)),
             admin_fee: ethers.utils.formatUnits(_admin_fee.mul(100)),
             rate: ethers.utils.formatUnits(_rate.mul(100)),
-            min_band: ethers.utils.formatUnits(_min_band, 0),
-            max_band: ethers.utils.formatUnits(_max_band, 0),
             active_band: ethers.utils.formatUnits(_active_band, 0),
             minted: ethers.utils.formatUnits(_minted),
             redeemed: ethers.utils.formatUnits(_redeemed),
@@ -217,26 +209,31 @@ export class LlammaTemplate {
         ];
     }
 
-    private async statsBandsBalances(): Promise<{ [index: number]: { stablecoin: string, collateral: string } }> {
+    private async statsMaxMinBands(): Promise<[number, number]> {
         const llammaContract = crvusd.contracts[this.address].contract;
 
         const calls1 = [
-            llammaContract.min_band(crvusd.constantOptions),
             llammaContract.max_band(crvusd.constantOptions),
+            llammaContract.min_band(crvusd.constantOptions),
         ]
 
-        const [min_band, max_band]: number[] = (await Promise.all(calls1)).map((_b: ethers.BigNumber) => _b.toNumber());
+        return (await Promise.all(calls1)).map((_b: ethers.BigNumber) => _b.toNumber()) as [number, number];
 
         // TODO switch to multicall
         // const llammaContract = crvusd.contracts[this.address].multicallContract;
 
         // const calls1 = [
-        //     llammaContract.min_band(),
         //     llammaContract.max_band(),
+        //     llammaContract.min_band(),
         // ]
 
-        // const [min_band, max_band]: number = (await crvusd.multicallProvider.all(calls1)).map((_b: ethers.BigNumber) => _b.toNumber());
+        // return (await crvusd.multicallProvider.all(calls1)).map((_b: ethers.BigNumber) => _b.toNumber()) as [number, number];
+    }
 
+    private async statsBandsBalances(): Promise<{ [index: number]: { stablecoin: string, collateral: string } }> {
+        const [max_band, min_band]: number[] = await this.statsMaxMinBands();
+
+        const llammaContract = crvusd.contracts[this.address].contract;
         const calls2 = [];
         for (let i = min_band; i <= max_band; i++) {
             calls2.push(llammaContract.bands_x(i, crvusd.constantOptions), llammaContract.bands_y(i, crvusd.constantOptions));
