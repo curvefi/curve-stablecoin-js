@@ -372,9 +372,8 @@ export class LlammaTemplate {
         const basePrice = await this.basePrice();
         const basePriceBN = BN(basePrice);
         const A_BN = BN(this.A);
-        const nBN = BN(n);
 
-        return _cutZeros(basePriceBN.times(A_BN.minus(1).div(A_BN).pow(nBN)).toFixed(18))
+        return _cutZeros(basePriceBN.times(A_BN.minus(1).div(A_BN).pow(n)).toFixed(18))
     }
 
     public async calcBandPrices(n: number): Promise<[string, string]> {
@@ -486,16 +485,7 @@ export class LlammaTemplate {
     }
 
     private async _calcPrices(_n2: ethers.BigNumber, _n1: ethers.BigNumber): Promise<[string, string]> {
-        const basePrice = await this.basePrice();
-        const basePriceBN = BN(basePrice);
-        const A_BN = BN(this.A);
-        const n1BN = toBN(_n1, 0);
-        const n2BN = toBN(_n2, 0);
-
-        return [
-            basePriceBN.times(A_BN.minus(1).div(A_BN).pow(n2BN.plus(1))).toFixed(18),
-            basePriceBN.times(A_BN.minus(1).div(A_BN).pow(n1BN)).toFixed(18),
-        ].map(_cutZeros) as [string, string];
+        return [await this.calcTickPrice(_n2.toNumber() + 1), await this.calcTickPrice(_n1.toNumber())];
     }
 
     private async _createLoanBands(collateral: number | string, debt: number | string, range: number): Promise<[ethers.BigNumber, ethers.BigNumber]> {
