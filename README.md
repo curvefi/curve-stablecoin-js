@@ -244,8 +244,6 @@ import crvusd from "@curvefi/stablecoin-api";
     //     fee: '0.0',
     //     admin_fee: '0.0',
     //     rate: '0.0',
-    //     minted: '5428.767016666357716798',
-    //     redeemed: '4053.027016666357716798',
     //     liquidation_discount: '2.0',
     //     loan_discount: '5.0'
     // }
@@ -274,6 +272,8 @@ import crvusd from "@curvefi/stablecoin-api";
     //     '14': { stablecoin: '0.0', collateral: '0.1' },
     //     '15': { stablecoin: '0.0', collateral: '0.1' }
     // }
+    await llamma.stats.totalSupply();
+    // 1375.74 
     await llamma.stats.totalDebt();
     // 1375.74
 })()

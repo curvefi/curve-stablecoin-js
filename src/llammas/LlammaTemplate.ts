@@ -55,9 +55,6 @@ export class LlammaTemplate {
             fee: string, // %
             admin_fee: string, // %
             rate: string, // %
-            minted: string,      // TODO supplyInfo()
-            redeemed: string,    // TODO supplyInfo()
-            supply: string,      // TODO supplyInfo()
             liquidation_discount: string, // %
             loan_discount: string, // %
         }>,
@@ -65,6 +62,7 @@ export class LlammaTemplate {
         maxMinBands: () => Promise<[number, number]>,
         activeBand:() => Promise<number>,
         bandsBalances: () => Promise<{ [index: number]: { stablecoin: string, collateral: string } }>,
+        totalSupply: () => Promise<string>,
         totalDebt: () => Promise<string>,
     };
     wallet: {
@@ -110,6 +108,7 @@ export class LlammaTemplate {
             maxMinBands: this.statsMaxMinBands.bind(this),
             activeBand: this.statsActiveBand.bind(this),
             bandsBalances: this.statsBandsBalances.bind(this),
+            totalSupply: this.statsTotalSupply.bind(this),
             totalDebt: this.statsTotalDebt.bind(this),
         }
         this.wallet = {
@@ -123,8 +122,6 @@ export class LlammaTemplate {
         fee: string, // %
         admin_fee: string, // %
         rate: string, // %
-        minted: string,
-        redeemed: string,
         liquidation_discount: string, // %
         loan_discount: string, // %
     }> => {
@@ -135,14 +132,12 @@ export class LlammaTemplate {
             llammaContract.fee(),
             llammaContract.admin_fee(),
             llammaContract.rate(),
-            controllerContract.minted(),
-            controllerContract.redeemed(),
             controllerContract.liquidation_discount(),
             controllerContract.loan_discount(),
         ]
 
-        const [_fee, _admin_fee, _rate,
-            _minted, _redeemed, _liquidation_discount, _loan_discount]: ethers.BigNumber[] = await Promise.all(calls);
+        const [fee, admin_fee, rate, liquidation_discount, loan_discount]: string[] =
+            (await Promise.all(calls)).map((x: ethers.BigNumber) => ethers.utils.formatUnits(x.mul(100)));
 
         // TODO switch to multicall
         // const llammaContract = crvusd.contracts[this.address].multicallContract;
@@ -152,24 +147,14 @@ export class LlammaTemplate {
         //     llammaContract.fee(),
         //     llammaContract.admin_fee(),
         //     llammaContract.rate(),
-        //     controllerContract.minted(),
-        //     controllerContract.redeemed(),
         //     controllerContract.liquidation_discount(),
         //     controllerContract.loan_discount(),
         // ]
 
-        // const [_fee, _admin_fee, _rate,
-        //     _minted, _redeemed, _liquidation_discount, _loan_discount]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
+        // const [fee, admin_fee, rate, liquidation_discount, loan_discount]: string[] =
+        //     (await crvusd.multicallProvider.all(calls)).map((x: ethers.BigNumber) => ethers.utils.formatUnits(x.mul(100)));
 
-        return {
-            fee: ethers.utils.formatUnits(_fee.mul(100)),
-            admin_fee: ethers.utils.formatUnits(_admin_fee.mul(100)),
-            rate: ethers.utils.formatUnits(_rate.mul(100)),
-            minted: ethers.utils.formatUnits(_minted),
-            redeemed: ethers.utils.formatUnits(_redeemed),
-            liquidation_discount: ethers.utils.formatUnits(_liquidation_discount.mul(100)),
-            loan_discount: ethers.utils.formatUnits(_loan_discount.mul(100)),
-        }
+        return { fee, admin_fee, rate, liquidation_discount, loan_discount }
     },
     {
         promise: true,
@@ -269,11 +254,32 @@ export class LlammaTemplate {
         return bands
     }
 
-    private async statsTotalDebt(): Promise<string> {
+    private statsTotalSupply = memoize(async (): Promise<string> => {
+        const controllerContract = crvusd.contracts[this.controller].contract;
+        const calls = [controllerContract.minted(), controllerContract.redeemed()];
+        const [_minted, _redeemed]: ethers.BigNumber[] = await Promise.all(calls);
+
+        // TODO switch to multicall
+        // const controllerContract = crvusd.contracts[this.controller].multicallContract;
+        // const calls = [controllerContract.minted(), controllerContract.redeemed()]
+        // const [_minted, _redeemed]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
+
+        return ethers.utils.formatUnits(_minted.sub(_redeemed))
+    },
+    {
+        promise: true,
+        maxAge: 60 * 1000, // 1m
+    });
+
+    private statsTotalDebt = memoize(async (): Promise<string> => {
         const debt = await crvusd.contracts[this.controller].contract.total_debt(crvusd.constantOptions);
 
         return ethers.utils.formatUnits(debt);
-    }
+    },
+    {
+        promise: true,
+        maxAge: 60 * 1000, // 1m
+    });
 
     // ---------------------------------------
 
