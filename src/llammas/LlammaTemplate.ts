@@ -55,7 +55,6 @@ export class LlammaTemplate {
             fee: string, // %
             admin_fee: string, // %
             rate: string, // %
-            active_band: string, // TODO bandsInfo()
             minted: string,      // TODO supplyInfo()
             redeemed: string,    // TODO supplyInfo()
             supply: string,      // TODO supplyInfo()
@@ -64,6 +63,7 @@ export class LlammaTemplate {
         }>,
         balances: () => Promise<[string, string]>,
         maxMinBands: () => Promise<[number, number]>,
+        activeBand:() => Promise<number>,
         bandsBalances: () => Promise<{ [index: number]: { stablecoin: string, collateral: string } }>,
         totalDebt: () => Promise<string>,
     };
@@ -108,6 +108,7 @@ export class LlammaTemplate {
             parameters: this.statsParameters.bind(this),
             balances: this.statsBalances.bind(this),
             maxMinBands: this.statsMaxMinBands.bind(this),
+            activeBand: this.statsActiveBand.bind(this),
             bandsBalances: this.statsBandsBalances.bind(this),
             totalDebt: this.statsTotalDebt.bind(this),
         }
@@ -122,7 +123,6 @@ export class LlammaTemplate {
         fee: string, // %
         admin_fee: string, // %
         rate: string, // %
-        active_band: string,
         minted: string,
         redeemed: string,
         liquidation_discount: string, // %
@@ -135,14 +135,13 @@ export class LlammaTemplate {
             llammaContract.fee(),
             llammaContract.admin_fee(),
             llammaContract.rate(),
-            llammaContract.active_band(),
             controllerContract.minted(),
             controllerContract.redeemed(),
             controllerContract.liquidation_discount(),
             controllerContract.loan_discount(),
         ]
 
-        const [_fee, _admin_fee, _rate, _active_band,
+        const [_fee, _admin_fee, _rate,
             _minted, _redeemed, _liquidation_discount, _loan_discount]: ethers.BigNumber[] = await Promise.all(calls);
 
         // TODO switch to multicall
@@ -153,7 +152,6 @@ export class LlammaTemplate {
         //     llammaContract.fee(),
         //     llammaContract.admin_fee(),
         //     llammaContract.rate(),
-        //     llammaContract.active_band(),
         //     controllerContract.minted(),
         //     controllerContract.redeemed(),
         //     controllerContract.liquidation_discount(),
@@ -161,13 +159,12 @@ export class LlammaTemplate {
         // ]
 
         // const [_fee, _admin_fee, _rate,
-        //     _active_band, _minted, _redeemed, _liquidation_discount, _loan_discount]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
+        //     _minted, _redeemed, _liquidation_discount, _loan_discount]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
 
         return {
             fee: ethers.utils.formatUnits(_fee.mul(100)),
             admin_fee: ethers.utils.formatUnits(_admin_fee.mul(100)),
             rate: ethers.utils.formatUnits(_rate.mul(100)),
-            active_band: ethers.utils.formatUnits(_active_band, 0),
             minted: ethers.utils.formatUnits(_minted),
             redeemed: ethers.utils.formatUnits(_redeemed),
             liquidation_discount: ethers.utils.formatUnits(_liquidation_discount.mul(100)),
@@ -209,7 +206,7 @@ export class LlammaTemplate {
         ];
     }
 
-    private async statsMaxMinBands(): Promise<[number, number]> {
+    private statsMaxMinBands = memoize(async (): Promise<[number, number]> => {
         const llammaContract = crvusd.contracts[this.address].contract;
 
         const calls1 = [
@@ -228,7 +225,19 @@ export class LlammaTemplate {
         // ]
 
         // return (await crvusd.multicallProvider.all(calls1)).map((_b: ethers.BigNumber) => _b.toNumber()) as [number, number];
-    }
+    },
+    {
+        promise: true,
+        maxAge: 60 * 1000, // 1m
+    });
+
+    private statsActiveBand = memoize(async (): Promise<number> => {
+        return (await crvusd.contracts[this.address].contract.active_band()).toNumber()
+    },
+    {
+        promise: true,
+        maxAge: 60 * 1000, // 1m
+    });
 
     private async statsBandsBalances(): Promise<{ [index: number]: { stablecoin: string, collateral: string } }> {
         const [max_band, min_band]: number[] = await this.statsMaxMinBands();

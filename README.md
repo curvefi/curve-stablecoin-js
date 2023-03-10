@@ -244,7 +244,6 @@ import crvusd from "@curvefi/stablecoin-api";
     //     fee: '0.0',
     //     admin_fee: '0.0',
     //     rate: '0.0',
-    //     active_band: '11',
     //     minted: '5428.767016666357716798',
     //     redeemed: '4053.027016666357716798',
     //     liquidation_discount: '2.0',
@@ -254,6 +253,8 @@ import crvusd from "@curvefi/stablecoin-api";
     // [ '300.0', '0.402268776965776345' ]
     await llamma.stats.maxMinBands();
     // [ 15, 0 ]
+    await llamma.stats.activeBand();
+    // 11
     await llamma.stats.bandBalances();
     // {
     //     '0': { stablecoin: '0.0', collateral: '0.0' },
