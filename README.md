@@ -256,6 +256,17 @@ import crvusd from "@curvefi/stablecoin-api";
     // [ 15, 0 ]
     await llamma.stats.bandBalances();
     // {
+    //     '0': { stablecoin: '0.0', collateral: '0.0' },
+    //     '1': { stablecoin: '0.0', collateral: '0.0' },
+    //     '2': { stablecoin: '0.0', collateral: '0.0' },
+    //     '3': { stablecoin: '0.0', collateral: '0.0' },
+    //     '4': { stablecoin: '0.0', collateral: '0.0' },
+    //     '5': { stablecoin: '0.0', collateral: '0.0' },
+    //     '6': { stablecoin: '0.0', collateral: '0.0' },
+    //     '7': { stablecoin: '0.0', collateral: '0.0' },
+    //     '8': { stablecoin: '0.0', collateral: '0.0' },
+    //     '9': { stablecoin: '0.0', collateral: '0.0' },
+    //     '10': { stablecoin: '0.0', collateral: '0.0' },
     //     '11': { stablecoin: '300.0', collateral: '0.002268776965776345' },
     //     '12': { stablecoin: '0.0', collateral: '0.1' },
     //     '13': { stablecoin: '0.0', collateral: '0.1' },

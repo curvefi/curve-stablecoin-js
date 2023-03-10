@@ -251,7 +251,6 @@ export class LlammaTemplate {
 
         const bands: { [index: number]: { stablecoin: string, collateral: string } } = {};
         for (let i = 0; i < max_band - min_band + 1; i++) {
-            if (_bands[2 * i].eq(0) && _bands[(2 * i) + 1].eq(0)) continue;
             bands[i] = {
                 stablecoin: ethers.utils.formatUnits(_bands[2 * i]),
                 collateral: ethers.utils.formatUnits(_bands[(2 * i) + 1], this.collateralDecimals),
