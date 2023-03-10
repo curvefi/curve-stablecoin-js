@@ -55,12 +55,13 @@ export class LlammaTemplate {
             fee: string, // %
             admin_fee: string, // %
             rate: string, // %
-            base_price: string,
-            min_band: string,
-            max_band: string,
-            active_band: string,
-            minted: string,
-            redeemed: string,
+            base_price: string,  // TODO basePrice()
+            min_band: string,    // TODO bandsInfo()
+            max_band: string,    // TODO bandsInfo()
+            active_band: string, // TODO bandsInfo()
+            minted: string,      // TODO supplyInfo()
+            redeemed: string,    // TODO supplyInfo()
+            supply: string,      // TODO supplyInfo()
             liquidation_discount: string, // %
             loan_discount: string, // %
         }>,
@@ -465,7 +466,7 @@ export class LlammaTemplate {
         // return await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
     }
 
-    private async _calcPrices(_n2: ethers.BigNumber, _n1: ethers.BigNumber): Promise<string[]> {
+    private async _getPrices(_n2: ethers.BigNumber, _n1: ethers.BigNumber): Promise<string[]> {
         const contract = crvusd.contracts[this.address].contract
         return (await Promise.all([
             contract.p_oracle_down(_n2, crvusd.constantOptions),
@@ -480,7 +481,7 @@ export class LlammaTemplate {
         // ]);
     }
 
-    private async _calcPricesApproximately(_n2: ethers.BigNumber, _n1: ethers.BigNumber): Promise<[string, string]> {
+    private async _calcPrices(_n2: ethers.BigNumber, _n1: ethers.BigNumber): Promise<[string, string]> {
         const { base_price } = (await this.statsParameters());
         const basePriceBN = BN(base_price);
         const A_BN = BN(this.A);
@@ -540,7 +541,7 @@ export class LlammaTemplate {
     public async createLoanPrices(collateral: number | string, debt: number | string, range: number): Promise<string[]> {
         const [_n2, _n1] = await this._createLoanBands(collateral, debt, range);
 
-        return await this._calcPrices(_n2, _n1);
+        return await this._getPrices(_n2, _n1);
     }
 
     public async createLoanPricesAllRanges(collateral: number | string, debt: number | string): Promise<{ [index: number]: [string, string] | null }> {
@@ -549,7 +550,7 @@ export class LlammaTemplate {
         const pricesAllRanges: { [index: number]: [string, string] | null } = {};
         for (let N = this.minBands; N <= this.maxBands; N++) {
             if (_bandsAllRanges[N]) {
-                pricesAllRanges[N] = await this._calcPricesApproximately(..._bandsAllRanges[N]);
+                pricesAllRanges[N] = await this._calcPrices(..._bandsAllRanges[N]);
             } else {
                 pricesAllRanges[N] = null
             }
@@ -643,7 +644,7 @@ export class LlammaTemplate {
     public async borrowMorePrices(collateral: number | string, debt: number | string): Promise<string[]> {
         const [_n2, _n1] = await this._borrowMoreBands(collateral, debt);
 
-        return await this._calcPrices(_n2, _n1);
+        return await this._getPrices(_n2, _n1);
     }
 
     public async borrowMoreHealth(collateral: number | string, debt: number | string, full = true, address = ""): Promise<string> {
@@ -720,7 +721,7 @@ export class LlammaTemplate {
     public async addCollateralPrices(collateral: number | string, address = ""): Promise<string[]> {
         const [_n2, _n1] = await this._addCollateralBands(collateral, address);
 
-        return await this._calcPrices(_n2, _n1);
+        return await this._getPrices(_n2, _n1);
     }
 
     public async addCollateralHealth(collateral: number | string, full = true, address = ""): Promise<string> {
@@ -804,7 +805,7 @@ export class LlammaTemplate {
     public async removeCollateralPrices(collateral: number | string): Promise<string[]> {
         const [_n2, _n1] = await this._removeCollateralBands(collateral);
 
-        return await this._calcPrices(_n2, _n1);
+        return await this._getPrices(_n2, _n1);
     }
 
     public async removeCollateralHealth(collateral: number | string, full = true, address = ""): Promise<string> {
@@ -864,7 +865,7 @@ export class LlammaTemplate {
     public async repayPrices(debt: number | string): Promise<string[]> {
         const [_n2, _n1] = await this._repayBands(debt);
 
-        return await this._calcPrices(_n2, _n1);
+        return await this._getPrices(_n2, _n1);
     }
 
     public async repayIsApproved(debt: number | string): Promise<boolean> {
