@@ -34,8 +34,8 @@ const generalTest = (id: string) => {
             const balances = await llamma.wallet.balances();
             const state = await llamma.userState();
             const userPrices = await llamma.userPrices();
-            const fullHealth = await llamma.health();
-            const health = await llamma.health(false);
+            const fullHealth = await llamma.userHealth();
+            const health = await llamma.userHealth(false);
 
             assert.equal(Number(createLoanPrices[0]), Number(userPrices[0]));
             assert.equal(Number(createLoanPrices[1]), Number(userPrices[1]));
@@ -67,8 +67,8 @@ const generalTest = (id: string) => {
             const balances = await llamma.wallet.balances();
             const state = await llamma.userState();
             const userPrices = await llamma.userPrices();
-            const fullHealth = await llamma.health();
-            const health = await llamma.health(false);
+            const fullHealth = await llamma.userHealth();
+            const health = await llamma.userHealth(false);
 
             assert.equal(Number(borrowMorePrices[0]), Number(userPrices[0]));
             assert.equal(Number(borrowMorePrices[1]), Number(userPrices[1]));
@@ -98,8 +98,8 @@ const generalTest = (id: string) => {
             const balances = await llamma.wallet.balances();
             const state = await llamma.userState();
             const userPrices = await llamma.userPrices();
-            const fullHealth = await llamma.health();
-            const health = await llamma.health(false);
+            const fullHealth = await llamma.userHealth();
+            const health = await llamma.userHealth(false);
 
             assert.equal(Number(addCollateralPrices[0]), Number(userPrices[0]));
             assert.equal(Number(addCollateralPrices[1]), Number(userPrices[1]));
@@ -130,8 +130,8 @@ const generalTest = (id: string) => {
             const balances = await llamma.wallet.balances();
             const state = await llamma.userState();
             const userPrices = await llamma.userPrices();
-            const fullHealth = await llamma.health();
-            const health = await llamma.health(false);
+            const fullHealth = await llamma.userHealth();
+            const health = await llamma.userHealth(false);
 
             assert.equal(Number(removeCollateralPrices[0]), Number(userPrices[0]));
             assert.equal(Number(removeCollateralPrices[1]), Number(userPrices[1]));
@@ -161,8 +161,8 @@ const generalTest = (id: string) => {
             const balances = await llamma.wallet.balances();
             const state = await llamma.userState();
             const userPrices = await llamma.userPrices();
-            const fullHealth = await llamma.health();
-            const health = await llamma.health(false);
+            const fullHealth = await llamma.userHealth();
+            const health = await llamma.userHealth(false);
 
             assert.equal(Number(repayPrices[0]), Number(userPrices[0]));
             assert.equal(Number(repayPrices[1]), Number(userPrices[1]));

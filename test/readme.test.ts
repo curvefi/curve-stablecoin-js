@@ -109,10 +109,10 @@ const generalTest = async () => {
     // ]
     console.log(await llamma.createLoan(0.5, 1000, 5));
 
-    console.log(await llamma.debt());  // OR await llamma.debt(address);
+    console.log(await llamma.userDebt());  // OR await llamma.userDebt(address);
     console.log(await llamma.loanExists());
-    console.log(await llamma.health());  // FULL
-    console.log(await llamma.health(false));  // NOT FULL
+    console.log(await llamma.userHealth());  // FULL
+    console.log(await llamma.userHealth(false));  // NOT FULL
     console.log(await llamma.userRange());
     console.log(await llamma.userBands());
     console.log(await llamma.userPrices());
@@ -132,8 +132,8 @@ const generalTest = async () => {
 
     console.log(await llamma.borrowMore(0.1, 500));
 
-    console.log(await llamma.health());  // FULL
-    console.log(await llamma.health(false));  // NOT FULL
+    console.log(await llamma.userHealth());  // FULL
+    console.log(await llamma.userHealth(false));  // NOT FULL
     console.log(await llamma.userBands());
     console.log(await llamma.userPrices());
     console.log(await llamma.userState());
@@ -150,8 +150,8 @@ const generalTest = async () => {
 
     console.log(await llamma.addCollateral(0.2));  // OR await llamma.addCollateral(0.2, forAddress);
 
-    console.log(await llamma.health());  // FULL
-    console.log(await llamma.health(false));  // NOT FULL
+    console.log(await llamma.userHealth());  // FULL
+    console.log(await llamma.userHealth(false));  // NOT FULL
     console.log(await llamma.userBands());
     console.log(await llamma.userPrices());
     console.log(await llamma.userState());
@@ -166,8 +166,8 @@ const generalTest = async () => {
 
     console.log(await llamma.removeCollateral(0.1));
 
-    console.log(await llamma.health());  // FULL
-    console.log(await llamma.health(false));  // NOT FULL
+    console.log(await llamma.userHealth());  // FULL
+    console.log(await llamma.userHealth(false));  // NOT FULL
     console.log(await llamma.userBands());
     console.log(await llamma.userPrices());
     console.log(await llamma.userState());
@@ -186,10 +186,10 @@ const generalTest = async () => {
 
     console.log(await llamma.repay(1000));
 
-    console.log(await llamma.debt());
+    console.log(await llamma.userDebt());
     console.log(await llamma.loanExists());
-    console.log(await llamma.health());  // FULL
-    console.log(await llamma.health(false));  // NOT FULL
+    console.log(await llamma.userHealth());  // FULL
+    console.log(await llamma.userHealth(false));  // NOT FULL
     console.log(await llamma.userBands());
     console.log(await llamma.userPrices());
     console.log(await llamma.userState());

@@ -315,19 +315,19 @@ export class LlammaTemplate {
 
     // ---------------------------------------
 
-    public async debt(address = ""): Promise<string> {
+    public async loanExists(address = ""): Promise<boolean> {
+        address = _getAddress(address);
+        return  await crvusd.contracts[this.controller].contract.loan_exists(address, crvusd.constantOptions);
+    }
+
+    public async userDebt(address = ""): Promise<string> {
         address = _getAddress(address);
         const debt = await crvusd.contracts[this.controller].contract.debt(address, crvusd.constantOptions);
 
         return ethers.utils.formatUnits(debt);
     }
 
-    public async loanExists(address = ""): Promise<boolean> {
-        address = _getAddress(address);
-        return  await crvusd.contracts[this.controller].contract.loan_exists(address, crvusd.constantOptions);
-    }
-
-    public async health(full = true, address = ""): Promise<string> {
+    public async userHealth(full = true, address = ""): Promise<string> {
         address = _getAddress(address);
         let _health = await crvusd.contracts[this.controller].contract.health(address, full, crvusd.constantOptions) as ethers.BigNumber;
         _health = _health.mul(100);

@@ -324,9 +324,9 @@ import crvusd from "@curvefi/stablecoin-api";
     // 1000.0
     await llamma.loanExists();
     // true
-    await llamma.health();  // FULL
+    await llamma.userHealth();  // FULL
     // 45.1912031476161562 %
-    await llamma.health(false);  // NOT FULL
+    await llamma.userHealth(false);  // NOT FULL
     // 3.9382535412942379
     await llamma.userRange()
     // 5
