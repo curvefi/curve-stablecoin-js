@@ -1,3 +1,5 @@
+// TODO liquidationBand, repayFull
+
 import { ethers } from "ethers";
 import memoize from "memoizee";
 import BigNumber from "bignumber.js";
@@ -61,6 +63,8 @@ export class LlammaTemplate {
         balances: () => Promise<[string, string]>,
         maxMinBands: () => Promise<[number, number]>,
         activeBand:() => Promise<number>,
+        liquidatingBand:() => Promise<number | null>,
+        bandBalances:(n: number) => Promise<{ stablecoin: string, collateral: string }>,
         bandsBalances: () => Promise<{ [index: number]: { stablecoin: string, collateral: string } }>,
         totalSupply: () => Promise<string>,
         totalDebt: () => Promise<string>,
@@ -107,6 +111,8 @@ export class LlammaTemplate {
             balances: this.statsBalances.bind(this),
             maxMinBands: this.statsMaxMinBands.bind(this),
             activeBand: this.statsActiveBand.bind(this),
+            liquidatingBand: this.statsLiquidatingBand.bind(this),
+            bandBalances: this.statsBandBalances.bind(this),
             bandsBalances: this.statsBandsBalances.bind(this),
             totalSupply: this.statsTotalSupply.bind(this),
             totalDebt: this.statsTotalDebt.bind(this),
@@ -224,24 +230,50 @@ export class LlammaTemplate {
         maxAge: 60 * 1000, // 1m
     });
 
+    private async statsLiquidatingBand(): Promise<number | null> {
+        const activeBand = await this.statsActiveBand();
+        const { stablecoin, collateral } = await this.statsBandBalances(activeBand);
+        if (Number(stablecoin) > 0 && Number(collateral) > 0) return activeBand;
+        return null
+    }
+
+    private async statsBandBalances(n: number): Promise<{ stablecoin: string, collateral: string }> {
+        const llammaContract = crvusd.contracts[this.address].contract;
+        const calls = [];
+        calls.push(llammaContract.bands_x(n, crvusd.constantOptions), llammaContract.bands_y(n, crvusd.constantOptions));
+
+        const _balances: ethers.BigNumber[] = await Promise.all(calls);
+
+        // TODO switch to multicall
+        // const calls = [];
+        // calls.push(llammaContract.bands_x(n), llammaContract.bands_y(n));
+        //
+        // const _balances = await crvusd.multicallProvider.all(calls);
+
+        return {
+            stablecoin: ethers.utils.formatUnits(_balances[0]),
+            collateral: ethers.utils.formatUnits(_balances[1], this.collateralDecimals),
+        }
+    }
+
     private async statsBandsBalances(): Promise<{ [index: number]: { stablecoin: string, collateral: string } }> {
         const [max_band, min_band]: number[] = await this.statsMaxMinBands();
 
         const llammaContract = crvusd.contracts[this.address].contract;
-        const calls2 = [];
+        const calls = [];
         for (let i = min_band; i <= max_band; i++) {
-            calls2.push(llammaContract.bands_x(i, crvusd.constantOptions), llammaContract.bands_y(i, crvusd.constantOptions));
+            calls.push(llammaContract.bands_x(i, crvusd.constantOptions), llammaContract.bands_y(i, crvusd.constantOptions));
         }
 
-        const _bands: ethers.BigNumber[] = await Promise.all(calls2);
+        const _bands: ethers.BigNumber[] = await Promise.all(calls);
 
         // TODO switch to multicall
-        // const calls2 = [];
+        // const calls = [];
         // for (let i = min_band; i <= max_band; i++) {
-        //     calls2.push(llammaContract.bands_x(i), llammaContract.bands_y(i));
+        //     calls.push(llammaContract.bands_x(i), llammaContract.bands_y(i));
         // }
         //
-        // const _bands = await crvusd.multicallProvider.all(calls2);
+        // const _bands = await crvusd.multicallProvider.all(calls);
 
         const bands: { [index: number]: { stablecoin: string, collateral: string } } = {};
         for (let i = 0; i < max_band - min_band + 1; i++) {

@@ -75,6 +75,9 @@ const statsTest = async () => {
     console.log(await llamma.stats.balances());
     console.log(await llamma.stats.maxMinBands());
     console.log(await llamma.stats.activeBand());
+    const liquidatingBand = await llamma.stats.liquidatingBand();
+    console.log(liquidatingBand);
+    console.log(await llamma.stats.bandBalances(liquidatingBand ?? 0));
     console.log(await llamma.stats.bandsBalances());
     console.log(await llamma.stats.totalSupply());
     console.log(await llamma.stats.totalDebt());

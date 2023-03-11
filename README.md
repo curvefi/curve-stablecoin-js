@@ -253,7 +253,11 @@ import crvusd from "@curvefi/stablecoin-api";
     // [ 15, 0 ]
     await llamma.stats.activeBand();
     // 11
-    await llamma.stats.bandBalances();
+    const liquidatingBand = await llamma.stats.liquidatingBand();  // null when there is no liquidation
+    // 11
+    await llamma.stats.bandBalances(liquidatingBand);
+    // { stablecoin: '300.0', collateral: '0.002268776965776345' }
+    await llamma.stats.bandsBalances();
     // {
     //     '0': { stablecoin: '0.0', collateral: '0.0' },
     //     '1': { stablecoin: '0.0', collateral: '0.0' },
