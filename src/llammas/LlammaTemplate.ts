@@ -397,6 +397,26 @@ export class LlammaTemplate {
         return ethers.utils.formatUnits(_price);
     }
 
+    public async oraclePriceBand(): Promise<number> {
+        const oraclePriceBN = BN(await this.oraclePrice());
+        const basePriceBN = BN(await this.basePrice());
+        const A_BN = BN(this.A);
+        const multiplier = oraclePriceBN.lte(basePriceBN) ? A_BN.minus(1).div(A_BN) : A_BN.div(A_BN.minus(1));
+        const term = oraclePriceBN.lte(basePriceBN) ? 1 : -1;
+        const compareFunc = oraclePriceBN.lte(basePriceBN) ?
+            (oraclePriceBN: BigNumber, currentTickPriceBN: BigNumber) => oraclePriceBN.lte(currentTickPriceBN) :
+            (oraclePriceBN: BigNumber, currentTickPriceBN: BigNumber) => oraclePriceBN.gt(currentTickPriceBN);
+
+        let band = 0;
+        let currentTickPriceBN = oraclePriceBN.lte(basePriceBN) ? basePriceBN.times(multiplier) : basePriceBN;
+        while (compareFunc(oraclePriceBN, currentTickPriceBN)) {
+            currentTickPriceBN = currentTickPriceBN.times(multiplier);
+            band = term;
+        }
+
+        return band;
+    }
+
     public async price(): Promise<string> {
         const _price = await crvusd.contracts[this.address].contract.get_p(crvusd.constantOptions) as ethers.BigNumber;
         return ethers.utils.formatUnits(_price);
