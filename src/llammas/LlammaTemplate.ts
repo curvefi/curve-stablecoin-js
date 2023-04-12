@@ -680,7 +680,7 @@ export class LlammaTemplate {
 
     private async _borrowMoreBands(collateral: number | string, debt: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
-        if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
+        if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} does not exist`);
 
         const N = await this.userRange();
         const _collateral = _currentCollateral.add(parseUnits(collateral, this.collateralDecimals));
@@ -730,7 +730,7 @@ export class LlammaTemplate {
 
     private async _borrowMore(collateral: number | string, debt: number | string, estimateGas: boolean): Promise<string | number> {
         const { stablecoin, debt: currentDebt } = await this.userState();
-        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
+        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} does not exist`);
         if (Number(stablecoin) > 0) throw Error(`User ${crvusd.signerAddress} is already in liquidation mode`);
 
         const _collateral = parseUnits(collateral, this.collateralDecimals);
@@ -759,7 +759,7 @@ export class LlammaTemplate {
     private async _addCollateralBands(collateral: number | string, address = ""): Promise<[ethers.BigNumber, ethers.BigNumber]> {
         address = _getAddress(address);
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState(address);
-        if (_currentDebt.eq(0)) throw Error(`Loan for ${address} is not created`);
+        if (_currentDebt.eq(0)) throw Error(`Loan for ${address} does not exist`);
 
         const N = await this.userRange(address);
         const _collateral = _currentCollateral.add(parseUnits(collateral, this.collateralDecimals));
@@ -806,7 +806,7 @@ export class LlammaTemplate {
 
     private async _addCollateral(collateral: number | string, address: string, estimateGas: boolean): Promise<string | number> {
         const { stablecoin, debt: currentDebt } = await this.userState(address);
-        if (Number(currentDebt) === 0) throw Error(`Loan for ${address} is not created`);
+        if (Number(currentDebt) === 0) throw Error(`Loan for ${address} does not exist`);
         if (Number(stablecoin) > 0) throw Error(`User ${address} is already in liquidation mode`);
 
         const _collateral = parseUnits(collateral, this.collateralDecimals);
@@ -843,7 +843,7 @@ export class LlammaTemplate {
 
     private async _removeCollateralBands(collateral: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
-        if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
+        if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} does not exist`);
 
         const N = await this.userRange();
         const _collateral = _currentCollateral.sub(parseUnits(collateral, this.collateralDecimals));
@@ -878,17 +878,17 @@ export class LlammaTemplate {
 
     private async _removeCollateral(collateral: number | string, estimateGas: boolean): Promise<string | number> {
         const { stablecoin, debt: currentDebt } = await this.userState();
-        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
+        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} does not exist`);
         if (Number(stablecoin) > 0) throw Error(`User ${crvusd.signerAddress} is already in liquidation mode`);
 
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const contract = crvusd.contracts[this.controller].contract;
-        const gas = await contract.estimateGas.remove_collateral(_collateral, crvusd.constantOptions);
+        const gas = await contract.estimateGas.remove_collateral(_collateral, false, crvusd.constantOptions);
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.remove_collateral(_collateral, { ...crvusd.options, gasLimit })).hash
+        return (await contract.remove_collateral(_collateral, false, { ...crvusd.options, gasLimit })).hash
     }
 
     public async removeCollateralEstimateGas(collateral: number | string): Promise<number> {
@@ -903,7 +903,7 @@ export class LlammaTemplate {
 
     private async _repayBands(debt: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
         const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
-        if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
+        if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} does not exist`);
 
         const N = await this.userRange();
         const _debt = _currentDebt.sub(parseUnits(debt, this.collateralDecimals));
@@ -950,16 +950,16 @@ export class LlammaTemplate {
 
     private async _repay(debt: number | string, address: string, estimateGas: boolean): Promise<string | number> {
         const { debt: currentDebt } = await this.userState();
-        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
+        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} does not exist`);
 
         const _debt = parseUnits(debt);
         const contract = crvusd.contracts[this.controller].contract;
-        const gas = await contract.estimateGas.repay(_debt, address, crvusd.constantOptions);
+        const gas = await contract.estimateGas.repay(_debt, address, false, crvusd.constantOptions);
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.repay(_debt, address, { ...crvusd.options, gasLimit })).hash
+        return (await contract.repay(_debt, address, false, { ...crvusd.options, gasLimit })).hash
     }
 
     public async repayEstimateGas(debt: number | string, address = ""): Promise<number> {
@@ -1097,37 +1097,37 @@ export class LlammaTemplate {
         return ethers.utils.formatUnits(_tokens)
     }
 
-    public async liquidateIsApproved(address: string): Promise<boolean> {
+    public async liquidateIsApproved(address = ""): Promise<boolean> {
         const tokensToLiquidate = await this.tokensToLiquidate(address);
         return await hasAllowance([crvusd.address], [tokensToLiquidate], crvusd.signerAddress, this.controller);
     }
 
-    private async liquidateApproveEstimateGas (address: string): Promise<number> {
+    private async liquidateApproveEstimateGas (address = ""): Promise<number> {
         const tokensToLiquidate = await this.tokensToLiquidate(address);
         return await ensureAllowanceEstimateGas([crvusd.address], [tokensToLiquidate], this.controller);
     }
 
-    public async liquidateApprove(address: string): Promise<string[]> {
+    public async liquidateApprove(address = ""): Promise<string[]> {
         const tokensToLiquidate = await this.tokensToLiquidate(address);
         return await ensureAllowance([crvusd.address], [tokensToLiquidate], this.controller);
     }
 
     private async _liquidate(address: string, slippage: number, estimateGas: boolean): Promise<string | number> {
-        const { stablecoin, debt: currentDebt } = await this.userState();
+        const { stablecoin, debt: currentDebt } = await this.userState(address);
         if (slippage <= 0) throw Error("Slippage must be > 0");
         if (slippage > 100) throw Error("Slippage must be <= 100");
-        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
-        if (Number(stablecoin) === 0) throw Error(`User ${crvusd.signerAddress} is not in liquidation mode`);
+        if (Number(currentDebt) === 0) throw Error(`Loan for ${address} does not exist`);
+        if (Number(stablecoin) === 0) throw Error(`User ${address} is not in liquidation mode`);
 
         const minAmountBN: BigNumber = BN(stablecoin).times(100 - slippage).div(100);
         const _minAmount = fromBN(minAmountBN);
         const contract = crvusd.contracts[this.controller].contract;
-        const gas = (await contract.estimateGas.liquidate(address, _minAmount, crvusd.constantOptions))
+        const gas = (await contract.estimateGas.liquidate(address, _minAmount, false, crvusd.constantOptions))
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.liquidate(address, _minAmount, { ...crvusd.options, gasLimit })).hash
+        return (await contract.liquidate(address, _minAmount, false, { ...crvusd.options, gasLimit })).hash
     }
 
     public async liquidateEstimateGas(address: string, slippage = 0.5): Promise<number> {
@@ -1143,45 +1143,24 @@ export class LlammaTemplate {
     // ---------------- SELF-LIQUIDATE ----------------
 
     public async selfLiquidateIsApproved(): Promise<boolean> {
-        const tokensToLiquidate = await this.tokensToLiquidate();
-        return await hasAllowance([crvusd.address], [tokensToLiquidate], crvusd.signerAddress, this.controller);
+        return await this.liquidateIsApproved()
     }
 
     private async selfLiquidateApproveEstimateGas (): Promise<number> {
-        const tokensToLiquidate = await this.tokensToLiquidate();
-        return await ensureAllowanceEstimateGas([crvusd.address], [tokensToLiquidate], this.controller);
+        return this.liquidateApproveEstimateGas()
     }
 
     public async selfLiquidateApprove(): Promise<string[]> {
-        const tokensToLiquidate = await this.tokensToLiquidate();
-        return await ensureAllowance([crvusd.address], [tokensToLiquidate], this.controller);
-    }
-
-    private async _selfLiquidate(slippage: number, estimateGas: boolean): Promise<string | number> {
-        const { stablecoin, debt: currentDebt } = await this.userState();
-        if (slippage <= 0) throw Error("Slippage must be > 0");
-        if (slippage > 100) throw Error("Slippage must be <= 100");
-        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} is not created`);
-        if (Number(stablecoin) === 0) throw Error(`User ${crvusd.signerAddress} is not in liquidation mode`);
-
-        const minAmountBN: BigNumber = BN(stablecoin).times(100 - slippage).div(100);
-        const _minAmount = fromBN(minAmountBN);
-        const contract = crvusd.contracts[this.controller].contract;
-        const gas = (await contract.estimateGas.self_liquidate(_minAmount, crvusd.constantOptions))
-        if (estimateGas) return gas.toNumber();
-
-        await crvusd.updateFeeData();
-        const gasLimit = gas.mul(130).div(100);
-        return (await contract.self_liquidate(_minAmount, { ...crvusd.options, gasLimit })).hash
+        return await this.liquidateApprove()
     }
 
     public async selfLiquidateEstimateGas(slippage = 0.5): Promise<number> {
         if (!(await this.selfLiquidateIsApproved())) throw Error("Approval is needed for gas estimation");
-        return await this._selfLiquidate(slippage, true) as number;
+        return await this._liquidate(crvusd.signerAddress, slippage, true) as number;
     }
 
     public async selfLiquidate(slippage = 0.5): Promise<string> {
         await this.selfLiquidateApprove();
-        return await this._selfLiquidate(slippage, false) as string;
+        return await this._liquidate(crvusd.signerAddress, slippage, false) as string;
     }
 }

@@ -68,11 +68,6 @@
       },
       {
         "indexed": false,
-        "name": "receiver",
-        "type": "address"
-      },
-      {
-        "indexed": false,
         "name": "amount_borrowed",
         "type": "uint256"
       },
@@ -148,26 +143,34 @@
       {
         "name": "_borrowed_token",
         "type": "address"
-      }
-    ],
-    "name": "constructor",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "constructor"
-  },
-  {
-    "inputs": [
-      {
-        "name": "_A",
-        "type": "uint256"
       },
       {
-        "name": "_base_price",
+        "name": "_borrowed_precision",
         "type": "uint256"
       },
       {
         "name": "_collateral_token",
         "type": "address"
+      },
+      {
+        "name": "_collateral_precision",
+        "type": "uint256"
+      },
+      {
+        "name": "_A",
+        "type": "uint256"
+      },
+      {
+        "name": "_sqrt_band_ratio",
+        "type": "uint256"
+      },
+      {
+        "name": "_log_A_ratio",
+        "type": "int256"
+      },
+      {
+        "name": "_base_price",
+        "type": "uint256"
       },
       {
         "name": "fee",
@@ -180,20 +183,57 @@
       {
         "name": "_price_oracle_contract",
         "type": "address"
-      },
+      }
+    ],
+    "name": "constructor",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [
       {
         "name": "_admin",
         "type": "address"
       }
     ],
-    "name": "initialize",
+    "name": "set_admin",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
+    "inputs": [
+      {
+        "name": "i",
+        "type": "uint256"
+      }
+    ],
+    "name": "coins",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
     "inputs": [],
     "name": "price_oracle",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "dynamic_fee",
     "outputs": [
       {
         "name": "",
@@ -296,23 +336,6 @@
     "type": "function"
   },
   {
-    "inputs": [
-      {
-        "name": "n",
-        "type": "int256"
-      }
-    ],
-    "name": "get_y0",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [],
     "name": "get_p",
     "outputs": [
@@ -359,6 +382,35 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "active_band_with_skip",
+    "outputs": [
+      {
+        "name": "",
+        "type": "int256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address"
+      }
+    ],
+    "name": "has_liquidity",
+    "outputs": [
+      {
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "name": "user",
@@ -375,10 +427,6 @@
       {
         "name": "n2",
         "type": "int256"
-      },
-      {
-        "name": "move_coins",
-        "type": "bool"
       }
     ],
     "name": "deposit_range",
@@ -393,8 +441,8 @@
         "type": "address"
       },
       {
-        "name": "move_to",
-        "type": "address"
+        "name": "frac",
+        "type": "uint256"
       }
     ],
     "name": "withdraw",
@@ -538,7 +586,7 @@
     "outputs": [
       {
         "name": "",
-        "type": "uint256"
+        "type": "uint256[2]"
       }
     ],
     "stateMutability": "nonpayable",
@@ -561,6 +609,39 @@
       {
         "name": "max_amount",
         "type": "uint256"
+      }
+    ],
+    "name": "exchange_dy",
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256[2]"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "i",
+        "type": "uint256"
+      },
+      {
+        "name": "j",
+        "type": "uint256"
+      },
+      {
+        "name": "out_amount",
+        "type": "uint256"
+      },
+      {
+        "name": "max_amount",
+        "type": "uint256"
+      },
+      {
+        "name": "_for",
+        "type": "address"
       }
     ],
     "name": "exchange_dy",
@@ -704,36 +785,31 @@
     "type": "function"
   },
   {
+    "inputs": [],
+    "name": "reset_admin_fees",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
-        "name": "price_oracle",
+        "name": "liquidity_mining_callback",
         "type": "address"
       }
     ],
-    "name": "set_price_oracle",
+    "name": "set_callback",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   },
   {
     "inputs": [],
-    "name": "collateral_token",
+    "name": "admin",
     "outputs": [
       {
         "name": "",
         "type": "address"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "collateral_precision",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -742,18 +818,6 @@
   {
     "inputs": [],
     "name": "A",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "sqrt_band_ratio",
     "outputs": [
       {
         "name": "",
@@ -790,18 +854,6 @@
   {
     "inputs": [],
     "name": "rate",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "rate_mul",
     "outputs": [
       {
         "name": "",
@@ -884,18 +936,6 @@
     "type": "function"
   },
   {
-    "inputs": [],
-    "name": "p_base_mul",
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
     "inputs": [
       {
         "name": "arg0",
@@ -931,7 +971,7 @@
   },
   {
     "inputs": [],
-    "name": "admin",
+    "name": "liquidity_mining_callback",
     "outputs": [
       {
         "name": "",
