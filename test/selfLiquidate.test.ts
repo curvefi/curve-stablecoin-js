@@ -6,28 +6,36 @@ const LLAMMAS = ['eth'];
 
 const selfLiquidationTest = (id: string) => {
     describe(`${id} self-liquidation test`, function () {
-        let ethLlamma: LlammaTemplate;
+        let llamma: LlammaTemplate;
 
         before(async function () {
-            ethLlamma = getLlamma(id);
+            llamma = getLlamma(id);
+            await llamma.createLoan(0.3, 500, 10)
+
+            const balances = await llamma.wallet.balances();
+            const swapAmount = Math.min(
+                Number(await llamma.maxSwappable(0, 1)),
+                Number(Object.values(balances)[0])
+            ) / 2;
+            await llamma.swap(0, 1, swapAmount, 0.05);
         });
 
         it('Self-liquidations', async function () {
-            const initialBalances = await ethLlamma.wallet.balances();
-            const initialState = await ethLlamma.userState();
-            const initialTokensToLiquidate = await ethLlamma.tokensToLiquidate();
+            const initialBalances = await llamma.wallet.balances();
+            const initialState = await llamma.userState();
+            const initialTokensToLiquidate = await llamma.tokensToLiquidate();
 
             assert.isAbove(Number(initialState.collateral), 0);
             assert.isAbove(Number(initialState.stablecoin), 0);
             assert.isAbove(Number(initialState.debt), 0);
             assert.isAtLeast(Number(initialBalances.stablecoin), Number(initialTokensToLiquidate));
 
-            await ethLlamma.selfLiquidate(0.1);
+            await llamma.selfLiquidate(0.1);
 
-            const balances = await ethLlamma.wallet.balances();
-            const state = await ethLlamma.userState();
+            const balances = await llamma.wallet.balances();
+            const state = await llamma.userState();
 
-            const tokensToLiquidate = await ethLlamma.tokensToLiquidate();
+            const tokensToLiquidate = await llamma.tokensToLiquidate();
             assert.equal(Number(tokensToLiquidate), 0);
             assert.equal(Number(state.collateral), 0);
             assert.equal(Number(state.stablecoin), 0);

@@ -27,7 +27,7 @@ const swapTest = (id: string) => {
                     const initialBalances = await llamma.wallet.balances();
                     const swapAmount = Math.min(
                         Number(await llamma.maxSwappable(i, j)),
-                        Number(Object.values(initialBalances)[i]),
+                        Number(Object.values(initialBalances)[i])
                     ) / 2;
                     const expected = await llamma.swapExpected(i, j, swapAmount);
 
