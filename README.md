@@ -441,6 +441,17 @@ import crvusd from "@curvefi/stablecoin-api";
     // Bands: [ 139, 135 ]
     // Prices: [ '734.595897104762463', '772.453820291837448' ]
     // State: { collateral: '0.7', stablecoin: '0.0', debt: '500.0' }
+
+    // --- FULL REPAY ---
+
+    await llamma.fullRepayIsApproved();
+    // true
+    await llamma.fullRepayApprove();
+    // []
+    await llamma.fullRepay();
+
+    // Loan exists: false
+    // State: { collateral: '0.0', stablecoin: '0.0', debt: '0.0' }
 })()
 ```
 

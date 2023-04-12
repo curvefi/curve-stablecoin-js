@@ -45,6 +45,8 @@ export class LlammaTemplate {
         borrowMore: (collateral: number | string, debt: number | string) => Promise<number>,
         repayApprove: (debt: number | string) => Promise<number>,
         repay: (debt: number | string, address?: string) => Promise<number>,
+        fullRepayApprove: (address?: string) => Promise<number>,
+        fullRepay: (address?: string) => Promise<number>,
         swapApprove: (i: number, amount: number | string) => Promise<number>,
         swap: (i: number, j: number, amount: number | string, slippage?: number) => Promise<number>,
         liquidateApprove: (address: string) => Promise<number>,
@@ -99,6 +101,8 @@ export class LlammaTemplate {
             borrowMore: this.borrowMoreEstimateGas.bind(this),
             repayApprove: this.repayApproveEstimateGas.bind(this),
             repay: this.repayEstimateGas.bind(this),
+            fullRepayApprove: this.fullRepayApproveEstimateGas.bind(this),
+            fullRepay: this.fullRepayEstimateGas.bind(this),
             swapApprove: this.swapApproveEstimateGas.bind(this),
             swap: this.swapEstimateGas.bind(this),
             liquidateApprove: this.liquidateApproveEstimateGas.bind(this),
@@ -901,11 +905,11 @@ export class LlammaTemplate {
 
     // ---------------- REPAY ----------------
 
-    private async _repayBands(debt: number | string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
-        const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState();
-        if (_currentDebt.eq(0)) throw Error(`Loan for ${crvusd.signerAddress} does not exist`);
+    private async _repayBands(debt: number | string, address: string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
+        const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState(address);
+        if (_currentDebt.eq(0)) throw Error(`Loan for ${address} does not exist`);
 
-        const N = await this.userRange();
+        const N = await this.userRange(address);
         const _debt = _currentDebt.sub(parseUnits(debt, this.collateralDecimals));
         const _n1 = await this._calcN1(_currentCollateral, _debt, N);
         const _n2 = _n1.add(N - 1);
@@ -913,14 +917,14 @@ export class LlammaTemplate {
         return [_n2, _n1];
     }
 
-    public async repayBands(debt: number | string): Promise<[number, number]> {
-        const [_n2, _n1] = await this._repayBands(debt);
+    public async repayBands(debt: number | string, address = ""): Promise<[number, number]> {
+        const [_n2, _n1] = await this._repayBands(debt, address);
 
         return [_n2.toNumber(), _n1.toNumber()];
     }
 
-    public async repayPrices(debt: number | string): Promise<string[]> {
-        const [_n2, _n1] = await this._repayBands(debt);
+    public async repayPrices(debt: number | string, address = ""): Promise<string[]> {
+        const [_n2, _n1] = await this._repayBands(debt, address);
 
         return await this._getPrices(_n2, _n1);
     }
@@ -949,8 +953,9 @@ export class LlammaTemplate {
     }
 
     private async _repay(debt: number | string, address: string, estimateGas: boolean): Promise<string | number> {
-        const { debt: currentDebt } = await this.userState();
-        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} does not exist`);
+        address = _getAddress(address);
+        const { debt: currentDebt } = await this.userState(address);
+        if (Number(currentDebt) === 0) throw Error(`Loan for ${address} does not exist`);
 
         const _debt = parseUnits(debt);
         const contract = crvusd.contracts[this.controller].contract;
@@ -963,15 +968,53 @@ export class LlammaTemplate {
     }
 
     public async repayEstimateGas(debt: number | string, address = ""): Promise<number> {
-        address = _getAddress(address);
         if (!(await this.repayIsApproved(debt))) throw Error("Approval is needed for gas estimation");
         return await this._repay(debt, address, true) as number;
     }
 
     public async repay(debt: number | string, address = ""): Promise<string> {
-        address = _getAddress(address);
         await this.repayApprove(debt);
         return await this._repay(debt, address, false) as string;
+    }
+
+    // ---------------- FULL REPAY ----------------
+
+    private async _fullRepayAmount(address = ""): Promise<string> {
+        address = _getAddress(address);
+        const debt = await this.userDebt(address);
+        return BN(debt).times(1.0001).toString();
+    }
+
+    public async fullRepayIsApproved(address = ""): Promise<boolean> {
+        address = _getAddress(address);
+        const fullRepayAmount = await this._fullRepayAmount(address);
+        return await this.repayIsApproved(fullRepayAmount);
+    }
+
+    private async fullRepayApproveEstimateGas (address = ""): Promise<number> {
+        address = _getAddress(address);
+        const fullRepayAmount = await this._fullRepayAmount(address);
+        return await this.repayApproveEstimateGas(fullRepayAmount);
+    }
+
+    public async fullRepayApprove(address = ""): Promise<string[]> {
+        address = _getAddress(address);
+        const fullRepayAmount = await this._fullRepayAmount(address);
+        return await this.repayApprove(fullRepayAmount);
+    }
+
+    public async fullRepayEstimateGas(address = ""): Promise<number> {
+        address = _getAddress(address);
+        const fullRepayAmount = await this._fullRepayAmount(address);
+        if (!(await this.repayIsApproved(fullRepayAmount))) throw Error("Approval is needed for gas estimation");
+        return await this._repay(fullRepayAmount, address, true) as number;
+    }
+
+    public async fullRepay(address = ""): Promise<string> {
+        address = _getAddress(address);
+        const fullRepayAmount = await this._fullRepayAmount(address);
+        await this.repayApprove(fullRepayAmount);
+        return await this._repay(fullRepayAmount, address, false) as string;
     }
 
     // ---------------- SWAP ----------------

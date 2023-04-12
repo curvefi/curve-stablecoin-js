@@ -193,6 +193,16 @@ const generalTest = async () => {
     console.log(await llamma.userBands());
     console.log(await llamma.userPrices());
     console.log(await llamma.userState());
+
+    console.log("\n--- FULL REPAY ---\n");
+
+    console.log(await llamma.fullRepayIsApproved());
+    console.log(await llamma.fullRepayApprove());
+
+    console.log(await llamma.fullRepay());
+
+    console.log(await llamma.loanExists());
+    console.log(await llamma.userState());
 }
 
 const createLoanAllRangesTest = async () => {

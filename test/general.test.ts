@@ -183,7 +183,7 @@ const generalTest = (id: string) => {
             assert.isTrue(loanExists);
             assert.isAtLeast(Number(initialBalances.stablecoin), Number(initialState.debt));
 
-            await llamma.repay(initialState.debt);
+            await llamma.fullRepay();
 
             const balances = await llamma.wallet.balances();
             const state = await llamma.userState();
