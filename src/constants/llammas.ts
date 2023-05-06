@@ -3,11 +3,11 @@ import { lowerCaseLlammasAddresses } from "./utils";
 
 
 export const LLAMMAS: IDict<ILlamma> = lowerCaseLlammasAddresses({
-    eth: {
-        amm_address: '0x725dfaf0E481653Ab86b2B071027e5DAA05cE8b4',
-        controller_address: '0x23cB95f7AeF76c73fC189051400917eB3D764fF0',
-        collateral_address: '0xb6286fAFd0451320ad6A8143089b216C2152c025',
-        collateral_symbol: 'WETH',
+    sfrxeth: {
+        amm_address: '0x803f3D9cD755ea914B9a1A06bA5AdF39055A42DF',
+        controller_address: '0x60C7dA1d9Bb55219897af4a19271BF80655ab2BF',
+        collateral_address: '0xac3E018457B222d93114458476f3E3416Abbe38F',
+        collateral_symbol: 'sfrxETH',
         collateral_decimals: 18,
         min_bands: 5,
         max_bands: 50,
