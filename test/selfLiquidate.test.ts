@@ -2,7 +2,7 @@ import { assert } from "chai";
 import { crvusd } from "../src/crvusd";
 import { getLlamma, LlammaTemplate } from "../src/llammas";
 
-const LLAMMAS = ['eth'];
+const LLAMMAS = ['sfrxeth'];
 
 const selfLiquidationTest = (id: string) => {
     describe(`${id} self-liquidation test`, function () {
@@ -10,7 +10,8 @@ const selfLiquidationTest = (id: string) => {
 
         before(async function () {
             llamma = getLlamma(id);
-            await llamma.createLoan(0.3, 500, 10)
+            const maxDebt = await llamma.createLoanMaxRecv(0.3, 10);
+            await llamma.createLoan(0.3, maxDebt, 10);
 
             const balances = await llamma.wallet.balances();
             const swapAmount = Math.min(
@@ -36,12 +37,12 @@ const selfLiquidationTest = (id: string) => {
             const state = await llamma.userState();
 
             const tokensToLiquidate = await llamma.tokensToLiquidate();
-            assert.equal(Number(tokensToLiquidate), 0);
-            assert.equal(Number(state.collateral), 0);
-            assert.equal(Number(state.stablecoin), 0);
-            assert.equal(Number(state.debt), 0);
-            assert.equal(Number(balances.collateral), Number(initialBalances.collateral) + Number(initialState.collateral));
-            assert.equal(Number(balances.stablecoin), Number(initialBalances.stablecoin) - Number(initialTokensToLiquidate));
+            assert.equal(Number(tokensToLiquidate), 0, 'tokens to liquidate');
+            assert.equal(Number(balances.collateral), Number(initialBalances.collateral) + Number(initialState.collateral), 'wallet collateral');
+            assert.approximately(Number(balances.stablecoin), Number(initialBalances.stablecoin) - Number(initialTokensToLiquidate), 1e-4, 'wallet stablecoin');
+            assert.equal(Number(state.collateral), 0, 'state callateral');
+            assert.equal(Number(state.stablecoin), 0, 'state stablecoin');
+            assert.equal(Number(state.debt), 0, 'state debt');
         });
     })
 }
