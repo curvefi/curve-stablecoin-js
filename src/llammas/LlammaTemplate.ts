@@ -1,5 +1,3 @@
-// TODO liquidationBand, repayFull
-
 import { ethers } from "ethers";
 import memoize from "memoizee";
 import BigNumber from "bignumber.js";
@@ -135,8 +133,8 @@ export class LlammaTemplate {
         liquidation_discount: string, // %
         loan_discount: string, // %
     }> => {
-        const llammaContract = crvusd.contracts[this.address].contract;
-        const controllerContract = crvusd.contracts[this.controller].contract;
+        const llammaContract = crvusd.contracts[this.address].multicallContract;
+        const controllerContract = crvusd.contracts[this.controller].multicallContract;
 
         const calls = [
             llammaContract.fee(),
@@ -147,22 +145,7 @@ export class LlammaTemplate {
         ]
 
         const [fee, admin_fee, rate, liquidation_discount, loan_discount]: string[] =
-            (await Promise.all(calls)).map((x: ethers.BigNumber) => ethers.utils.formatUnits(x.mul(100)));
-
-        // TODO switch to multicall
-        // const llammaContract = crvusd.contracts[this.address].multicallContract;
-        // const controllerContract = crvusd.contracts[this.controller].multicallContract;
-
-        // const calls = [
-        //     llammaContract.fee(),
-        //     llammaContract.admin_fee(),
-        //     llammaContract.rate(),
-        //     controllerContract.liquidation_discount(),
-        //     controllerContract.loan_discount(),
-        // ]
-
-        // const [fee, admin_fee, rate, liquidation_discount, loan_discount]: string[] =
-        //     (await crvusd.multicallProvider.all(calls)).map((x: ethers.BigNumber) => ethers.utils.formatUnits(x.mul(100)));
+            (await crvusd.multicallProvider.all(calls) as ethers.BigNumber[]).map((x) => ethers.utils.formatUnits(x.mul(100)));
 
         return { fee, admin_fee, rate, liquidation_discount, loan_discount }
     },
@@ -172,28 +155,16 @@ export class LlammaTemplate {
     });
 
     private async statsBalances(): Promise<[string, string]> {
-        const crvusdContract = crvusd.contracts[crvusd.address].contract;
-        const collateralContract = crvusd.contracts[this.collateral].contract;
-        const contract = crvusd.contracts[this.address].contract;
+        const crvusdContract = crvusd.contracts[crvusd.address].multicallContract;
+        const collateralContract = crvusd.contracts[this.collateral].multicallContract;
+        const contract = crvusd.contracts[this.address].multicallContract;
         const calls = [
-            crvusdContract.balanceOf(this.address, crvusd.constantOptions),
-            collateralContract.balanceOf(this.address, crvusd.constantOptions),
-            contract.admin_fees_x(crvusd.constantOptions),
-            contract.admin_fees_y(crvusd.constantOptions),
+            crvusdContract.balanceOf(this.address),
+            collateralContract.balanceOf(this.address),
+            contract.admin_fees_x(),
+            contract.admin_fees_y(),
         ]
-        const [_crvusdBalance, _collateralBalance, _crvusdAdminFees, _collateralAdminFees] = await Promise.all(calls);
-
-        // TODO switch to multicall
-        // const crvusdContract = crvusd.contracts[crvusd.address].multicallContract;
-        // const collateralContract = crvusd.contracts[this.collateral].multicallContract;
-        // const contract = crvusd.contracts[this.address].multicallContract;
-        // const calls = [
-        //     crvusdContract.balanceOf(this.address),
-        //     collateralContract.balanceOf(this.address),
-        //     contract.admin_fees_x(),
-        //     contract.admin_fees_y(),
-        // ]
-        // const [_crvusdBalance, _collateralBalance, _crvusdAdminFees, _collateralAdminFees] = await crvusd.multicallProvider.all(calls);
+        const [_crvusdBalance, _collateralBalance, _crvusdAdminFees, _collateralAdminFees]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
 
         return [
             ethers.utils.formatUnits(_crvusdBalance.sub(_crvusdAdminFees)),
@@ -202,24 +173,14 @@ export class LlammaTemplate {
     }
 
     private statsMaxMinBands = memoize(async (): Promise<[number, number]> => {
-        const llammaContract = crvusd.contracts[this.address].contract;
+        const llammaContract = crvusd.contracts[this.address].multicallContract;
 
         const calls1 = [
-            llammaContract.max_band(crvusd.constantOptions),
-            llammaContract.min_band(crvusd.constantOptions),
+            llammaContract.max_band(),
+            llammaContract.min_band(),
         ]
 
-        return (await Promise.all(calls1)).map((_b: ethers.BigNumber) => _b.toNumber()) as [number, number];
-
-        // TODO switch to multicall
-        // const llammaContract = crvusd.contracts[this.address].multicallContract;
-
-        // const calls1 = [
-        //     llammaContract.max_band(),
-        //     llammaContract.min_band(),
-        // ]
-
-        // return (await crvusd.multicallProvider.all(calls1)).map((_b: ethers.BigNumber) => _b.toNumber()) as [number, number];
+        return (await crvusd.multicallProvider.all(calls1) as ethers.BigNumber[]).map((_b) => _b.toNumber()) as [number, number];
     },
     {
         promise: true,
@@ -242,17 +203,11 @@ export class LlammaTemplate {
     }
 
     private async statsBandBalances(n: number): Promise<{ stablecoin: string, collateral: string }> {
-        const llammaContract = crvusd.contracts[this.address].contract;
+        const llammaContract = crvusd.contracts[this.address].multicallContract;
         const calls = [];
-        calls.push(llammaContract.bands_x(n, crvusd.constantOptions), llammaContract.bands_y(n, crvusd.constantOptions));
+        calls.push(llammaContract.bands_x(n), llammaContract.bands_y(n));
 
-        const _balances: ethers.BigNumber[] = await Promise.all(calls);
-
-        // TODO switch to multicall
-        // const calls = [];
-        // calls.push(llammaContract.bands_x(n), llammaContract.bands_y(n));
-        //
-        // const _balances = await crvusd.multicallProvider.all(calls);
+        const _balances: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
 
         return {
             stablecoin: ethers.utils.formatUnits(_balances[0]),
@@ -263,21 +218,13 @@ export class LlammaTemplate {
     private async statsBandsBalances(): Promise<{ [index: number]: { stablecoin: string, collateral: string } }> {
         const [max_band, min_band]: number[] = await this.statsMaxMinBands();
 
-        const llammaContract = crvusd.contracts[this.address].contract;
+        const llammaContract = crvusd.contracts[this.address].multicallContract;
         const calls = [];
         for (let i = min_band; i <= max_band; i++) {
-            calls.push(llammaContract.bands_x(i, crvusd.constantOptions), llammaContract.bands_y(i, crvusd.constantOptions));
+            calls.push(llammaContract.bands_x(i), llammaContract.bands_y(i));
         }
 
-        const _bands: ethers.BigNumber[] = await Promise.all(calls);
-
-        // TODO switch to multicall
-        // const calls = [];
-        // for (let i = min_band; i <= max_band; i++) {
-        //     calls.push(llammaContract.bands_x(i), llammaContract.bands_y(i));
-        // }
-        //
-        // const _bands = await crvusd.multicallProvider.all(calls);
+        const _bands: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
 
         const bands: { [index: number]: { stablecoin: string, collateral: string } } = {};
         for (let i = 0; i < max_band - min_band + 1; i++) {
@@ -291,14 +238,9 @@ export class LlammaTemplate {
     }
 
     private statsTotalSupply = memoize(async (): Promise<string> => {
-        const controllerContract = crvusd.contracts[this.controller].contract;
-        const calls = [controllerContract.minted(), controllerContract.redeemed()];
-        const [_minted, _redeemed]: ethers.BigNumber[] = await Promise.all(calls);
-
-        // TODO switch to multicall
-        // const controllerContract = crvusd.contracts[this.controller].multicallContract;
-        // const calls = [controllerContract.minted(), controllerContract.redeemed()]
-        // const [_minted, _redeemed]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
+        const controllerContract = crvusd.contracts[this.controller].multicallContract;
+        const calls = [controllerContract.minted(), controllerContract.redeemed()]
+        const [_minted, _redeemed]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
 
         return ethers.utils.formatUnits(_minted.sub(_redeemed))
     },
@@ -486,15 +428,9 @@ export class LlammaTemplate {
 
         const calls = [];
         for (let N = this.minBands; N <= this.maxBands; N++) {
-            calls.push(crvusd.contracts[this.controller].contract.max_borrowable(_collateral, N, crvusd.constantOptions));
+            calls.push(crvusd.contracts[this.controller].multicallContract.max_borrowable(_collateral, N));
         }
-        const _amounts = await Promise.all(calls) as ethers.BigNumber[];
-
-        // TODO switch to multicall
-        // for (let N = this.minBands; N <= this.maxBands; N++) {
-        //     calls.push(crvusd.contracts[this.controller].multicallContract.max_borrowable(_collateral, N));
-        // }
-        // const _amounts = await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
+        const _amounts = await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
 
         const res: { [index: number]: string } = {};
         for (let N = this.minBands; N <= this.maxBands; N++) {
@@ -525,30 +461,17 @@ export class LlammaTemplate {
     private async _calcN1AllRanges(_collateral: ethers.BigNumber, _debt: ethers.BigNumber, maxN: number): Promise<ethers.BigNumber[]> {
         const calls = [];
         for (let N = this.minBands; N <= maxN; N++) {
-            calls.push(crvusd.contracts[this.controller].contract.calculate_debt_n1(_collateral, _debt, N, crvusd.constantOptions));
+            calls.push(crvusd.contracts[this.controller].multicallContract.calculate_debt_n1(_collateral, _debt, N));
         }
-        return await Promise.all(calls) as ethers.BigNumber[];
-
-        // TODO switch to multicall
-        // for (let N = this.minBands; N <= maxN; N++) {
-        //     calls.push(crvusd.contracts[this.controller].multicallContract.calculate_debt_n1(_collateral, _debt, N));
-        // }
-        // return await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
+        return await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
     }
 
     private async _getPrices(_n2: ethers.BigNumber, _n1: ethers.BigNumber): Promise<string[]> {
-        const contract = crvusd.contracts[this.address].contract
-        return (await Promise.all([
-            contract.p_oracle_down(_n2, crvusd.constantOptions),
-            contract.p_oracle_up(_n1, crvusd.constantOptions),
+        const contract = crvusd.contracts[this.address].multicallContract;
+        return (await crvusd.multicallProvider.all([
+            contract.p_oracle_down(_n2),
+            contract.p_oracle_up(_n1),
         ]) as ethers.BigNumber[]).map((_p) => ethers.utils.formatUnits(_p));
-
-        // TODO switch to multicall
-        // const contract = crvusd.contracts[this.address].multicallContract;
-        // const [_price1, _price2] = await crvusd.multicallProvider.all([
-        //     contract.price_oracle_up(_n2),
-        //     contract.price_oracle_down(_n1),
-        // ]);
     }
 
     private async _calcPrices(_n2: ethers.BigNumber, _n1: ethers.BigNumber): Promise<[string, string]> {

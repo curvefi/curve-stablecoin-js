@@ -82,7 +82,6 @@ export const _getCoinDecimals = (coinAddresses: string[]): number[] => {
 
 // --- BALANCES ---
 
-
 export const _getBalances = async (coinAddresses: string[], address = ""): Promise<ethers.BigNumber[]> => {
     address = _getAddress(address);
     const _coinAddresses = [...coinAddresses];
@@ -91,10 +90,11 @@ export const _getBalances = async (coinAddresses: string[], address = ""): Promi
         _coinAddresses.splice(ethIndex, 1);
     }
 
-    const _balances: ethers.BigNumber[] = [];
+    const contractCalls = [];
     for (const coinAddr of _coinAddresses) {
-        _balances.push(await crvusd.contracts[coinAddr].contract.balanceOf(address));
+        contractCalls.push(crvusd.contracts[coinAddr].multicallContract.balanceOf(address));
     }
+    const _balances: ethers.BigNumber[] = await crvusd.multicallProvider.all(contractCalls);
 
     if (ethIndex !== -1) {
         const ethBalance: ethers.BigNumber = await crvusd.provider.getBalance(address);
@@ -103,28 +103,6 @@ export const _getBalances = async (coinAddresses: string[], address = ""): Promi
 
     return _balances
 }
-
-// TODO switch to multicall
-// export const _getBalances = async (coinAddresses: string[], address = ""): Promise<ethers.BigNumber[]> => {
-//     const _coinAddresses = [...coinAddresses];
-//     const ethIndex = getEthIndex(_coinAddresses);
-//     if (ethIndex !== -1) {
-//         _coinAddresses.splice(ethIndex, 1);
-//     }
-//
-//     const contractCalls = [];
-//     for (const coinAddr of _coinAddresses) {
-//         contractCalls.push(crvusd.contracts[coinAddr].multicallContract.balanceOf(address));
-//     }
-//     const _balances: ethers.BigNumber[] = await crvusd.multicallProvider.all(contractCalls);
-//
-//     if (ethIndex !== -1) {
-//         const ethBalance: ethers.BigNumber = await crvusd.provider.getBalance(address);
-//         _balances.splice(ethIndex, 0, ethBalance);
-//     }
-//
-//     return _balances
-// }
 
 export const getBalances = async (coins: string[], address = ""): Promise<string[]> => {
     const coinAddresses = _getCoinAddresses(coins);
