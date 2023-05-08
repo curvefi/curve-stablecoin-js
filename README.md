@@ -143,7 +143,7 @@ import crvusd from "@curvefi/stablecoin-api";
 
     // You can specify the address
     const balances2 = await crvusd.getBalances(['crvusd', 'weth'], "0x0063046686E46Dc6F15918b61AE2B121458534a5");
-    // OR const balances2 = await crvusd.getBalances(['0x028171bCA77440897B824Ca71D1c56caC55b68A3', '0x6c5024cd4f8a59110119c56f8933403a539555eb'], '0x0063046686E46Dc6F15918b61AE2B121458534a5');
+    // OR const balances2 = await crvusd.getBalances(['0x3194cBDC3dbcd3E11a07892e7bA5c3394048Cc87', '0xa3B53dDCd2E3fC28e8E130288F2aBD8d5EE37472'], '0x0063046686E46Dc6F15918b61AE2B121458534a5');
     console.log(balances2);
     // [ '0.0', '0.0' ]
 

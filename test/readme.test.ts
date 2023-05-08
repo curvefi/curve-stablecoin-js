@@ -3,24 +3,24 @@ import crvusd from "../src";
 const generalMethodsTest = async () => {
     await crvusd.init('JsonRpc', {});
 
-    const balances1 = await crvusd.getBalances(['crvusd', 'weth']);
-    // OR const balances1 = await crvusd.getBalances(['0x602C71e4DAC47a042Ee7f46E0aee17F94A3bA0B6', '0xa3B53dDCd2E3fC28e8E130288F2aBD8d5EE37472']);
+    const balances1 = await crvusd.getBalances(['crvusd', 'sfrxeth']);
+    // OR const balances1 = await crvusd.getBalances(['0xf71040d20Cc3FFBb28c1abcEF46134C7936624e0', '0xac3E018457B222d93114458476f3E3416Abbe38F']);
     console.log(balances1);
     // [ '0.0', '1.0' ]
 
     // You can specify address
-    const balances2 = await crvusd.getBalances(['crvusd', 'weth'], "0x0063046686E46Dc6F15918b61AE2B121458534a5");
-    // OR const balances2 = await crvusd.getBalances(['0x028171bCA77440897B824Ca71D1c56caC55b68A3', '0x6c5024cd4f8a59110119c56f8933403a539555eb'], '0x0063046686E46Dc6F15918b61AE2B121458534a5');
+    const balances2 = await crvusd.getBalances(['crvusd', 'sfrxeth'], "0x0063046686E46Dc6F15918b61AE2B121458534a5");
+    // OR const balances2 = await crvusd.getBalances(['0xf71040d20Cc3FFBb28c1abcEF46134C7936624e0', '0xac3E018457B222d93114458476f3E3416Abbe38F'], '0x0063046686E46Dc6F15918b61AE2B121458534a5');
     console.log(balances2);
     // [ '0.0', '0.0' ]
 
-    const spender = "0x3897810a334833184Ef7D6B419ba4d78EC2bBF80" // eth llamma address
+    const spender = "0x77fCFB78151c676f390a6236A78b5d3152e43384" // sfrxeth llamma address
 
-    await crvusd.getAllowance(["crvusd", "weth"], crvusd.signerAddress, spender);
+    await crvusd.getAllowance(["crvusd", "sfrxeth"], crvusd.signerAddress, spender);
     // [ '0.0', '0.0' ]
-    await crvusd.hasAllowance(["crvusd", "weth"], ['1000', '1000'], crvusd.signerAddress, spender);
+    await crvusd.hasAllowance(["crvusd", "sfrxeth"], ['1000', '1000'], crvusd.signerAddress, spender);
     // false
-    await crvusd.ensureAllowance(["crvusd", "weth"], ['1000', '1000'], spender);
+    await crvusd.ensureAllowance(["crvusd", "sfrxeth"], ['1000', '1000'], spender);
     // [
     //     '0xb0cada2a2983dc0ed85a26916d32b9caefe45fecde47640bd7d0e214ff22aed3',
     //     '0x00ea7d827b3ad50ce933e96c579810cd7e70d66a034a86ec4e1e10005634d041'
@@ -33,7 +33,7 @@ const generalMethodsTest = async () => {
 const llammaFieldsTest = async () => {
     await crvusd.init('JsonRpc', {});
 
-    const llamma = crvusd.getLlamma('eth');
+    const llamma = crvusd.getLlamma('sfrxeth');
 
     console.log(llamma.id);
     console.log(llamma.address);
@@ -53,7 +53,7 @@ const llammaFieldsTest = async () => {
 const walletBalancesTest = async () => {
     await crvusd.init('JsonRpc', {});
 
-    const llamma = crvusd.getLlamma('eth');
+    const llamma = crvusd.getLlamma('sfrxeth');
 
     // 1. Current address (signer) balances
 
@@ -69,7 +69,7 @@ const walletBalancesTest = async () => {
 const statsTest = async () => {
     await crvusd.init('JsonRpc', {});
 
-    const llamma = crvusd.getLlamma('eth');
+    const llamma = crvusd.getLlamma('sfrxeth');
 
     console.log(await llamma.stats.parameters());
     console.log(await llamma.stats.balances());
@@ -86,7 +86,7 @@ const statsTest = async () => {
 const generalTest = async () => {
     await crvusd.init('JsonRpc', {});
 
-    const llamma = crvusd.getLlamma('eth');
+    const llamma = crvusd.getLlamma('sfrxeth');
 
 
     console.log("\n--- CREATE LOAN ---\n");
@@ -95,19 +95,19 @@ const generalTest = async () => {
     console.log(await llamma.price());
     console.log(await llamma.basePrice());
     console.log(await llamma.wallet.balances());
-    console.log(await llamma.createLoanMaxRecv(0.5, 5));
-    console.log(await llamma.createLoanBands(0.5, 1000, 5));
-    console.log(await llamma.createLoanPrices(0.5, 1000, 5));
-    console.log(await llamma.createLoanHealth(0.5, 1000, 5));  // FULL
-    console.log(await llamma.createLoanHealth(0.5, 1000, 5, false));  // NOT FULL
+    console.log(await llamma.createLoanMaxRecv(1, 5));
+    console.log(await llamma.createLoanBands(1, 1000, 5));
+    console.log(await llamma.createLoanPrices(1, 1000, 5));
+    console.log(await llamma.createLoanHealth(1, 1000, 5));  // FULL
+    console.log(await llamma.createLoanHealth(1, 1000, 5, false));  // NOT FULL
 
-    console.log(await llamma.createLoanIsApproved(0.5));
+    console.log(await llamma.createLoanIsApproved(1));
     // false
-    console.log(await llamma.createLoanApprove(0.5));
+    console.log(await llamma.createLoanApprove(1));
     // [
     //     '0xc111e471715ae6f5437e12d3b94868a5b6542cd7304efca18b5782d315760ae5'
     // ]
-    console.log(await llamma.createLoan(0.5, 1000, 5));
+    console.log(await llamma.createLoan(1, 1000, 5));
 
     console.log(await llamma.userDebt());  // OR await llamma.userDebt(address);
     console.log(await llamma.loanExists());
@@ -121,16 +121,16 @@ const generalTest = async () => {
 
     console.log("\n--- BORROW MORE ---\n");
 
-    console.log(await llamma.borrowMoreMaxRecv(0.1));
-    console.log(await llamma.borrowMoreBands(0.1, 500));
-    console.log(await llamma.borrowMorePrices(0.1, 500));
-    console.log(await llamma.borrowMoreHealth(0.1, 500));  // FULL
-    console.log(await llamma.borrowMoreHealth(0.1, 500, false));  // NOT FULL
+    console.log(await llamma.borrowMoreMaxRecv(0.5));
+    console.log(await llamma.borrowMoreBands(0.5, 500));
+    console.log(await llamma.borrowMorePrices(0.5, 500));
+    console.log(await llamma.borrowMoreHealth(0.5, 500));  // FULL
+    console.log(await llamma.borrowMoreHealth(0.5, 500, false));  // NOT FULL
 
-    console.log(await llamma.borrowMoreIsApproved(0.1));
-    console.log(await llamma.borrowMoreApprove(0.1));
+    console.log(await llamma.borrowMoreIsApproved(0.5));
+    console.log(await llamma.borrowMoreApprove(0.5));
 
-    console.log(await llamma.borrowMore(0.1, 500));
+    console.log(await llamma.borrowMore(0.5, 500));
 
     console.log(await llamma.userHealth());  // FULL
     console.log(await llamma.userHealth(false));  // NOT FULL
@@ -208,17 +208,17 @@ const generalTest = async () => {
 const createLoanAllRangesTest = async () => {
     await crvusd.init('JsonRpc', {});
 
-    const llamma = crvusd.getLlamma('eth');
+    const llamma = crvusd.getLlamma('sfrxeth');
 
     console.log(await llamma.createLoanMaxRecvAllRanges(1));
-    console.log(await llamma.createLoanBandsAllRanges(1, 2600));
-    console.log(await llamma.createLoanPricesAllRanges(1, 2600));
+    console.log(await llamma.createLoanBandsAllRanges(1, 1600));
+    console.log(await llamma.createLoanPricesAllRanges(1, 1600));
 }
 
 const swapTest = async () => {
     await crvusd.init('JsonRpc', {});
 
-    const llamma = crvusd.getLlamma('eth');
+    const llamma = crvusd.getLlamma('sfrxeth');
 
     console.log(await llamma.wallet.balances());
 
@@ -236,7 +236,11 @@ const swapTest = async () => {
 const selfLiquidationTest = async () => {
     await crvusd.init('JsonRpc', {});
 
-    const llamma = crvusd.getLlamma('eth');
+    const llamma = crvusd.getLlamma('sfrxeth');
+
+    const maxDebt = await llamma.createLoanMaxRecv(0.3, 10);
+    await llamma.createLoan(0.3, maxDebt, 10);
+    await llamma.swap(0, 1, Number(maxDebt) * 10, 0.05);
 
     console.log(await llamma.wallet.balances());
     console.log(await llamma.userState());
@@ -249,3 +253,22 @@ const selfLiquidationTest = async () => {
     console.log(await llamma.wallet.balances());
     console.log(await llamma.userState());
 }
+
+(async () => {
+    console.log("\n--- generalMethodsTest ---\n")
+    await generalMethodsTest();
+    console.log("\n--- llammaFieldsTest ---\n")
+    await llammaFieldsTest();
+    console.log("\n--- walletBalancesTest ---\n")
+    await walletBalancesTest();
+    console.log("\n--- statsTest ---\n")
+    await statsTest();
+    console.log("\n--- generalTest ---\n")
+    await generalTest();
+    console.log("\n--- createLoanAllRangesTest ---\n")
+    await createLoanAllRangesTest();
+    console.log("\n--- swapTest ---\n")
+    await swapTest();
+    console.log("\n--- selfLiquidationTest ---\n")
+    await selfLiquidationTest();
+})()
