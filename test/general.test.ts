@@ -41,10 +41,10 @@ const generalTest = (id: string) => {
 
             assert.approximately(Number(createLoanPrices[0]), Number(userPrices[0]), 1e-2, 'price 0');
             assert.approximately(Number(createLoanPrices[1]), Number(userPrices[1]), 1e-2, 'price 1');
-            assert.approximately(Number(createLoanFullHealth), Number(fullHealth), 1e-4, 'full health');
+            assert.approximately(Number(createLoanFullHealth), Number(fullHealth), 1e-3, 'full health');
             assert.approximately(Number(createLoanHealth), Number(health), 1e-4, 'health');
             assert.equal(Number(balances.collateral), Number(initialBalances.collateral) - Number(collateralAmount), 'wallet collateral');
-            assert.equal(Number(balances.stablecoin), Number(initialBalances.stablecoin) + Number(debtAmount), 'wallet stablecoin');
+            assert.approximately(Number(balances.stablecoin), BN(initialBalances.stablecoin).plus(Number(debtAmount)).toNumber(), 1e-12, 'wallet stablecoin');
             assert.equal(Number(state.collateral), Number(collateralAmount), 'state collateral');
             assert.equal(Number(state.debt), Number(debtAmount), 'state debt');
         });

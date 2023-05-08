@@ -12,13 +12,7 @@ const selfLiquidationTest = (id: string) => {
             llamma = getLlamma(id);
             const maxDebt = await llamma.createLoanMaxRecv(0.3, 10);
             await llamma.createLoan(0.3, maxDebt, 10);
-
-            const balances = await llamma.wallet.balances();
-            const swapAmount = Math.min(
-                Number(await llamma.maxSwappable(0, 1)),
-                Number(Object.values(balances)[0])
-            ) / 2;
-            await llamma.swap(0, 1, swapAmount, 0.05);
+            await llamma.swap(0, 1, Number(maxDebt) * 10, 0.05);
         });
 
         it('Self-liquidations', async function () {
