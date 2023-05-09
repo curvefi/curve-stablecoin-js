@@ -280,6 +280,10 @@ import crvusd from "@curvefi/stablecoin-api";
     // 1375.74 
     await llamma.stats.totalDebt();
     // 1375.74
+    await llamma.stats.totalStablecoin();
+    // 300.0 
+    await llamma.stats.totalCollateral();
+    // 0.402268776965776345
 })()
 ````
 
