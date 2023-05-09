@@ -68,6 +68,8 @@ export class LlammaTemplate {
         bandsBalances: () => Promise<{ [index: number]: { stablecoin: string, collateral: string } }>,
         totalSupply: () => Promise<string>,
         totalDebt: () => Promise<string>,
+        totalStablecoin: () => Promise<string>,
+        totalCollateral: () => Promise<string>,
     };
     wallet: {
         balances: (address?: string) => Promise<{ stablecoin: string, collateral: string }>,
@@ -118,6 +120,8 @@ export class LlammaTemplate {
             bandsBalances: this.statsBandsBalances.bind(this),
             totalSupply: this.statsTotalSupply.bind(this),
             totalDebt: this.statsTotalDebt.bind(this),
+            totalStablecoin: this.statsTotalStablecoin.bind(this),
+            totalCollateral: this.statsTotalCollateral.bind(this),
         }
         this.wallet = {
             balances: this.walletBalances.bind(this),
@@ -253,6 +257,38 @@ export class LlammaTemplate {
         const debt = await crvusd.contracts[this.controller].contract.total_debt(crvusd.constantOptions);
 
         return ethers.utils.formatUnits(debt);
+    },
+    {
+        promise: true,
+        maxAge: 60 * 1000, // 1m
+    });
+
+    private statsTotalStablecoin = memoize(async (): Promise<string> => {
+        const stablecoinContract = crvusd.contracts[crvusd.address].multicallContract;
+        const ammContract = crvusd.contracts[this.address].multicallContract;
+
+        const [_balance, _fee]: ethers.BigNumber[] = await crvusd.multicallProvider.all([
+            stablecoinContract.balanceOf(this.address),
+            ammContract.admin_fees_x(),
+        ]);
+
+        return toBN(_balance).minus(toBN(_fee)).toString()
+    },
+    {
+        promise: true,
+        maxAge: 60 * 1000, // 1m
+    });
+
+    private statsTotalCollateral = memoize(async (): Promise<string> => {
+        const collateralContract = crvusd.contracts[this.collateral].multicallContract;
+        const ammContract = crvusd.contracts[this.address].multicallContract;
+
+        const [_balance, _fee]: ethers.BigNumber[] = await crvusd.multicallProvider.all([
+            collateralContract.balanceOf(this.address),
+            ammContract.admin_fees_y(),
+        ]);
+
+        return toBN(_balance).minus(toBN(_fee)).toString()
     },
     {
         promise: true,
