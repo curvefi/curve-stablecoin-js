@@ -5,6 +5,7 @@ import { Icrvusd, IDict, ILlamma } from "./interfaces";
 import ERC20ABI from "./constants/abis/ERC20.json";
 import controllerABI from "./constants/abis/controller.json";
 import llammaABI from "./constants/abis/llamma.json";
+import PegKeeper from "./constants/abis/PegKeeper.json";
 import { LLAMMAS } from "./constants/llammas";
 import { COINS } from "./constants/coins";
 import { extractDecimals } from "./constants/utils";
@@ -124,9 +125,12 @@ class Crvusd implements Icrvusd {
 
         this.setContract(this.address, ERC20ABI);
         for (const llamma of Object.values(this.constants.LLAMMAS)) {
-            this.setContract(llamma.amm_address, llammaABI)
-            this.setContract(llamma.controller_address, controllerABI)
-            this.setContract(llamma.collateral_address, ERC20ABI)
+            this.setContract(llamma.amm_address, llammaABI);
+            this.setContract(llamma.controller_address, controllerABI);
+            this.setContract(llamma.collateral_address, ERC20ABI);
+            for (const pegKeeper of llamma.peg_keepers) {
+                this.setContract(pegKeeper, PegKeeper);
+            }
         }
     }
 

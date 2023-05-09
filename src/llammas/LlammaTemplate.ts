@@ -29,6 +29,7 @@ export class LlammaTemplate {
     coins: string[];
     coinAddresses: string[];
     coinDecimals: number[];
+    pegKeepers: string[];
     minBands: number;
     maxBands: number;
     defaultBands: number;
@@ -87,6 +88,7 @@ export class LlammaTemplate {
         this.coins = ["crvUSD", llammaData.collateral_symbol];
         this.coinAddresses = [crvusd.address, llammaData.collateral_address];
         this.coinDecimals = [18, llammaData.collateral_decimals];
+        this.pegKeepers = llammaData.peg_keepers;
         this.minBands = llammaData.min_bands;
         this.maxBands = llammaData.max_bands;
         this.defaultBands = llammaData.default_bands;
@@ -244,9 +246,17 @@ export class LlammaTemplate {
     private statsTotalSupply = memoize(async (): Promise<string> => {
         const controllerContract = crvusd.contracts[this.controller].multicallContract;
         const calls = [controllerContract.minted(), controllerContract.redeemed()]
-        const [_minted, _redeemed]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
+        for (const pegKeeper of this.pegKeepers) {
+            calls.push(crvusd.contracts[pegKeeper].multicallContract.debt());
+        }
+        const [_minted, _redeemed, ..._pegKeeperDebts]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
 
-        return ethers.utils.formatUnits(_minted.sub(_redeemed))
+        const totalSupplyBN = toBN(_minted).minus(toBN(_redeemed));
+        for (const _pegKeeperDebt of _pegKeeperDebts) {
+            totalSupplyBN.plus(toBN(_pegKeeperDebt));
+        }
+
+        return totalSupplyBN.toString();
     },
     {
         promise: true,
@@ -288,7 +298,7 @@ export class LlammaTemplate {
             ammContract.admin_fees_y(),
         ]);
 
-        return toBN(_balance).minus(toBN(_fee)).toString()
+        return toBN(_balance, this.collateralDecimals).minus(toBN(_fee, this.collateralDecimals)).toString()
     },
     {
         promise: true,
