@@ -357,7 +357,7 @@ export class LlammaTemplate {
         let currentTickPriceBN = oraclePriceBN.lte(basePriceBN) ? basePriceBN.times(multiplier) : basePriceBN;
         while (compareFunc(oraclePriceBN, currentTickPriceBN)) {
             currentTickPriceBN = currentTickPriceBN.times(multiplier);
-            band = term;
+            band += term;
         }
 
         return band;
