@@ -1,7 +1,7 @@
+import axios from "axios";
 import { ethers } from "ethers";
 import BigNumber from 'bignumber.js';
-import { Contract as MulticallContract } from 'ethcall';
-import { IDict, Icrvusd } from "./interfaces";
+import { IDict } from "./interfaces";
 import { _getPoolsFromApi } from "./external-api";
 import { crvusd } from "./crvusd";
 
@@ -239,8 +239,29 @@ export const _getUsdPricesFromApi = async (): Promise<IDict<number>> => {
     return priceDict
 }
 
+const _usdRatesCache: IDict<{ rate: number, time: number }> = {}
 export const getUsdRate = async (coin: string): Promise<number> => {
-    const [coinAddress] = _getCoinAddressesNoCheck([coin]);
+    let [coinAddress] = _getCoinAddressesNoCheck([coin]);
     const pricesFromApi = await _getUsdPricesFromApi()
-    return pricesFromApi[coinAddress.toLowerCase()];
+    if (coinAddress.toLowerCase() in pricesFromApi) return pricesFromApi[coinAddress.toLowerCase()];
+    console.log('HERE');
+
+    const chainName = 'ethereum';
+    const nativeTokenName = 'ethereum';
+    coinAddress = isEth(coinAddress) ? nativeTokenName : coinAddress.toLowerCase();
+
+
+    if ((_usdRatesCache[coinAddress]?.time || 0) + 600000 < Date.now()) {
+        const url = coinAddress === nativeTokenName ?
+            `https://api.coingecko.com/api/v3/simple/price?ids=${coinAddress}&vs_currencies=usd` :
+            `https://api.coingecko.com/api/v3/simple/token_price/${chainName}?contract_addresses=${coinAddress}&vs_currencies=usd`
+        const response = await axios.get(url);
+        try {
+            _usdRatesCache[coinAddress] = {'rate': response.data[coinAddress]['usd'] ?? 0, 'time': Date.now()};
+        } catch (err) { // TODO pay attention!
+            _usdRatesCache[coinAddress] = {'rate': 0, 'time': Date.now()};
+        }
+    }
+
+    return _usdRatesCache[coinAddress]['rate']
 }
