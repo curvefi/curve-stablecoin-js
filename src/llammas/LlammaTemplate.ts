@@ -233,10 +233,11 @@ export class LlammaTemplate {
         const _bands: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
 
         const bands: { [index: number]: { stablecoin: string, collateral: string } } = {};
-        for (let i = 0; i < max_band - min_band + 1; i++) {
+        for (let i = min_band; i <= max_band; i++) {
+            const _i = i - min_band
             bands[i] = {
-                stablecoin: ethers.utils.formatUnits(_bands[2 * i]),
-                collateral: ethers.utils.formatUnits(_bands[(2 * i) + 1], this.collateralDecimals),
+                stablecoin: ethers.utils.formatUnits(_bands[2 * _i]),
+                collateral: ethers.utils.formatUnits(_bands[(2 * _i) + 1], this.collateralDecimals),
             }
         }
 
