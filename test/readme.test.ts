@@ -4,17 +4,17 @@ const generalMethodsTest = async () => {
     await crvusd.init('JsonRpc', {});
 
     const balances1 = await crvusd.getBalances(['crvusd', 'sfrxeth']);
-    // OR const balances1 = await crvusd.getBalances(['0xf71040d20Cc3FFBb28c1abcEF46134C7936624e0', '0xac3E018457B222d93114458476f3E3416Abbe38F']);
+    // OR const balances1 = await crvusd.getBalances(['0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E', '0xac3E018457B222d93114458476f3E3416Abbe38F']);
     console.log(balances1);
     // [ '0.0', '1.0' ]
 
     // You can specify address
     const balances2 = await crvusd.getBalances(['crvusd', 'sfrxeth'], "0x0063046686E46Dc6F15918b61AE2B121458534a5");
-    // OR const balances2 = await crvusd.getBalances(['0xf71040d20Cc3FFBb28c1abcEF46134C7936624e0', '0xac3E018457B222d93114458476f3E3416Abbe38F'], '0x0063046686E46Dc6F15918b61AE2B121458534a5');
+    // OR const balances2 = await crvusd.getBalances(['0xf939E0A03FB07F59A73314E73794Be0E57ac1b4E', '0xac3E018457B222d93114458476f3E3416Abbe38F'], '0x0063046686E46Dc6F15918b61AE2B121458534a5');
     console.log(balances2);
     // [ '0.0', '0.0' ]
 
-    const spender = "0x77fCFB78151c676f390a6236A78b5d3152e43384" // sfrxeth llamma address
+    const spender = "0x136e783846ef68C8Bd00a3369F787dF8d683a696" // sfrxeth llamma address
 
     await crvusd.getAllowance(["crvusd", "sfrxeth"], crvusd.signerAddress, spender);
     // [ '0.0', '0.0' ]
