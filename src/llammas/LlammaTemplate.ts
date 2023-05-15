@@ -933,12 +933,13 @@ export class LlammaTemplate {
 
         const _debt = parseUnits(debt);
         const contract = crvusd.contracts[this.controller].contract;
-        const gas = await contract.estimateGas.repay(_debt, address, false, crvusd.constantOptions);
+        const [_, n] = await this.userBands(address);
+        const gas = await contract.estimateGas.repay(_debt, address, n-1, false, crvusd.constantOptions);
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.repay(_debt, address, false, { ...crvusd.options, gasLimit })).hash
+        return (await contract.repay(_debt, address, n-1, false, { ...crvusd.options, gasLimit })).hash
     }
 
     public async repayEstimateGas(debt: number | string, address = ""): Promise<number> {

@@ -467,6 +467,10 @@
         "type": "address"
       },
       {
+        "name": "max_active_band",
+        "type": "int256"
+      },
+      {
         "name": "use_eth",
         "type": "bool"
       }
