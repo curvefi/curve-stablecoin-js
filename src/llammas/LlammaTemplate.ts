@@ -150,8 +150,12 @@ export class LlammaTemplate {
             controllerContract.loan_discount(),
         ]
 
-        const [fee, admin_fee, rate, liquidation_discount, loan_discount]: string[] =
-            (await crvusd.multicallProvider.all(calls) as ethers.BigNumber[]).map((x) => ethers.utils.formatUnits(x.mul(100)));
+        const [_fee, _admin_fee, _rate, _liquidation_discount, _loan_discount]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls) as ethers.BigNumber[];
+        const [fee, admin_fee, liquidation_discount, loan_discount] = [_fee, _admin_fee, _liquidation_discount, _loan_discount]
+            .map((x) => ethers.utils.formatUnits(x.mul(100)));
+
+        // (1+rate)**(365*86400)-1 ~= (e**(rate*365*86400))-1
+        const rate = String(((2.71828 ** (toBN(_rate).times(365).times(86400)).toNumber()) - 1) * 100);
 
         return { fee, admin_fee, rate, liquidation_discount, loan_discount }
     },
