@@ -6,6 +6,7 @@ import { _getPoolsFromApi } from "./external-api";
 import { crvusd } from "./crvusd";
 
 export const MAX_ALLOWANCE = ethers.BigNumber.from(2).pow(ethers.BigNumber.from(256)).sub(ethers.BigNumber.from(1));
+export const MAX_ACTIVE_BAND = ethers.BigNumber.from(2).pow(ethers.BigNumber.from(255)).sub(ethers.BigNumber.from(1));
 
 // bignumber.js
 

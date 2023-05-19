@@ -15,6 +15,7 @@ import {
     isEth,
     _cutZeros,
     MAX_ALLOWANCE,
+    MAX_ACTIVE_BAND,
 } from "../utils";
 import { IDict } from "../interfaces";
 
@@ -933,13 +934,15 @@ export class LlammaTemplate {
 
         const _debt = parseUnits(debt);
         const contract = crvusd.contracts[this.controller].contract;
-        const [_, n] = await this.userBands(address);
-        const gas = await contract.estimateGas.repay(_debt, address, n-1, false, crvusd.constantOptions);
+        const [_, n1] = await this.userBands(address);
+        const { stablecoin } = await this.userState(address);
+        const n = (BN(stablecoin).gt(0)) ? MAX_ACTIVE_BAND : n1 - 1;  // In liquidation mode it doesn't matter if active band moves
+        const gas = await contract.estimateGas.repay(_debt, address, n, false, crvusd.constantOptions);
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.repay(_debt, address, n-1, false, { ...crvusd.options, gasLimit })).hash
+        return (await contract.repay(_debt, address, n, false, { ...crvusd.options, gasLimit })).hash
     }
 
     public async repayEstimateGas(debt: number | string, address = ""): Promise<number> {
