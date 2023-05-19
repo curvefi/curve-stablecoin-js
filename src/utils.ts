@@ -213,9 +213,7 @@ export const _getUsdPricesFromApi = async (): Promise<IDict<number>> => {
     const network = crvusd.constants.NETWORK_NAME;
     const promises = [
         _getPoolsFromApi(network, "main"),
-        _getPoolsFromApi(network, "crypto"),
-        _getPoolsFromApi(network, "factory"),
-        _getPoolsFromApi(network, "factory-crypto"),
+        _getPoolsFromApi(network, "factory-crvusd"),
     ];
     const allTypesExtendedPoolData = await Promise.all(promises);
     const priceDict: IDict<number> = {};
@@ -244,7 +242,6 @@ export const getUsdRate = async (coin: string): Promise<number> => {
     let [coinAddress] = _getCoinAddressesNoCheck([coin]);
     const pricesFromApi = await _getUsdPricesFromApi()
     if (coinAddress.toLowerCase() in pricesFromApi) return pricesFromApi[coinAddress.toLowerCase()];
-    console.log('HERE');
 
     const chainName = 'ethereum';
     const nativeTokenName = 'ethereum';
