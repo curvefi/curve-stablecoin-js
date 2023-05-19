@@ -15,7 +15,7 @@ export const LLAMMAS: IDict<ILlamma> = lowerCaseLlammasAddresses({
             '0x6B765d07cf966c745B340AdCa67749fE75B5c345',
             '0x1ef89Ed0eDd93D1EC09E4c07373f69C49f4dcCae',
         ],
-        min_bands: 5,
+        min_bands: 4,
         max_bands: 50,
         default_bands: 10,
         A: 100,
