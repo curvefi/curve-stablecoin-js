@@ -3,6 +3,7 @@ import { Networkish } from "@ethersproject/networks";
 import { Provider as MulticallProvider, Contract as MulticallContract } from 'ethcall';
 import { Icrvusd, IDict, ILlamma } from "./interfaces";
 import ERC20ABI from "./constants/abis/ERC20.json";
+import MonetaryPolicyABI from "./constants/abis/MonetaryPolicy.json";
 import controllerABI from "./constants/abis/controller.json";
 import llammaABI from "./constants/abis/llamma.json";
 import PegKeeper from "./constants/abis/PegKeeper.json";
@@ -18,6 +19,7 @@ class Crvusd implements Icrvusd {
     signer: ethers.Signer | null;
     signerAddress: string;
     chainId: number;
+    monetary_policy: string;
     contracts: { [index: string]: { contract: Contract, multicallContract: MulticallContract } };
     feeData: { gasPrice?: number, maxFeePerGas?: number, maxPriorityFeePerGas?: number };
     constantOptions: { gasLimit: number };
@@ -35,8 +37,9 @@ class Crvusd implements Icrvusd {
         this.provider = null;
         // @ts-ignore
         this.signer = null;
-        this.signerAddress = '';
+        this.signerAddress = "";
         this.chainId = 0;
+        this.monetary_policy = "0xc684432FD6322c6D58b6bC5d28B18569aA0AD0A1";
         // @ts-ignore
         this.multicallProvider = null;
         this.contracts = {};
@@ -60,7 +63,7 @@ class Crvusd implements Icrvusd {
         this.provider = null;
         // @ts-ignore
         this.signer = null;
-        this.signerAddress = '';
+        this.signerAddress = "";
         this.chainId = 0;
         // @ts-ignore
         this.multicallProvider = null;
@@ -124,6 +127,7 @@ class Crvusd implements Icrvusd {
         await this.updateFeeData();
 
         this.setContract(this.address, ERC20ABI);
+        this.setContract(this.monetary_policy, MonetaryPolicyABI);
         for (const llamma of Object.values(this.constants.LLAMMAS)) {
             this.setContract(llamma.amm_address, llammaABI);
             this.setContract(llamma.controller_address, controllerABI);
