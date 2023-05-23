@@ -244,7 +244,7 @@ import crvusd from "@curvefi/stablecoin-api";
     //     fee: '0.0',
     //     admin_fee: '0.0',
     //     rate: '0.0',
-    //     monetary_policy_rate: '0.0',
+    //     future_rate: '0.0',
     //     liquidation_discount: '2.0',
     //     loan_discount: '5.0'
     // }

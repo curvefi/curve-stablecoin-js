@@ -137,7 +137,7 @@ export class LlammaTemplate {
         fee: string, // %
         admin_fee: string, // %
         rate: string, // %
-        monetary_policy_rate: string, // %
+        future_rate: string, // %
         liquidation_discount: string, // %
         loan_discount: string, // %
     }> => {
@@ -160,9 +160,9 @@ export class LlammaTemplate {
 
         // (1+rate)**(365*86400)-1 ~= (e**(rate*365*86400))-1
         const rate = String(((2.718281828459 ** (toBN(_rate).times(365).times(86400)).toNumber()) - 1) * 100);
-        const monetary_policy_rate = String(((2.718281828459 ** (toBN(_mp_rate).times(365).times(86400)).toNumber()) - 1) * 100);
+        const future_rate = String(((2.718281828459 ** (toBN(_mp_rate).times(365).times(86400)).toNumber()) - 1) * 100);
 
-        return { fee, admin_fee, rate, monetary_policy_rate, liquidation_discount, loan_discount }
+        return { fee, admin_fee, rate, future_rate, liquidation_discount, loan_discount }
     },
     {
         promise: true,
