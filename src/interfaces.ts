@@ -11,7 +11,6 @@ export interface ILlamma {
     collateral_address: string,
     collateral_symbol: string,
     collateral_decimals: number,
-    peg_keepers: string[],
     min_bands: number,
     max_bands: number,
     default_bands: number,

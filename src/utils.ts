@@ -264,3 +264,27 @@ export const getUsdRate = async (coin: string): Promise<number> => {
 
     return _usdRatesCache[coinAddress]['rate']
 }
+
+export const totalSupply = async (): Promise<string> => {
+    const calls = [];
+    for (const llammaId of crvusd.getLlammaList()) {
+        const controllerAddress = crvusd.constants.LLAMMAS[llammaId].controller_address;
+        const controllerContract = crvusd.contracts[controllerAddress].multicallContract;
+        calls.push(controllerContract.minted(), controllerContract.redeemed());
+    }
+    for (const pegKeeper of crvusd.constants.PEG_KEEPERS) {
+        calls.push(crvusd.contracts[pegKeeper].multicallContract.debt());
+    }
+    const res: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
+
+    let totalSupplyBN = BN(0);
+    for (let i = 0; i < crvusd.getLlammaList().length; i++) {
+        const [_minted, _redeemed] = res.splice(0, 2);
+        totalSupplyBN = toBN(_minted).minus(toBN(_redeemed)).plus(totalSupplyBN);
+    }
+    for (const _pegKeeperDebt of res) {
+        totalSupplyBN = totalSupplyBN.plus(toBN(_pegKeeperDebt));
+    }
+
+    return totalSupplyBN.toString();
+}
