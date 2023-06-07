@@ -28,6 +28,8 @@ const generalMethodsTest = async () => {
 
     await crvusd.getUsdRate('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
     // 1257.43
+
+    console.log(await crvusd.totalSupply());
 }
 
 const llammaFieldsTest = async () => {

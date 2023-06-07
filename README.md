@@ -162,6 +162,9 @@ import crvusd from "@curvefi/stablecoin-api";
 
     await crvusd.getUsdRate('0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee');
     // 1257.43
+
+    await crvusd.totalSupply();  // sum(llammasSupply) + sum(pegKeepersDebt)
+    // 1415.12 
 })()
 ```
 
