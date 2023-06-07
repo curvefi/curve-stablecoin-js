@@ -214,6 +214,7 @@ export const _getUsdPricesFromApi = async (): Promise<IDict<number>> => {
     const network = crvusd.constants.NETWORK_NAME;
     const promises = [
         _getPoolsFromApi(network, "main"),
+        _getPoolsFromApi(network, "factory"),
         _getPoolsFromApi(network, "factory-crvusd"),
     ];
     const allTypesExtendedPoolData = await Promise.all(promises);

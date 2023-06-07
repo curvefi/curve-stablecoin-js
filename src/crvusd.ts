@@ -4,6 +4,7 @@ import { Provider as MulticallProvider, Contract as MulticallContract } from 'et
 import { Icrvusd, IDict, ILlamma } from "./interfaces";
 import ERC20ABI from "./constants/abis/ERC20.json";
 import MonetaryPolicyABI from "./constants/abis/MonetaryPolicy.json";
+import FactoryABI from "./constants/abis/Factory.json";
 import controllerABI from "./constants/abis/controller.json";
 import llammaABI from "./constants/abis/llamma.json";
 import PegKeeper from "./constants/abis/PegKeeper.json";
@@ -29,6 +30,7 @@ class Crvusd implements Icrvusd {
         COINS: IDict<string>,
         DECIMALS: IDict<number>,
         NETWORK_NAME: "ethereum",
+        FACTORY: string,
     };
 
     constructor() {
@@ -51,6 +53,7 @@ class Crvusd implements Icrvusd {
             COINS: {},
             DECIMALS: {},
             NETWORK_NAME: "ethereum",
+            FACTORY: "0xC9332fdCB1C491Dcc683bAe86Fe3cb70360738BC",
         };
     }
 
@@ -65,6 +68,7 @@ class Crvusd implements Icrvusd {
         this.signer = null;
         this.signerAddress = "";
         this.chainId = 0;
+        this.monetary_policy = "0xc684432FD6322c6D58b6bC5d28B18569aA0AD0A1";
         // @ts-ignore
         this.multicallProvider = null;
         this.contracts = {};
@@ -106,10 +110,6 @@ class Crvusd implements Icrvusd {
             throw Error('Wrong providerType');
         }
 
-        this.constants.DECIMALS = extractDecimals(this.constants.LLAMMAS);
-        this.constants.DECIMALS[this.address] = 18;
-        this.constants.COINS = COINS;
-
         this.multicallProvider = new MulticallProvider();
         await this.multicallProvider.init(this.provider);
 
@@ -136,6 +136,67 @@ class Crvusd implements Icrvusd {
                 this.setContract(pegKeeper, PegKeeper);
             }
         }
+
+        // Fetch new llammas
+
+        this.setContract(this.constants.FACTORY, FactoryABI);
+        const factoryContract = this.contracts[this.constants.FACTORY].contract;
+        const factoryMulticallContract = this.contracts[this.constants.FACTORY].multicallContract;
+
+        const N = await factoryContract.n_collaterals(this.constantOptions);
+        let calls = [];
+        for (let i = 0; i < N; i++) {
+            calls.push(factoryMulticallContract.collaterals(i));
+        }
+        const existingCollaterals = Object.values(this.constants.LLAMMAS).map((l) => l.collateral_address);
+        const collaterals: string[] = (await this.multicallProvider.all(calls) as string[])
+            .map((c) => c.toLowerCase())
+            .filter((c) => !existingCollaterals.includes(c));
+
+        if (collaterals.length > 0) {
+            for (const collateral of collaterals) this.setContract(collateral, ERC20ABI);
+
+            calls = [];
+            for (const collateral of collaterals) {
+                calls.push(
+                    this.contracts[collateral].multicallContract.symbol(),
+                    this.contracts[collateral].multicallContract.decimals(),
+                    factoryMulticallContract.get_amm(collateral),
+                    factoryMulticallContract.get_controller(collateral)
+                )
+            }
+            const res = (await this.multicallProvider.all(calls)).map((x) => {
+                if (typeof x === "string") return x.toLowerCase();
+                return x;
+            });
+
+            for (const collateral_address of collaterals) {
+                const [collateral_symbol, collateral_decimals, amm_address, controller_address] = res.splice(0, 4) as [string, number, string, string];
+                this.setContract(amm_address, llammaABI);
+                this.setContract(controller_address, controllerABI);
+                this.constants.LLAMMAS[collateral_symbol.toLowerCase()] = {
+                    amm_address,
+                    controller_address,
+                    collateral_address,
+                    collateral_symbol,
+                    collateral_decimals,
+                    peg_keepers: [
+                        '0xaA346781dDD7009caa644A4980f044C50cD2ae22',
+                        '0xE7cd2b4EB1d98CD6a4A48B6071D46401Ac7DC5C8',
+                        '0x6B765d07cf966c745B340AdCa67749fE75B5c345',
+                        '0x1ef89Ed0eDd93D1EC09E4c07373f69C49f4dcCae',
+                    ],
+                    min_bands: 4,
+                    max_bands: 50,
+                    default_bands: 10,
+                    A: 100,
+                }
+            }
+        }
+
+        this.constants.DECIMALS = extractDecimals(this.constants.LLAMMAS);
+        this.constants.DECIMALS[this.address] = 18;
+        this.constants.COINS = COINS;
     }
 
     setContract(address: string, abi: any): void {
