@@ -210,6 +210,8 @@ class Crvusd implements Icrvusd {
         this.feeData = { ...this.feeData, ...customFeeData };
     }
 
+    getLlammaList = () => Object.keys(this.constants.LLAMMAS);
+
     async updateFeeData(): Promise<void> {
         const feeData = await this.provider.getFeeData();
         if (feeData.maxFeePerGas === null || feeData.maxPriorityFeePerGas === null) {
