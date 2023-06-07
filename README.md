@@ -293,6 +293,9 @@ import crvusd from "@curvefi/stablecoin-api";
 (async () => {
     await crvusd.init('JsonRpc', {});
 
+    console.log(crvusd.getLlammaList());
+    // [ 'sfrxeth' ]
+    
     const llamma = crvusd.getLlamma('eth');
     
     

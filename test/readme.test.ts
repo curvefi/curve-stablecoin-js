@@ -88,6 +88,8 @@ const statsTest = async () => {
 const generalTest = async () => {
     await crvusd.init('JsonRpc', {});
 
+    console.log(crvusd.getLlammaList());
+
     const llamma = crvusd.getLlamma('sfrxeth');
 
 
