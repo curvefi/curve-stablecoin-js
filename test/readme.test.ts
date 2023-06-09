@@ -40,6 +40,8 @@ const llammaFieldsTest = async () => {
     console.log(llamma.id);
     console.log(llamma.address);
     console.log(llamma.controller);
+    console.log(llamma.monetaryPolicy);
+    console.log(llamma.collateral);
     console.log(llamma.collateralSymbol);
     console.log(llamma.collateralDecimals);
     console.log(llamma.coins);
