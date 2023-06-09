@@ -8,6 +8,7 @@ export interface IDict<T> {
 export interface ILlamma {
     amm_address: string,
     controller_address: string,
+    monetary_policy_address: string,
     collateral_address: string,
     collateral_symbol: string,
     collateral_decimals: number,
@@ -15,6 +16,7 @@ export interface ILlamma {
     max_bands: number,
     default_bands: number,
     A: number,
+    monetary_policy_abi: any
 }
 
 export interface Icrvusd {

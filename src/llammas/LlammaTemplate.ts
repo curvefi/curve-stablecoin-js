@@ -24,6 +24,7 @@ export class LlammaTemplate {
     id: string;
     address: string;
     controller: string;
+    monetaryPolicy: string;
     collateral: string;
     collateralSymbol: string;
     collateralDecimals: number;
@@ -82,6 +83,7 @@ export class LlammaTemplate {
         this.id = id;
         this.address = llammaData.amm_address;
         this.controller = llammaData.controller_address;
+        this.monetaryPolicy = llammaData.monetary_policy_address;
         this.collateral = llammaData.collateral_address;
         this.collateralSymbol = llammaData.collateral_symbol;
         this.collateralDecimals = llammaData.collateral_decimals;
@@ -141,13 +143,13 @@ export class LlammaTemplate {
     }> => {
         const llammaContract = crvusd.contracts[this.address].multicallContract;
         const controllerContract = crvusd.contracts[this.controller].multicallContract;
-        const monetaryPolicycontract = crvusd.contracts[crvusd.monetary_policy].multicallContract;
+        const monetaryPolicyContract = crvusd.contracts[this.monetaryPolicy].multicallContract;
 
         const calls = [
             llammaContract.fee(),
             llammaContract.admin_fee(),
             llammaContract.rate(),
-            monetaryPolicycontract.rate(),
+            "rate(address)" in crvusd.contracts[this.monetaryPolicy].contract ? monetaryPolicyContract.rate(this.controller) : monetaryPolicyContract.rate(),
             controllerContract.liquidation_discount(),
             controllerContract.loan_discount(),
         ]
@@ -599,14 +601,6 @@ export class LlammaTemplate {
         _health = _health.mul(100);
 
         return ethers.utils.formatUnits(_health);
-    }
-
-
-    private async _monetaryPolicyRate(): Promise<string> {
-        const contract = crvusd.contracts[crvusd.monetary_policy].contract;
-        const _rate = await contract.rate(crvusd.constantOptions) as ethers.BigNumber;
-        // (1+rate)**(365*86400)-1 ~= (e**(rate*365*86400))-1
-        return String(((2.718281828459 ** (toBN(_rate).times(365).times(86400)).toNumber()) - 1) * 100);
     }
 
     public async createLoanIsApproved(collateral: number | string): Promise<boolean> {
