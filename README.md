@@ -292,6 +292,8 @@ import crvusd from "@curvefi/stablecoin-api";
     // 300.0 
     await llamma.stats.totalCollateral();
     // 0.402268776965776345
+    await llamma.stats.capAndAvailable();
+    // { cap: '10000000.0', available: '172237.031342956400517635' }
 })()
 ````
 

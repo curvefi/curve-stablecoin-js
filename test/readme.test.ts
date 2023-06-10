@@ -87,6 +87,7 @@ const statsTest = async () => {
     console.log(await llamma.stats.totalDebt());
     console.log(await llamma.stats.totalStablecoin());
     console.log(await llamma.stats.totalCollateral());
+    console.log(await llamma.stats.capAndAvailable());
 }
 
 const generalTest = async () => {
