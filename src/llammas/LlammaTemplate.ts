@@ -72,6 +72,7 @@ export class LlammaTemplate {
         totalDebt: () => Promise<string>,
         totalStablecoin: () => Promise<string>,
         totalCollateral: () => Promise<string>,
+        capAndAvailable: () => Promise<{ "cap": string, "available": string }>,
     };
     wallet: {
         balances: (address?: string) => Promise<{ stablecoin: string, collateral: string }>,
@@ -125,6 +126,7 @@ export class LlammaTemplate {
             totalDebt: this.statsTotalDebt.bind(this),
             totalStablecoin: this.statsTotalStablecoin.bind(this),
             totalCollateral: this.statsTotalCollateral.bind(this),
+            capAndAvailable: this.statsCapAndAvailable.bind(this),
         }
         this.wallet = {
             balances: this.walletBalances.bind(this),
@@ -301,6 +303,22 @@ export class LlammaTemplate {
         ]);
 
         return toBN(_balance, this.collateralDecimals).minus(toBN(_fee, this.collateralDecimals)).toString()
+    },
+    {
+        promise: true,
+        maxAge: 60 * 1000, // 1m
+    });
+
+    private statsCapAndAvailable = memoize(async (): Promise<{ "cap": string, "available": string }> => {
+        const factoryContract = crvusd.contracts[crvusd.constants.FACTORY].multicallContract;
+        const crvusdContract = crvusd.contracts[crvusd.address].multicallContract;
+
+        const [_cap, _available]: ethers.BigNumber[] = await crvusd.multicallProvider.all([
+            factoryContract.debt_ceiling(this.controller),
+            crvusdContract.balanceOf(this.controller),
+        ]);
+
+        return { "cap": crvusd.formatUnits(_cap), "available": crvusd.formatUnits(_available) }
     },
     {
         promise: true,
