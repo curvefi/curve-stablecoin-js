@@ -18,6 +18,7 @@ import {
     MAX_ACTIVE_BAND,
 } from "../utils";
 import { IDict } from "../interfaces";
+import { _getUserCollateral } from "../external-api.js";
 
 
 export class LlammaTemplate {
@@ -382,6 +383,32 @@ export class LlammaTemplate {
             collateral: ethers.utils.formatUnits(_collateral, this.collateralDecimals),
             stablecoin: ethers.utils.formatUnits(_stablecoin),
             debt: ethers.utils.formatUnits(_debt),
+        };
+    }
+
+    public async userLoss(userAddress = ""): Promise<{ deposited_collateral: string, current_collateral_estimation: string, loss: string, loss_pct: string }> {
+        userAddress = _getAddress(userAddress);
+        const [deposited_collateral, _current_collateral_estimation] = await Promise.all([
+            _getUserCollateral(crvusd.constants.NETWORK_NAME, this.collateral, userAddress, this.collateralDecimals),
+            crvusd.contracts[this.address].contract.get_y_up(userAddress),
+        ]);
+        const current_collateral_estimation = crvusd.formatUnits(_current_collateral_estimation, this.collateralDecimals);
+        if (BN(deposited_collateral).lte(0)) {
+            return {
+                deposited_collateral,
+                current_collateral_estimation,
+                loss: "0.0",
+                loss_pct: "0.0",
+            };
+        }
+        const loss = BN(deposited_collateral).minus(current_collateral_estimation).toString()
+        const loss_pct = BN(loss).div(deposited_collateral).times(100).toString();
+
+        return {
+            deposited_collateral,
+            current_collateral_estimation,
+            loss,
+            loss_pct,
         };
     }
 
