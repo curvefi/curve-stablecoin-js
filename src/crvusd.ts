@@ -214,6 +214,14 @@ class Crvusd implements Icrvusd {
 
     getLlammaList = () => Object.keys(this.constants.LLAMMAS);
 
+    formatUnits(value: ethers.BigNumberish, unit?: string | ethers.BigNumberish): string {
+        return ethers.utils.formatUnits(value, unit);
+    }
+
+    parseUnits(value: string, unit?: string | ethers.BigNumberish): ethers.BigNumber {
+        return ethers.utils.parseUnits(value, unit);
+    }
+
     async updateFeeData(): Promise<void> {
         const feeData = await this.provider.getFeeData();
         if (feeData.maxFeePerGas === null || feeData.maxPriorityFeePerGas === null) {
