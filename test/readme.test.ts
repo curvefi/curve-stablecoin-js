@@ -263,6 +263,20 @@ const selfLiquidationTest = async () => {
     console.log(await llamma.userState());
 }
 
+const userLossTest = async () => {
+    await crvusd.init('JsonRpc', {});
+
+    const llamma = crvusd.getLlamma('sfrxeth');
+
+    console.log(await llamma.userLoss("0x0063046686E46Dc6F15918b61AE2B121458534a5"));
+    // {
+    //     deposited_collateral: '929.933909709140155529',
+    //     current_collateral_estimation: '883.035865972092328038',
+    //     loss: '46.898043737047827491',
+    //     loss_pct: '5.043158793049750311'
+    // }
+}
+
 (async () => {
     console.log("\n--- generalMethodsTest ---\n")
     await generalMethodsTest();
@@ -280,4 +294,6 @@ const selfLiquidationTest = async () => {
     await swapTest();
     console.log("\n--- selfLiquidationTest ---\n")
     await selfLiquidationTest();
+    console.log("\n--- userLossTest ---\n")
+    await userLossTest();
 })()

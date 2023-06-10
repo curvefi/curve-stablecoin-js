@@ -650,6 +650,23 @@ import crvusd from "@curvefi/stablecoin-api";
 })()
 ```
 
+### User loss
+```ts
+(async () => {
+    await crvusd.init('JsonRpc', {});
+
+    const llamma = crvusd.getLlamma('sfrxeth');
+
+    console.log(await llamma.userLoss("0x0063046686E46Dc6F15918b61AE2B121458534a5"));
+    // {
+    //     deposited_collateral: '929.933909709140155529',
+    //     current_collateral_estimation: '883.035865972092328038',
+    //     loss: '46.898043737047827491',
+    //     loss_pct: '5.043158793049750311'
+    // }
+})()
+```
+
 ## Gas estimation
 Every non-constant method has corresponding gas estimation method. Rule: ```obj.method -> obj.estimateGas.method```
 
