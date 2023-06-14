@@ -147,15 +147,13 @@ class Crvusd implements Icrvusd {
         const factoryContract = this.contracts[this.constants.FACTORY].contract;
         const factoryMulticallContract = this.contracts[this.constants.FACTORY].multicallContract;
 
-        const N = await factoryContract.n_collaterals(this.constantOptions);
+        const N1 = Object.keys(this.constants.LLAMMAS).length;
+        const N2 = await factoryContract.n_collaterals(this.constantOptions);
         let calls = [];
-        for (let i = 0; i < N; i++) {
+        for (let i = N1; i < N2; i++) {
             calls.push(factoryMulticallContract.collaterals(i));
         }
-        const existingCollaterals = Object.values(this.constants.LLAMMAS).map((l) => l.collateral_address);
-        const collaterals: string[] = (await this.multicallProvider.all(calls) as string[])
-            .map((c) => c.toLowerCase())
-            .filter((c) => !existingCollaterals.includes(c));
+        const collaterals: string[] = await this.multicallProvider.all(calls);
 
         if (collaterals.length > 0) {
             for (const collateral of collaterals) this.setContract(collateral, ERC20ABI);
