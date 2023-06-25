@@ -122,7 +122,7 @@ const generalTest = (id: string) => {
             assert.isAbove(Number(initialState.collateral), 0);
 
             const maxRemovable = await llamma.maxRemovable();
-            const collateralAmount = (Number(maxRemovable) / 2).toFixed(18);
+            const collateralAmount = (Number(maxRemovable) / 2).toFixed(llamma.collateralDecimals);
             const removeCollateralPrices = await llamma.removeCollateralPrices(collateralAmount);
             const removeCollateralFullHealth = await llamma.removeCollateralHealth(collateralAmount);
             const removeCollateralHealth = await llamma.removeCollateralHealth(collateralAmount, false);

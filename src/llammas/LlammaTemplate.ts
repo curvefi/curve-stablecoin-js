@@ -667,12 +667,13 @@ export class LlammaTemplate {
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const _debt = parseUnits(debt);
         const contract = crvusd.contracts[this.controller].contract;
-        const gas = await contract.estimateGas.create_loan(_collateral, _debt, range, crvusd.constantOptions);
+        const value = isEth(this.collateral) ? _collateral : crvusd.parseUnits("0");
+        const gas = await contract.estimateGas.create_loan(_collateral, _debt, range, { ...crvusd.constantOptions, value });
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.create_loan(_collateral, _debt, range, { ...crvusd.options, gasLimit })).hash
+        return (await contract.create_loan(_collateral, _debt, range, { ...crvusd.options, gasLimit, value })).hash
     }
 
     public async createLoanEstimateGas(collateral: number | string, debt: number | string, range: number): Promise<number> {
@@ -756,12 +757,13 @@ export class LlammaTemplate {
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const _debt = parseUnits(debt);
         const contract = crvusd.contracts[this.controller].contract;
-        const gas = await contract.estimateGas.borrow_more(_collateral, _debt, crvusd.constantOptions);
+        const value = isEth(this.collateral) ? _collateral : crvusd.parseUnits("0");
+        const gas = await contract.estimateGas.borrow_more(_collateral, _debt, { ...crvusd.constantOptions, value });
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.borrow_more(_collateral, _debt, { ...crvusd.options, gasLimit })).hash
+        return (await contract.borrow_more(_collateral, _debt, { ...crvusd.options, gasLimit, value })).hash
     }
 
     public async borrowMoreEstimateGas(collateral: number | string, debt: number | string): Promise<number> {
@@ -831,12 +833,13 @@ export class LlammaTemplate {
 
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const contract = crvusd.contracts[this.controller].contract;
-        const gas = await contract.estimateGas.add_collateral(_collateral, address, crvusd.constantOptions);
+        const value = isEth(this.collateral) ? _collateral : crvusd.parseUnits("0");
+        const gas = await contract.estimateGas.add_collateral(_collateral, address, { ...crvusd.constantOptions, value });
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.add_collateral(_collateral, address, { ...crvusd.options, gasLimit })).hash
+        return (await contract.add_collateral(_collateral, address, { ...crvusd.options, gasLimit, value })).hash
     }
 
     public async addCollateralEstimateGas(collateral: number | string, address = ""): Promise<number> {
@@ -903,12 +906,12 @@ export class LlammaTemplate {
 
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const contract = crvusd.contracts[this.controller].contract;
-        const gas = await contract.estimateGas.remove_collateral(_collateral, false, crvusd.constantOptions);
+        const gas = await contract.estimateGas.remove_collateral(_collateral, isEth(this.collateral), crvusd.constantOptions);
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.remove_collateral(_collateral, false, { ...crvusd.options, gasLimit })).hash
+        return (await contract.remove_collateral(_collateral, isEth(this.collateral), { ...crvusd.options, gasLimit })).hash
     }
 
     public async removeCollateralEstimateGas(collateral: number | string): Promise<number> {
@@ -978,12 +981,12 @@ export class LlammaTemplate {
         const [_, n1] = await this.userBands(address);
         const { stablecoin } = await this.userState(address);
         const n = (BN(stablecoin).gt(0)) ? MAX_ACTIVE_BAND : n1 - 1;  // In liquidation mode it doesn't matter if active band moves
-        const gas = await contract.estimateGas.repay(_debt, address, n, false, crvusd.constantOptions);
+        const gas = await contract.estimateGas.repay(_debt, address, n, isEth(this.collateral), crvusd.constantOptions);
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.repay(_debt, address, n, false, { ...crvusd.options, gasLimit })).hash
+        return (await contract.repay(_debt, address, n, isEth(this.collateral), { ...crvusd.options, gasLimit })).hash
     }
 
     public async repayEstimateGas(debt: number | string, address = ""): Promise<number> {
@@ -1124,20 +1127,18 @@ export class LlammaTemplate {
     private async _swap(i: number, j: number, amount: number | string, slippage: number, estimateGas: boolean): Promise<string | number> {
         if (!(i === 0 && j === 1) && !(i === 1 && j === 0)) throw Error("Wrong index");
 
-        const inCoinAddress = this.coinAddresses[i];
         const [inDecimals, outDecimals] = [this.coinDecimals[i], this.coinDecimals[j]];
         const _amount = parseUnits(amount, inDecimals);
         const _expected = await this._swapExpected(i, j, _amount);
         const minRecvAmountBN: BigNumber = toBN(_expected, outDecimals).times(100 - slippage).div(100);
         const _minRecvAmount = fromBN(minRecvAmountBN);
-        const value = isEth(inCoinAddress) ? _amount : ethers.BigNumber.from(0);
         const contract = crvusd.contracts[this.address].contract;
-        const gas = await contract.estimateGas.exchange(i, j, _amount, _minRecvAmount, { ...crvusd.constantOptions, value });
+        const gas = await contract.estimateGas.exchange(i, j, _amount, _minRecvAmount, crvusd.constantOptions);
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.exchange(i, j, _amount, _minRecvAmount, { ...crvusd.options, value, gasLimit })).hash
+        return (await contract.exchange(i, j, _amount, _minRecvAmount, { ...crvusd.options, gasLimit })).hash
     }
 
     public async swapEstimateGas(i: number, j: number, amount: number | string, slippage = 0.5): Promise<number> {
@@ -1184,12 +1185,12 @@ export class LlammaTemplate {
         const minAmountBN: BigNumber = BN(stablecoin).times(100 - slippage).div(100);
         const _minAmount = fromBN(minAmountBN);
         const contract = crvusd.contracts[this.controller].contract;
-        const gas = (await contract.estimateGas.liquidate(address, _minAmount, false, crvusd.constantOptions))
+        const gas = (await contract.estimateGas.liquidate(address, _minAmount, isEth(this.collateral), crvusd.constantOptions))
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.liquidate(address, _minAmount, false, { ...crvusd.options, gasLimit })).hash
+        return (await contract.liquidate(address, _minAmount, isEth(this.collateral), { ...crvusd.options, gasLimit })).hash
     }
 
     public async liquidateEstimateGas(address: string, slippage = 0.5): Promise<number> {

@@ -31,6 +31,7 @@ class Crvusd implements Icrvusd {
         NETWORK_NAME: "ethereum",
         FACTORY: string,
         PEG_KEEPERS: string[],
+        WETH: string,
     };
 
     constructor() {
@@ -52,13 +53,14 @@ class Crvusd implements Icrvusd {
             COINS: {},
             DECIMALS: {},
             NETWORK_NAME: "ethereum",
-            FACTORY: "0xC9332fdCB1C491Dcc683bAe86Fe3cb70360738BC",
+            FACTORY: "0xC9332fdCB1C491Dcc683bAe86Fe3cb70360738BC".toLowerCase(),
             PEG_KEEPERS: [
                 '0xaA346781dDD7009caa644A4980f044C50cD2ae22'.toLowerCase(),
                 '0xE7cd2b4EB1d98CD6a4A48B6071D46401Ac7DC5C8'.toLowerCase(),
                 '0x6B765d07cf966c745B340AdCa67749fE75B5c345'.toLowerCase(),
                 '0x1ef89Ed0eDd93D1EC09E4c07373f69C49f4dcCae'.toLowerCase(),
             ],
+            WETH: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".toLowerCase(),
         };
     }
 
@@ -147,15 +149,13 @@ class Crvusd implements Icrvusd {
         const factoryContract = this.contracts[this.constants.FACTORY].contract;
         const factoryMulticallContract = this.contracts[this.constants.FACTORY].multicallContract;
 
-        const N = await factoryContract.n_collaterals(this.constantOptions);
+        const N1 = Object.keys(this.constants.LLAMMAS).length;
+        const N2 = await factoryContract.n_collaterals(this.constantOptions);
         let calls = [];
-        for (let i = 0; i < N; i++) {
+        for (let i = N1; i < N2; i++) {
             calls.push(factoryMulticallContract.collaterals(i));
         }
-        const existingCollaterals = Object.values(this.constants.LLAMMAS).map((l) => l.collateral_address);
-        const collaterals: string[] = (await this.multicallProvider.all(calls) as string[])
-            .map((c) => c.toLowerCase())
-            .filter((c) => !existingCollaterals.includes(c));
+        const collaterals: string[] = (await this.multicallProvider.all(calls) as string[]).map((c) => c.toLowerCase());
 
         if (collaterals.length > 0) {
             for (const collateral of collaterals) this.setContract(collateral, ERC20ABI);
@@ -175,17 +175,18 @@ class Crvusd implements Icrvusd {
             });
 
             for (const collateral_address of collaterals) {
+                const is_eth = collateral_address === this.constants.WETH;
                 const [collateral_symbol, collateral_decimals, amm_address, controller_address] = res.splice(0, 4) as [string, number, string, string];
                 this.setContract(amm_address, llammaABI);
                 this.setContract(controller_address, controllerABI);
                 const monetary_policy_address = await this.contracts[controller_address].contract.monetary_policy(this.constantOptions);
                 this.setContract(monetary_policy_address, MonetaryPolicy2ABI);
-                this.constants.LLAMMAS[collateral_symbol.toLowerCase()] = {
+                this.constants.LLAMMAS[is_eth ? "eth" : collateral_symbol.toLowerCase()] = {
                     amm_address,
                     controller_address,
                     monetary_policy_address,
-                    collateral_address,
-                    collateral_symbol,
+                    collateral_address: is_eth ? "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" : collateral_address,
+                    collateral_symbol: is_eth ? "ETH" : collateral_symbol,
                     collateral_decimals,
                     min_bands: 4,
                     max_bands: 50,
