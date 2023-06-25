@@ -247,9 +247,12 @@ export class LlammaTemplate {
         const bands: { [index: number]: { stablecoin: string, collateral: string } } = {};
         for (let i = min_band; i <= max_band; i++) {
             const _i = i - min_band
+            let collateral = ethers.utils.formatUnits(_bands[(2 * _i) + 1]);
+            collateral = collateral.split(".")[0] + "." +
+                (collateral.split(".")[1] || "0").slice(0, this.collateralDecimals);
             bands[i] = {
                 stablecoin: ethers.utils.formatUnits(_bands[2 * _i]),
-                collateral: ethers.utils.formatUnits(_bands[(2 * _i) + 1], this.collateralDecimals),
+                collateral,
             }
         }
 
