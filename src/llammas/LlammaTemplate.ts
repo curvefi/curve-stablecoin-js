@@ -174,7 +174,7 @@ export class LlammaTemplate {
 
     private async statsBalances(): Promise<[string, string]> {
         const crvusdContract = crvusd.contracts[crvusd.address].multicallContract;
-        const collateralContract = crvusd.contracts[this.collateral].multicallContract;
+        const collateralContract = crvusd.contracts[isEth(this.collateral) ? crvusd.constants.WETH : this.collateral].multicallContract;
         const contract = crvusd.contracts[this.address].multicallContract;
         const calls = [
             crvusdContract.balanceOf(this.address),
@@ -298,7 +298,7 @@ export class LlammaTemplate {
     });
 
     private statsTotalCollateral = memoize(async (): Promise<string> => {
-        const collateralContract = crvusd.contracts[this.collateral].multicallContract;
+        const collateralContract = crvusd.contracts[isEth(this.collateral) ? crvusd.constants.WETH : this.collateral].multicallContract;
         const ammContract = crvusd.contracts[this.address].multicallContract;
 
         const [_balance, _fee]: ethers.BigNumber[] = await crvusd.multicallProvider.all([
