@@ -27,6 +27,7 @@ export class LlammaTemplate {
     controller: string;
     monetaryPolicy: string;
     collateral: string;
+    healthCalculator: string | undefined;
     collateralSymbol: string;
     collateralDecimals: number;
     coins: string[];
@@ -87,6 +88,7 @@ export class LlammaTemplate {
         this.controller = llammaData.controller_address;
         this.monetaryPolicy = llammaData.monetary_policy_address;
         this.collateral = llammaData.collateral_address;
+        this.healthCalculator = llammaData.health_calculator_zap;
         this.collateralSymbol = llammaData.collateral_symbol;
         this.collateralDecimals = llammaData.collateral_decimals;
         this.coins = ["crvUSD", llammaData.collateral_symbol];
@@ -644,7 +646,7 @@ export class LlammaTemplate {
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const _debt = parseUnits(debt);
 
-        const contract = crvusd.contracts[this.controller].contract;
+        const contract = crvusd.contracts[this.healthCalculator ?? this.controller].contract;
         let _health = await contract.health_calculator(address, _collateral, _debt, full, range, crvusd.constantOptions) as ethers.BigNumber;
         _health = _health.mul(100);
 
@@ -733,7 +735,7 @@ export class LlammaTemplate {
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const _debt = parseUnits(debt);
 
-        const contract = crvusd.contracts[this.controller].contract;
+        const contract = crvusd.contracts[this.healthCalculator ?? this.controller].contract;
         let _health = await contract.health_calculator(address, _collateral, _debt, full, 0, crvusd.constantOptions) as ethers.BigNumber;
         _health = _health.mul(100);
 
@@ -810,7 +812,7 @@ export class LlammaTemplate {
         address = _getAddress(address);
         const _collateral = parseUnits(collateral, this.collateralDecimals);
 
-        const contract = crvusd.contracts[this.controller].contract;
+        const contract = crvusd.contracts[this.healthCalculator ?? this.controller].contract;
         let _health = await contract.health_calculator(address, _collateral, 0, full, 0, crvusd.constantOptions) as ethers.BigNumber;
         _health = _health.mul(100);
 
@@ -895,7 +897,7 @@ export class LlammaTemplate {
         address = _getAddress(address);
         const _collateral = parseUnits(collateral, this.collateralDecimals).mul(-1);
 
-        const contract = crvusd.contracts[this.controller].contract;
+        const contract = crvusd.contracts[this.healthCalculator ?? this.controller].contract;
         let _health = await contract.health_calculator(address, _collateral, 0, full, 0, crvusd.constantOptions) as ethers.BigNumber;
         _health = _health.mul(100);
 
@@ -967,7 +969,7 @@ export class LlammaTemplate {
         address = _getAddress(address);
         const _debt = parseUnits(debt).mul(-1);
 
-        const contract = crvusd.contracts[this.controller].contract;
+        const contract = crvusd.contracts[this.healthCalculator ?? this.controller].contract;
         let _health = await contract.health_calculator(address, 0, _debt, full, 0, crvusd.constantOptions) as ethers.BigNumber;
         _health = _health.mul(100);
 

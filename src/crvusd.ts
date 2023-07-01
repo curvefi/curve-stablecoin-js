@@ -7,6 +7,7 @@ import MonetaryPolicy2ABI from "./constants/abis/MonetaryPolicy2.json";
 import FactoryABI from "./constants/abis/Factory.json";
 import controllerABI from "./constants/abis/controller.json";
 import llammaABI from "./constants/abis/llamma.json";
+import HealthCalculatorZapABI from "./constants/abis/HealthCalculatorZap.json";
 import PegKeeper from "./constants/abis/PegKeeper.json";
 import { LLAMMAS } from "./constants/llammas";
 import { COINS } from "./constants/coins";
@@ -138,6 +139,7 @@ class Crvusd implements Icrvusd {
             this.setContract(llamma.controller_address, controllerABI);
             this.setContract(llamma.monetary_policy_address, llamma.monetary_policy_abi);
             this.setContract(llamma.collateral_address, ERC20ABI);
+            if (llamma.health_calculator_zap) this.setContract(llamma.health_calculator_zap, HealthCalculatorZapABI);
         }
         for (const pegKeeper of this.constants.PEG_KEEPERS) {
             this.setContract(pegKeeper, PegKeeper);

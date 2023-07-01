@@ -36,6 +36,7 @@ export const LLAMMAS: IDict<ILlamma> = lowerCaseLlammasAddresses({
         controller_address: '0x4e59541306910ad6dc1dac0ac9dfb29bd9f15c67',
         monetary_policy_address: '0x1E7d3bf98d3f8D8CE193236c3e0eC4b00e32DaaE',
         collateral_address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+        health_calculator_zap: "0xCF61Ee62b136e3553fB545bd8fEc11fb7f830d6A",
         collateral_symbol: 'wbtc',
         collateral_decimals: 8,
         min_bands: 4,
