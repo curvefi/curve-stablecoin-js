@@ -10,6 +10,7 @@ export interface ILlamma {
     controller_address: string,
     monetary_policy_address: string,
     collateral_address: string,
+    health_calculator_zap?: string,
     collateral_symbol: string,
     collateral_decimals: number,
     min_bands: number,
