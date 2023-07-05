@@ -138,7 +138,11 @@ class Crvusd implements Icrvusd {
             this.setContract(llamma.amm_address, llammaABI);
             this.setContract(llamma.controller_address, controllerABI);
             this.setContract(llamma.monetary_policy_address, llamma.monetary_policy_abi);
-            this.setContract(llamma.collateral_address, ERC20ABI);
+            if (llamma.collateral_address === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") {
+                this.setContract(this.constants.WETH, ERC20ABI);
+            } else {
+                this.setContract(llamma.collateral_address, ERC20ABI);
+            }
             if (llamma.health_calculator_zap) this.setContract(llamma.health_calculator_zap, HealthCalculatorZapABI);
         }
         for (const pegKeeper of this.constants.PEG_KEEPERS) {
