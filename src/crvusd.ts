@@ -137,7 +137,9 @@ class Crvusd implements Icrvusd {
         for (const llamma of Object.values(this.constants.LLAMMAS)) {
             this.setContract(llamma.amm_address, llammaABI);
             this.setContract(llamma.controller_address, controllerABI);
-            this.setContract(llamma.monetary_policy_address, llamma.monetary_policy_abi);
+            const monetary_policy_address = await this.contracts[llamma.controller_address].contract.monetary_policy(this.constantOptions);
+            llamma.monetary_policy_address = monetary_policy_address;
+            this.setContract(monetary_policy_address, llamma.monetary_policy_abi);
             if (llamma.collateral_address === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") {
                 this.setContract(this.constants.WETH, ERC20ABI);
             } else {
