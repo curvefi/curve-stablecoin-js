@@ -277,6 +277,50 @@ const userLossTest = async () => {
     // }
 }
 
+const leverageTest = async () => {
+    await crvusd.init('JsonRpc', {});
+
+    const llamma = crvusd.getLlamma('wsteth');
+
+    console.log(await llamma.leverage.createLoanMaxRecv(1, 5));
+    const { collateral, leverage, routeIdx } = await llamma.leverage.createLoanCollateral(1, 1000);
+    console.log({ collateral, leverage, routeIdx });
+    console.log(await llamma.leverage.getRouteName(routeIdx));
+    console.log(await llamma.leverage.getMaxRange(1, 1000));
+    console.log(await llamma.leverage.createLoanBands(1, 1000, 5));
+    console.log(await llamma.leverage.createLoanPrices(1, 1000, 5));
+    console.log(await llamma.leverage.createLoanHealth(1, 1000, 5));  // FULL
+    console.log(await llamma.leverage.createLoanHealth(1, 1000, 5, false));  // NOT FULL
+
+    console.log(await llamma.leverage.createLoanIsApproved(1));
+    // false
+    console.log(await llamma.leverage.createLoanApprove(1));
+    // [
+    //     '0xa2cb9316c58a4e383a0fcc9d9c60c3742c46a901115b23d2c84ced6b61c5be84'
+    // ]
+    console.log(await llamma.leverage.createLoan(1, 1000, 5, 0.5));
+
+    console.log(await llamma.userDebt());  // OR await llamma.userDebt(address);
+    console.log(await llamma.loanExists());
+    console.log(await llamma.userHealth());  // FULL
+    console.log(await llamma.userHealth(false));  // NOT FULL
+    console.log(await llamma.userRange());
+    console.log(await llamma.userBands());
+    console.log(await llamma.userPrices());
+    console.log(await llamma.userState());
+    console.log(await llamma.userBandsBalances());
+}
+
+const leverageAllRangesTest = async () => {
+    await crvusd.init('JsonRpc', {});
+
+    const llamma = crvusd.getLlamma('wsteth');
+
+    console.log(await llamma.leverage.createLoanMaxRecvAllRanges(1));
+    console.log(await llamma.leverage.createLoanBandsAllRanges(1, 14000));
+    console.log(await llamma.leverage.createLoanPricesAllRanges(1, 14000));
+}
+
 (async () => {
     console.log("\n--- generalMethodsTest ---\n")
     await generalMethodsTest();
@@ -296,4 +340,8 @@ const userLossTest = async () => {
     await selfLiquidationTest();
     console.log("\n--- userLossTest ---\n")
     await userLossTest();
+    console.log("\n--- leverageTest ---\n")
+    await leverageTest();
+    console.log("\n--- leverageAllRangesTest ---\n")
+    await leverageAllRangesTest();
 })()

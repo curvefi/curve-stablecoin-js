@@ -667,6 +667,180 @@ import crvusd from "@curvefi/stablecoin-api";
 })()
 ```
 
+### Leverage
+```ts
+(async () => {
+
+    //        Creates leveraged position (collateral + leverage_collateral)
+    //                          ^
+    //                          | 
+    //        collateral        |         crvUSD                 crvUSD    
+    // user       -->      controller     -->     leverage_zap    -->    curve_router
+    //                          ^                                             |
+    //                          |_____________________________________________|
+    //                                         leverage_collateral
+    
+    await crvusd.init('JsonRpc', {});
+
+    const llamma = crvusd.getLlamma('wsteth');
+    
+    
+    await llamma.leverage.createLoanMaxRecv(0.5, 5);
+    // {
+    //     maxBorrowable: '16547.886068664425693035',
+    //     maxCollateral: '8.789653769216069731',
+    //     leverage: '8.7897',
+    //     routeIdx: 1
+    // }
+    const { collateral, leverage, routeIdx } = await llamma.leverage.createLoanCollateral(1, 1000);
+    // { collateral: '1.470781767566863562', leverage: '1.4708', routeIdx: 1 }
+    await llamma.leverage.getRouteName(routeIdx);
+    // crvUSD/USDT --> tricrypto2 --> steth
+    await llamma.leverage.getMaxRange(1, 1000);
+    // 50
+    await llamma.leverage.createLoanBands(1, 1000, 5);
+    // [ 103, 99 ]
+    await llamma.leverage.createLoanPrices(1, 1000, 5);
+    // [ '731.101353314760924139', '768.779182694401331144' ]
+    await llamma.leverage.createLoanHealth(1, 1000, 5);  // FULL
+    // 203.0010181561119221
+    await llamma.leverage.createLoanHealth(1, 1000, 5, false);  // NOT FULL
+    // 3.6596075146233826
+
+    await llamma.leverage.createLoanIsApproved(1);
+    // false
+    await llamma.leverage.createLoanApprove(1);
+    // [
+    //     '0xc111e471715ae6f5437e12d3b94868a5b6542cd7304efca18b5782d315760ae5'
+    // ]
+    await llamma.leverage.createLoan(1, 1000, 5);
+    // 0x0c6fbfdbd5c35d84b6137d3f27b91235100c540f97d87f27eefe9c53d3fe2727
+
+    await llamma.debt();  // OR await llamma.debt(address);
+    // 1000.0
+    await llamma.loanExists();
+    // true
+    await llamma.userHealth();  // FULL
+    // 202.9745534261399119
+    await llamma.userHealth(false);  // NOT FULL
+    // 3.664403959327331
+    await llamma.userRange()
+    // 5
+    await llamma.userBands();
+    // [ 103, 99 ]
+    await llamma.userPrices();
+    // [ '731.101559601446893847', '768.779399612218705572' ]
+    await llamma.userState();
+    // {
+    //     collateral: '1.47084941027800225',
+    //     stablecoin: '0.0',
+    //     debt: '1000.0'
+    // }
+    await llamma.userBandsBalances();
+    // {
+    //     '99': { stablecoin: '0.0', collateral: '0.29416988205560045' },
+    //     '100': { stablecoin: '0.0', collateral: '0.29416988205560045' },
+    //     '101': { stablecoin: '0.0', collateral: '0.29416988205560045' },
+    //     '102': { stablecoin: '0.0', collateral: '0.29416988205560045' },
+    //     '103': { stablecoin: '0.0', collateral: '0.29416988205560045' }
+    // }
+
+})()
+```
+
+### Leverage all ranges methods
+```ts
+    await crvusd.init('JsonRpc', {});
+
+    const llamma = crvusd.getLlamma('wsteth');
+
+    await llamma.leverage.createLoanMaxRecvAllRanges(1);
+    // {
+    //     '4': {
+    //         maxBorrowable: '17147.090188198024935509',
+    //         maxCollateral: '9.062551195413331339',
+    //         leverage: '9.0626',
+    //         routeIdx: 1
+    //     },
+    //     '5': {
+    //         maxBorrowable: '16403.646954605099577422',
+    //         maxCollateral: '8.713012324116998431',
+    //         leverage: '8.7130',
+    //         routeIdx: 1
+    //     },
+    //     '6': {
+    //         maxBorrowable: '15719.798733163998861372',
+    //         maxCollateral: '8.391490399698554111',
+    //         leverage: '8.3915',
+    //         routeIdx: 1
+    //     },
+    //     '7': {
+    //         maxBorrowable: '15088.670386359222674207',
+    //         maxCollateral: '8.094753549413418159',
+    //         leverage: '8.0948',
+    //         routeIdx: 1
+    //     },
+    //     '8': {
+    //         maxBorrowable: '14504.40446852885551856',
+    //         maxCollateral: '7.820048255346502533',
+    //         leverage: '7.8200',
+    //         routeIdx: 1
+    //     },
+    //     '9': {
+    //         maxBorrowable: '13961.979739583096049766',
+    //         maxCollateral: '7.565014055477733007',
+    //         leverage: '7.5650',
+    //         routeIdx: 1
+    //     },
+    //     '10': {
+    //         maxBorrowable: '13457.067188253192169488',
+    //         maxCollateral: '7.327615875203003395',
+    //         leverage: '7.3276',
+    //         routeIdx: 1
+    //     },
+    //      
+    //      ...
+    //
+    //     '50': {
+    //         maxBorrowable: '5292.589588751249894884',
+    //         maxCollateral: '3.488707841886932836',
+    //         leverage: '3.4887',
+    //         routeIdx: 1
+    //     }
+    // }
+
+    await llamma.leverage.createLoanBandsAllRanges(1, 14000);
+    // {
+    //     '4': [ 3, 0 ],
+    //     '5': [ 3, -1 ],
+    //     '6': [ 4, -1 ],
+    //     '7': [ 4, -2 ],
+    //     '8': [ 5, -2 ],
+    //     '9': null,
+    //     '10': null,
+    //
+    //      ...
+    //
+    //     '50': null
+    // }
+
+    await llamma.leverage.createLoanPricesAllRanges(1, 14000);
+    // {
+    //     '4': [ '1997.376270314867650039', '2079.309355360395105159' ],
+    //     '5': [ '1997.376270314867650039', '2100.312480162015257736' ],
+    //     '6': [ '1977.402507611718973539', '2100.312480162015257736' ],
+    //     '7': [ '1977.402507611718973539', '2121.527757739409351246' ],
+    //     '8': [ '1957.628482535601783803', '2121.527757739409351246' ],
+    //     '9': null,
+    //     '10': null,
+    //
+    //      ...
+    //
+    //     '50': null
+    // }
+```
+
+
 ## Gas estimation
 Every non-constant method has corresponding gas estimation method. Rule: ```obj.method -> obj.estimateGas.method```
 
