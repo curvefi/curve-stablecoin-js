@@ -3,13 +3,13 @@ import MonetaryPolicyABI from "../constants/abis/MonetaryPolicy.json";
 import MonetaryPolicy2ABI from "../constants/abis/MonetaryPolicy2.json";
 import { lowerCaseLlammasAddresses } from "./utils";
 
-
 export const LLAMMAS: IDict<ILlamma> = lowerCaseLlammasAddresses({
     sfrxeth: {
         amm_address: '0x136e783846ef68C8Bd00a3369F787dF8d683a696',
         controller_address: '0x8472A9A7632b173c8Cf3a86D3afec50c35548e76',
         monetary_policy_address: '0xc684432FD6322c6D58b6bC5d28B18569aA0AD0A1',
         collateral_address: '0xac3E018457B222d93114458476f3E3416Abbe38F',
+        leverage_zap: '0xb556FA4C4752321B3154f08DfBDFCF34847f2eac',
         collateral_symbol: 'sfrxETH',
         collateral_decimals: 18,
         min_bands: 4,
@@ -23,6 +23,7 @@ export const LLAMMAS: IDict<ILlamma> = lowerCaseLlammasAddresses({
         controller_address: '0x100daa78fc509db39ef7d04de0c1abd299f4c6ce',
         monetary_policy_address: '0x1E7d3bf98d3f8D8CE193236c3e0eC4b00e32DaaE',
         collateral_address: '0x7f39C581F595B53c5cb19bD0b3f8dA6c935E2Ca0',
+        leverage_zap: '0x293436d4e4a15FBc6cCC400c14a01735E5FC74fd',
         collateral_symbol: 'wsteth',
         collateral_decimals: 18,
         min_bands: 4,
@@ -36,6 +37,7 @@ export const LLAMMAS: IDict<ILlamma> = lowerCaseLlammasAddresses({
         controller_address: '0x4e59541306910ad6dc1dac0ac9dfb29bd9f15c67',
         monetary_policy_address: '0x1E7d3bf98d3f8D8CE193236c3e0eC4b00e32DaaE',
         collateral_address: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+        leverage_zap: '0xA2518b71ee64E910741f5Cf480b19E8e402de4d7',
         health_calculator_zap: "0xCF61Ee62b136e3553fB545bd8fEc11fb7f830d6A",
         collateral_symbol: 'wbtc',
         collateral_decimals: 8,
@@ -50,6 +52,7 @@ export const LLAMMAS: IDict<ILlamma> = lowerCaseLlammasAddresses({
         controller_address: '0xa920de414ea4ab66b97da1bfe9e6eca7d4219635',
         monetary_policy_address: '0x1E7d3bf98d3f8D8CE193236c3e0eC4b00e32DaaE',
         collateral_address: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
+        leverage_zap: '0xd3e576B5DcDe3580420A5Ef78F3639BA9cd1B967',
         collateral_symbol: 'ETH',
         collateral_decimals: 18,
         min_bands: 4,
