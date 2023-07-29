@@ -395,10 +395,6 @@
         "type": "address"
       },
       {
-        "name": "callback_sig",
-        "type": "bytes32"
-      },
-      {
         "name": "callback_args",
         "type": "uint256[]"
       }
@@ -487,10 +483,6 @@
         "type": "address"
       },
       {
-        "name": "callback_sig",
-        "type": "bytes32"
-      },
-      {
         "name": "callback_args",
         "type": "uint256[]"
       }
@@ -574,10 +566,6 @@
       {
         "name": "callbacker",
         "type": "address"
-      },
-      {
-        "name": "callback_sig",
-        "type": "bytes32"
       },
       {
         "name": "callback_args",
