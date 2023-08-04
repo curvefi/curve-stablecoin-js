@@ -1533,7 +1533,7 @@ export class LlammaTemplate {
 
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const _debt = parseUnits(debt);
-        const leverageContract = crvusd.contracts[this.controller].contract;
+        const leverageContract = crvusd.contracts[this.leverageZap].contract;
         const routeIdx = await this._getRouteIdx(collateral, debt);
         const _expected = await leverageContract.get_collateral_underlying(debt, routeIdx);
         const minRecvBN = toBN(_expected, this.collateralDecimals).times(100 - slippage).div(100);
