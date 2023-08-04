@@ -1535,7 +1535,7 @@ export class LlammaTemplate {
         const _debt = parseUnits(debt);
         const leverageContract = crvusd.contracts[this.leverageZap].contract;
         const routeIdx = await this._getRouteIdx(collateral, debt);
-        const _expected = await leverageContract.get_collateral_underlying(debt, routeIdx);
+        const _expected = await leverageContract.get_collateral_underlying(_debt, routeIdx, crvusd.constantOptions);
         const minRecvBN = toBN(_expected, this.collateralDecimals).times(100 - slippage).div(100);
         const _minRecv = fromBN(minRecvBN, this.collateralDecimals);
         const contract = crvusd.contracts[this.controller].contract;
@@ -1552,7 +1552,14 @@ export class LlammaTemplate {
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.create_loan(_collateral, _debt, range, { ...crvusd.options, gasLimit, value })).hash
+        return (await contract.create_loan_extended(
+            _collateral,
+            _debt,
+            range,
+            this.leverageZap,
+            [routeIdx, _minRecv],
+            { ...crvusd.options, gasLimit, value }
+        )).hash
     }
 
     private async leverageCreateLoanEstimateGas(collateral: number | string, debt: number | string, range: number, slippage = 0.5): Promise<number> {
