@@ -1299,8 +1299,8 @@ export class LlammaTemplate {
             calls.push(crvusd.contracts[this.leverageZap].multicallContract.max_borrowable_and_collateral(_collateral, range, i));
         }
         const _res: ethers.BigNumber[][] = await crvusd.multicallProvider.all(calls);
-        const _maxBorrowable = _res.map((r) => r[0]);
-        const _maxCollateral = _res.map((r) => r[1]);
+        const _maxBorrowable = _res.map((r) => r[0].mul(999).div(1000));
+        const _maxCollateral = _res.map((r) => r[1].mul(999).div(1000));
         const routeIdx = this._getBestIdx(_maxCollateral);
 
         const maxBorrowable = crvusd.formatUnits(_maxBorrowable[routeIdx]);
@@ -1329,8 +1329,8 @@ export class LlammaTemplate {
         const res: IDict<{ maxBorrowable: string, maxCollateral: string, leverage: string, routeIdx: number }> = {};
         for (let N = this.minBands; N <= this.maxBands; N++) {
             const _res = _rawRes.splice(0, 5);
-            const _maxBorrowable = _res.map((r) => r[0]);
-            const _maxCollateral = _res.map((r) => r[1]);
+            const _maxBorrowable = _res.map((r) => r[0].mul(999).div(1000));
+            const _maxCollateral = _res.map((r) => r[1].mul(999).div(1000));
             const routeIdx = this._getBestIdx(_maxCollateral);
             const maxBorrowable = crvusd.formatUnits(_maxBorrowable[routeIdx]);
             const maxCollateral = crvusd.formatUnits(_maxCollateral[routeIdx], this.collateralDecimals);
@@ -1361,8 +1361,8 @@ export class LlammaTemplate {
 
         const res: IDict<{ maxBorrowable: string, maxCollateral: string, leverage: string }> = {};
         for (let N = this.minBands; N <= this.maxBands; N++) {
-            const maxBorrowable = crvusd.formatUnits(_res[N - this.minBands][0]);
-            const maxCollateral = crvusd.formatUnits(_res[N - this.minBands][1], this.collateralDecimals);
+            const maxBorrowable = crvusd.formatUnits(_res[N - this.minBands][0].mul(999).div(1000));
+            const maxCollateral = crvusd.formatUnits(_res[N - this.minBands][1].mul(999).div(1000), this.collateralDecimals);
             res[N] = {
                 maxBorrowable,
                 maxCollateral,
