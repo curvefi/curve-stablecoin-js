@@ -291,6 +291,7 @@ const leverageTest = async () => {
     console.log(await llamma.leverage.createLoanPrices(1, 1000, 5));
     console.log(await llamma.leverage.createLoanHealth(1, 1000, 5));  // FULL
     console.log(await llamma.leverage.createLoanHealth(1, 1000, 5, false));  // NOT FULL
+    console.log(await llamma.leverage.priceImpact(1, 1000));
 
     console.log(await llamma.leverage.createLoanIsApproved(1));
     // false

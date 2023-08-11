@@ -706,6 +706,8 @@ import crvusd from "@curvefi/stablecoin-api";
     // 203.0010181561119221
     await llamma.leverage.createLoanHealth(1, 1000, 5, false);  // NOT FULL
     // 3.6596075146233826
+    await llamma.leverage.priceImpact(1, 1000);
+    // 0.0007 %
 
     await llamma.leverage.createLoanIsApproved(1);
     // false
