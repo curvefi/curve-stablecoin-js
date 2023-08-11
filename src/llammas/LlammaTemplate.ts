@@ -93,6 +93,7 @@ export class LlammaTemplate {
         createLoanHealth: (collateral: number | string, debt: number | string, range: number, full?: boolean, address?: string) => Promise<string>,
         createLoanIsApproved: (collateral: number | string) => Promise<boolean>,
         createLoanApprove: (collateral: number | string) => Promise<string[]>,
+        priceImpact: (collateral: number | string, debt: number | string) => Promise<string>,
         createLoan: (collateral: number | string, debt: number | string, range: number, slippage?: number) => Promise<string>,
         estimateGas: {
             createLoanApprove: (collateral: number | string) => Promise<number>,
@@ -168,6 +169,7 @@ export class LlammaTemplate {
             createLoanHealth: this.leverageCreateLoanHealth.bind(this),
             createLoanIsApproved: this.createLoanIsApproved.bind(this),
             createLoanApprove: this.createLoanApprove.bind(this),
+            priceImpact: this.leveragePriceImpact.bind(this),
             createLoan: this.leverageCreateLoan.bind(this),
             estimateGas: {
                 createLoanApprove: this.createLoanApproveEstimateGas.bind(this),
@@ -1297,8 +1299,8 @@ export class LlammaTemplate {
             calls.push(crvusd.contracts[this.leverageZap].multicallContract.max_borrowable_and_collateral(_collateral, range, i));
         }
         const _res: ethers.BigNumber[][] = await crvusd.multicallProvider.all(calls);
-        const _maxBorrowable = _res.map((r) => r[0]);
-        const _maxCollateral = _res.map((r) => r[1]);
+        const _maxBorrowable = _res.map((r) => r[0].mul(999).div(1000));
+        const _maxCollateral = _res.map((r) => r[1].mul(999).div(1000));
         const routeIdx = this._getBestIdx(_maxCollateral);
 
         const maxBorrowable = crvusd.formatUnits(_maxBorrowable[routeIdx]);
@@ -1327,8 +1329,8 @@ export class LlammaTemplate {
         const res: IDict<{ maxBorrowable: string, maxCollateral: string, leverage: string, routeIdx: number }> = {};
         for (let N = this.minBands; N <= this.maxBands; N++) {
             const _res = _rawRes.splice(0, 5);
-            const _maxBorrowable = _res.map((r) => r[0]);
-            const _maxCollateral = _res.map((r) => r[1]);
+            const _maxBorrowable = _res.map((r) => r[0].mul(999).div(1000));
+            const _maxCollateral = _res.map((r) => r[1].mul(999).div(1000));
             const routeIdx = this._getBestIdx(_maxCollateral);
             const maxBorrowable = crvusd.formatUnits(_maxBorrowable[routeIdx]);
             const maxCollateral = crvusd.formatUnits(_maxCollateral[routeIdx], this.collateralDecimals);
@@ -1359,8 +1361,8 @@ export class LlammaTemplate {
 
         const res: IDict<{ maxBorrowable: string, maxCollateral: string, leverage: string }> = {};
         for (let N = this.minBands; N <= this.maxBands; N++) {
-            const maxBorrowable = crvusd.formatUnits(_res[N - this.minBands][0]);
-            const maxCollateral = crvusd.formatUnits(_res[N - this.minBands][1], this.collateralDecimals);
+            const maxBorrowable = crvusd.formatUnits(_res[N - this.minBands][0].mul(999).div(1000));
+            const maxCollateral = crvusd.formatUnits(_res[N - this.minBands][1].mul(999).div(1000), this.collateralDecimals);
             res[N] = {
                 maxBorrowable,
                 maxCollateral,
@@ -1525,6 +1527,21 @@ export class LlammaTemplate {
         _health = _health.mul(100);
 
         return ethers.utils.formatUnits(_health);
+    }
+
+    public async leveragePriceImpact(collateral: number | string, debt: number | string): Promise<string> {
+        const x_BN = BN(debt);
+        const small_x_BN = BN(100);
+        const { _collateral, routeIdx } = await this._leverageCreateLoanCollateral(collateral, debt);
+        const _y = _collateral.sub(parseUnits(collateral, this.collateralDecimals));
+        const _small_y = await crvusd.contracts[this.leverageZap].contract.get_collateral(fromBN(small_x_BN), routeIdx);
+        const y_BN = toBN(_y, this.collateralDecimals);
+        const small_y_BN = toBN(_small_y, this.collateralDecimals);
+        const rateBN = y_BN.div(x_BN);
+        const smallRateBN = small_y_BN.div(small_x_BN);
+        if (rateBN.gt(smallRateBN)) return "0.0";
+
+        return BN(1).minus(rateBN.div(smallRateBN)).times(100).toFixed(4);
     }
 
     private async _leverageCreateLoan(collateral: number | string, debt: number | string, range: number, slippage: number, estimateGas: boolean): Promise<string | number> {
