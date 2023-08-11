@@ -93,6 +93,7 @@ export class LlammaTemplate {
         createLoanHealth: (collateral: number | string, debt: number | string, range: number, full?: boolean, address?: string) => Promise<string>,
         createLoanIsApproved: (collateral: number | string) => Promise<boolean>,
         createLoanApprove: (collateral: number | string) => Promise<string[]>,
+        priceImpact: (collateral: number | string, debt: number | string) => Promise<string>,
         createLoan: (collateral: number | string, debt: number | string, range: number, slippage?: number) => Promise<string>,
         estimateGas: {
             createLoanApprove: (collateral: number | string) => Promise<number>,
@@ -168,6 +169,7 @@ export class LlammaTemplate {
             createLoanHealth: this.leverageCreateLoanHealth.bind(this),
             createLoanIsApproved: this.createLoanIsApproved.bind(this),
             createLoanApprove: this.createLoanApprove.bind(this),
+            priceImpact: this.leveragePriceImpact.bind(this),
             createLoan: this.leverageCreateLoan.bind(this),
             estimateGas: {
                 createLoanApprove: this.createLoanApproveEstimateGas.bind(this),
@@ -1525,6 +1527,21 @@ export class LlammaTemplate {
         _health = _health.mul(100);
 
         return ethers.utils.formatUnits(_health);
+    }
+
+    public async leveragePriceImpact(collateral: number | string, debt: number | string): Promise<string> {
+        const x_BN = BN(debt);
+        const small_x_BN = BN(100);
+        const { _collateral, routeIdx } = await this._leverageCreateLoanCollateral(collateral, debt);
+        const _y = _collateral.sub(parseUnits(collateral, this.collateralDecimals));
+        const _small_y = await crvusd.contracts[this.leverageZap].contract.get_collateral(fromBN(small_x_BN), routeIdx);
+        const y_BN = toBN(_y, this.collateralDecimals);
+        const small_y_BN = toBN(_small_y, this.collateralDecimals);
+        const rateBN = y_BN.div(x_BN);
+        const smallRateBN = small_y_BN.div(small_x_BN);
+        if (rateBN.gt(smallRateBN)) return "0.0";
+
+        return BN(1).minus(rateBN.div(smallRateBN)).times(100).toFixed(4);
     }
 
     private async _leverageCreateLoan(collateral: number | string, debt: number | string, range: number, slippage: number, estimateGas: boolean): Promise<string | number> {
