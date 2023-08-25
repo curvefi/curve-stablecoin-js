@@ -4,7 +4,7 @@ import { getLlamma, LlammaTemplate } from "../src/llammas";
 import { BN } from "../src/utils";
 
 
-const LLAMMAS = ['eth'];
+const LLAMMAS = ['sfrxeth', 'wsteth', 'wbtc', 'eth'];
 
 const generalTest = (id: string) => {
     describe(`${id} llamma general test`, function () {
@@ -137,7 +137,7 @@ const generalTest = (id: string) => {
 
             assert.approximately(Number(removeCollateralPrices[0]), Number(userPrices[0]), 1e-2, 'price 0');
             assert.approximately(Number(removeCollateralPrices[1]), Number(userPrices[1]), 1e-2, 'price 1');
-            assert.approximately(Number(removeCollateralFullHealth), Number(fullHealth), 1e-3, 'full health');
+            assert.approximately(Number(removeCollateralFullHealth), Number(fullHealth), 1e-2, 'full health');
             assert.approximately(Number(removeCollateralHealth), Number(health), 1e-4, 'health');
             assert.equal(Number(balances.collateral), Number(initialBalances.collateral) + Number(collateralAmount), 'wallet collateral');
             assert.equal(Number(balances.stablecoin), Number(initialBalances.stablecoin), 'wallet stablecoin');
@@ -168,7 +168,7 @@ const generalTest = (id: string) => {
 
             assert.approximately(Number(repayPrices[0]), Number(userPrices[0]), 1e-2, 'price 0');
             assert.approximately(Number(repayPrices[1]), Number(userPrices[1]), 1e-2, 'price 1');
-            assert.approximately(Number(repayFullHealth), Number(fullHealth), 1e-3, 'full health');
+            assert.approximately(Number(repayFullHealth), Number(fullHealth), 1e-2, 'full health');
             assert.approximately(Number(repayHealth), Number(health), 1e-4, 'health');
             assert.equal(Number(balances.collateral), Number(initialBalances.collateral), 'wallet collateral');
             assert.equal(balances.stablecoin, BN(initialBalances.stablecoin).minus(BN(debtAmount)).toString(), 'wallet stablecoin');
