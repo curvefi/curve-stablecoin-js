@@ -752,7 +752,7 @@ export class LlammaTemplate {
 
         const N = await this.userRange();
         const _collateral = _currentCollateral.add(parseUnits(collateral, this.collateralDecimals));
-        const _debt = _currentDebt.add(parseUnits(debt, this.collateralDecimals));
+        const _debt = _currentDebt.add(parseUnits(debt));
 
         const _n1 = await this._calcN1(_collateral, _debt, N);
         const _n2 = _n1.add(N - 1);
@@ -976,7 +976,7 @@ export class LlammaTemplate {
         if (_currentDebt.eq(0)) throw Error(`Loan for ${address} does not exist`);
 
         const N = await this.userRange(address);
-        const _debt = _currentDebt.sub(parseUnits(debt, this.collateralDecimals));
+        const _debt = _currentDebt.sub(parseUnits(debt));
         const _n1 = await this._calcN1(_currentCollateral, _debt, N);
         const _n2 = _n1.add(N - 1);
 
