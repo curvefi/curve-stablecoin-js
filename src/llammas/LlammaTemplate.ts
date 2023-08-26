@@ -436,7 +436,7 @@ export class LlammaTemplate {
     public async userLoss(userAddress = ""): Promise<{ deposited_collateral: string, current_collateral_estimation: string, loss: string, loss_pct: string }> {
         userAddress = _getAddress(userAddress);
         const [deposited_collateral, _current_collateral_estimation] = await Promise.all([
-            _getUserCollateral(crvusd.constants.NETWORK_NAME, this.collateral, userAddress, this.collateralDecimals),
+            _getUserCollateral(crvusd.constants.NETWORK_NAME, this.controller, userAddress, this.collateralDecimals),
             crvusd.contracts[this.address].contract.get_y_up(userAddress),
         ]);
         const current_collateral_estimation = crvusd.formatUnits(_current_collateral_estimation, this.collateralDecimals);

@@ -7,6 +7,8 @@ export const lowerCaseLlammasAddresses = (llammas: IDict<ILlamma>): IDict<ILlamm
         llamma.amm_address = llamma.amm_address.toLowerCase();
         llamma.controller_address = llamma.controller_address.toLowerCase();
         llamma.collateral_address = llamma.collateral_address.toLowerCase();
+        llamma.monetary_policy_address = llamma.monetary_policy_address.toLowerCase();
+        llamma.leverage_zap = llamma.leverage_zap.toLowerCase();
     }
 
     return llammas
