@@ -196,7 +196,11 @@ class Crvusd implements Icrvusd {
                 this.setContract(controllers[i], controllerABI);
                 const monetary_policy_address = (await this.contracts[controllers[i]].contract.monetary_policy(this.constantOptions)).toLowerCase();
                 this.setContract(monetary_policy_address, MonetaryPolicy2ABI);
-                this.constants.LLAMMAS[is_eth ? "eth" : collateral_symbol.toLowerCase()] = {
+                const _llammaId: string = is_eth ? "eth" : collateral_symbol.toLowerCase();
+                let llammaId = _llammaId
+                let j = 1;
+                while (llammaId in this.constants.LLAMMAS) llammaId = _llammaId + j++;
+                this.constants.LLAMMAS[llammaId] = {
                     amm_address: amms[i],
                     controller_address: controllers[i],
                     monetary_policy_address,
