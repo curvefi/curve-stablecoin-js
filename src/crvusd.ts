@@ -139,7 +139,7 @@ class Crvusd implements Icrvusd {
             this.setContract(llamma.amm_address, llammaABI);
             this.setContract(llamma.controller_address, controllerABI);
             const monetary_policy_address = await this.contracts[llamma.controller_address].contract.monetary_policy(this.constantOptions);
-            llamma.monetary_policy_address = monetary_policy_address;
+            llamma.monetary_policy_address = monetary_policy_address.toLowerCase();
             this.setContract(monetary_policy_address, llamma.monetary_policy_abi);
             if (llamma.collateral_address === "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee") {
                 this.setContract(this.constants.WETH, ERC20ABI);
@@ -163,9 +163,16 @@ class Crvusd implements Icrvusd {
         const N2 = await factoryContract.n_collaterals(this.constantOptions);
         let calls = [];
         for (let i = N1; i < N2; i++) {
-            calls.push(factoryMulticallContract.collaterals(i));
+            calls.push(
+                factoryMulticallContract.collaterals(i),
+                factoryMulticallContract.amms(i),
+                factoryMulticallContract.controllers(i)
+            );
         }
-        const collaterals: string[] = (await this.multicallProvider.all(calls) as string[]).map((c) => c.toLowerCase());
+        const res: string[] = (await this.multicallProvider.all(calls) as string[]).map((c) => c.toLowerCase());
+        const collaterals = res.filter((a, i) => i % 3 == 0) as string[];
+        const amms = res.filter((a, i) => i % 3 == 1) as string[];
+        const controllers = res.filter((a, i) => i % 3 == 2) as string[];
 
         if (collaterals.length > 0) {
             for (const collateral of collaterals) this.setContract(collateral, ERC20ABI);
@@ -174,9 +181,7 @@ class Crvusd implements Icrvusd {
             for (const collateral of collaterals) {
                 calls.push(
                     this.contracts[collateral].multicallContract.symbol(),
-                    this.contracts[collateral].multicallContract.decimals(),
-                    factoryMulticallContract.get_amm(collateral),
-                    factoryMulticallContract.get_controller(collateral)
+                    this.contracts[collateral].multicallContract.decimals()
                 )
             }
             const res = (await this.multicallProvider.all(calls)).map((x) => {
@@ -184,18 +189,18 @@ class Crvusd implements Icrvusd {
                 return x;
             });
 
-            for (const collateral_address of collaterals) {
-                const is_eth = collateral_address === this.constants.WETH;
-                const [collateral_symbol, collateral_decimals, amm_address, controller_address] = res.splice(0, 4) as [string, number, string, string];
-                this.setContract(amm_address, llammaABI);
-                this.setContract(controller_address, controllerABI);
-                const monetary_policy_address = await this.contracts[controller_address].contract.monetary_policy(this.constantOptions);
+            for (let i = 0; i < collaterals.length; i++) {
+                const is_eth = collaterals[i] === this.constants.WETH;
+                const [collateral_symbol, collateral_decimals] = res.splice(0, 2) as [string, number];
+                this.setContract(amms[i], llammaABI);
+                this.setContract(controllers[i], controllerABI);
+                const monetary_policy_address = (await this.contracts[controllers[i]].contract.monetary_policy(this.constantOptions)).toLowerCase();
                 this.setContract(monetary_policy_address, MonetaryPolicy2ABI);
                 this.constants.LLAMMAS[is_eth ? "eth" : collateral_symbol.toLowerCase()] = {
-                    amm_address,
-                    controller_address,
+                    amm_address: amms[i],
+                    controller_address: controllers[i],
                     monetary_policy_address,
-                    collateral_address: is_eth ? "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" : collateral_address,
+                    collateral_address: is_eth ? "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" : collaterals[i],
                     leverage_zap: "0x0000000000000000000000000000000000000000",
                     collateral_symbol: is_eth ? "ETH" : collateral_symbol,
                     collateral_decimals,
