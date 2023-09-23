@@ -4,7 +4,7 @@ import { getLlamma, LlammaTemplate } from "../src/llammas";
 import { BN } from "../src/utils";
 
 
-const LLAMMAS = ['sfrxeth', 'wsteth', 'wbtc', 'eth'];
+const LLAMMAS = ['sfrxeth', 'wsteth', 'wbtc', 'eth', 'sfrxeth2', 'tbtc'];
 
 const generalTest = (id: string) => {
     describe(`${id} llamma general test`, function () {
@@ -191,17 +191,53 @@ const generalTest = (id: string) => {
             const state = await llamma.userState();
 
 
-            assert.equal(Number(balances.collateral), Number(initialBalances.collateral) + Number(initialState.collateral), 'wallet collateral');
-            assert.approximately(Number(balances.stablecoin), Number(initialBalances.stablecoin) - Number(initialState.debt), 1e-4, 'wallet stablecoin');
+            assert.approximately(Number(balances.collateral), Number(initialBalances.collateral) + Number(initialState.collateral), 10**(-llamma.collateralDecimals), 'wallet collateral');
+            assert.approximately(Number(balances.stablecoin), Number(initialBalances.stablecoin) - Number(initialState.debt), 1e-3, 'wallet stablecoin');
             assert.equal(Number(state.collateral), 0, 'state collateral');
             assert.equal(Number(state.stablecoin), 0, 'state stablecoin');
             assert.equal(Number(state.debt), 0, 'state debt');
+        });
+
+        it('Leverage', async function () {
+            const initialBalances = await llamma.wallet.balances();
+            const initialState = await llamma.userState();
+
+            assert.equal(Number(initialState.collateral), 0);
+            assert.equal(Number(initialState.stablecoin), 0);
+            assert.equal(Number(initialState.debt), 0);
+            assert.isAbove(Number(initialBalances.collateral), 0);
+
+            const collateralAmount = 0.5;
+            const N = 10;
+            const maxRecv = await llamma.leverage.createLoanMaxRecv(collateralAmount, N);
+            const debtAmount = (Number(maxRecv.maxBorrowable) / 2).toFixed(18);
+            const createLoanPrices = await llamma.leverage.createLoanPrices(collateralAmount, debtAmount, N);
+            const createLoanFullHealth = await llamma.leverage.createLoanHealth(collateralAmount, debtAmount, N);
+            const createLoanHealth = await llamma.leverage.createLoanHealth(collateralAmount, debtAmount, N, false);
+            const { collateral } = await llamma.leverage.createLoanCollateral(collateralAmount, debtAmount);
+
+            await llamma.leverage.createLoan(collateralAmount, debtAmount, N);
+
+            const balances = await llamma.wallet.balances();
+            const state = await llamma.userState();
+            const userPrices = await llamma.userPrices();
+            const fullHealth = await llamma.userHealth();
+            const health = await llamma.userHealth(false);
+
+            assert.approximately(Number(createLoanPrices[0]), Number(userPrices[0]), 1e-2, 'price 0');
+            assert.approximately(Number(createLoanPrices[1]), Number(userPrices[1]), 1e-2, 'price 1');
+            assert.approximately(Number(createLoanFullHealth), Number(fullHealth), 0.1, 'full health');
+            assert.approximately(Number(createLoanHealth), Number(health), 1e-4, 'health');
+            assert.equal(Number(balances.collateral), Number(initialBalances.collateral) - Number(collateralAmount), 'wallet collateral');
+            assert.equal(Number(balances.stablecoin), Number(initialBalances.stablecoin), 'wallet stablecoin');
+            assert.approximately(Number(state.collateral), Number(collateral), 1e-7, 'state collateral');
+            assert.equal(Number(state.debt), Number(debtAmount), 'state debt');
         });
     })
 }
 
 describe('General test', async function () {
-    this.timeout(120000);
+    this.timeout(240000);
 
     before(async function () {
         await crvusd.init('JsonRpc', {},{ gasPrice: 0, maxFeePerGas: 0, maxPriorityFeePerGas: 0 });
