@@ -198,7 +198,7 @@ class Crvusd implements Icrvusd {
                 this.setContract(monetary_policy_address, MonetaryPolicy2ABI);
                 const _llammaId: string = is_eth ? "eth" : collateral_symbol.toLowerCase();
                 let llammaId = _llammaId
-                let j = 1;
+                let j = 2;
                 while (llammaId in this.constants.LLAMMAS) llammaId = _llammaId + j++;
                 this.constants.LLAMMAS[llammaId] = {
                     amm_address: amms[i],
