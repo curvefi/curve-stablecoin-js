@@ -676,16 +676,16 @@ import crvusd from "@curvefi/stablecoin-api";
     //                          | 
     //        collateral        |         crvUSD                 crvUSD    
     // user       -->      controller     -->     leverage_zap    -->    curve_router
-    //                          ^                                             |
-    //                          |_____________________________________________|
-    //                                         leverage_collateral
+    //                          ^                      |  ^                   |
+    //                          |______________________|  |___________________|
+    //                             leverage_collateral     leverage_collateral
     
     await crvusd.init('JsonRpc', {});
 
     const llamma = crvusd.getLlamma('wsteth');
     
     
-    await llamma.leverage.createLoanMaxRecv(0.5, 5);
+    await llamma.leverage.createLoanMaxRecv(1, 5);
     // {
     //     maxBorrowable: '16547.886068664425693035',
     //     maxCollateral: '8.789653769216069731',
@@ -840,6 +840,76 @@ import crvusd from "@curvefi/stablecoin-api";
     //
     //     '50': null
     // }
+```
+
+### Deleverage
+```ts
+(async () => {
+
+    //    Deleveraged position (fully or partially)
+    //      ^
+    //      | 
+    //      |     collateral              collateral    
+    // controller     -->     leverage_zap    -->    curve_router
+    //      ^                      |    ^                   |
+    //      |______________________|    |___________________|
+    //               crvUSD                     crvUSD
+    
+    await crvusd.init('JsonRpc', {});
+
+    const llamma = crvusd.getLlamma('wsteth');
+
+
+    await llamma.userState();
+    // {
+    //     collateral: '1.532865973844812038',
+    //     stablecoin: '0.0',
+    //     debt: '1000.0'
+    // }
+    const { stablecoins, routeIdx } = await llamma.deleverage.repayStablecoins(0.5);
+    // { stablecoins: '936.993512434228957835', routeIdx: 2 }
+    await llamma.deleverage.getRouteName(routeIdx)
+    // wstETH wrapper -> steth -> factory-tricrypto-4 (TriCRV)
+    await llamma.deleverage.repayBands(0.5)
+    // [ 344, 340 ]
+    await llamma.deleverage.repayPrices(0.5)
+    // [ '65.389368517832066821', '68.759256234814550815' ]
+    await llamma.deleverage.repayHealth(0.5)  // FULL
+    // 2962.6116372201716629
+    await llamma.deleverage.repayHealth(0.5, false)  // NOT FULL
+    // 3.3355078309621505
+    await llamma.deleverage.priceImpact(0.5)
+    // 0.0080 %
+    await llamma.deleverage.isAvailable(0.5)
+    // true
+    await llamma.deleverage.isFullRepayment(0.5)
+    // false
+
+    await llamma.deleverage.repay(0.5, 0.3)
+
+    await llamma.userState()
+    // {
+    //     collateral: '1.032865973844812038',
+    //     stablecoin: '0.0',
+    //     debt: '63.006629410173187253'
+    // }
+    await llamma.userBands()
+    // [ 344, 340 ]
+    await llamma.userPrices()
+    // [ '65.389377792947951092', '68.759265987930143609' ]
+    await llamma.userHealth()  // FULL
+    // 2962.6210276926274746
+    await llamma.userHealth(false)  // NOT FULL
+    // 3.3352898532375197
+    await llamma.userBandsBalances()
+    // {
+    //     '340': { stablecoin: '0.0', collateral: '0.20657319476896241' },
+    //     '341': { stablecoin: '0.0', collateral: '0.206573194768962407' },
+    //     '342': { stablecoin: '0.0', collateral: '0.206573194768962407' },
+    //     '343': { stablecoin: '0.0', collateral: '0.206573194768962407' },
+    //     '344': { stablecoin: '0.0', collateral: '0.206573194768962407' }
+    // }
+})()
 ```
 
 

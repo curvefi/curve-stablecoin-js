@@ -322,6 +322,33 @@ const leverageAllRangesTest = async () => {
     console.log(await llamma.leverage.createLoanPricesAllRanges(1, 14000));
 }
 
+const deleverageTest = async () => {
+    await crvusd.init('JsonRpc', {});
+
+    const llamma = crvusd.getLlamma('wsteth');
+
+    console.log(await llamma.userState());
+    const { stablecoins, routeIdx } = await llamma.deleverage.repayStablecoins(0.5);
+    console.log({ stablecoins, routeIdx });
+    console.log(await llamma.deleverage.getRouteName(routeIdx));
+    console.log(await llamma.deleverage.repayBands(0.5));
+    console.log(await llamma.deleverage.repayPrices(0.5));
+    console.log(await llamma.deleverage.repayHealth(0.5));  // FULL
+    console.log(await llamma.deleverage.repayHealth(0.5, false));  // NOT FULL
+    console.log(await llamma.deleverage.priceImpact(0.5));
+    console.log(await llamma.deleverage.isAvailable(0.5));
+    console.log(await llamma.deleverage.isFullRepayment(0.5));
+
+    console.log(await llamma.deleverage.repay(0.5, 0.3));
+
+    console.log(await llamma.userState());
+    console.log(await llamma.userBands());
+    console.log(await llamma.userPrices());
+    console.log(await llamma.userHealth());  // FULL
+    console.log(await llamma.userHealth(false));  // NOT FULL
+    console.log(await llamma.userBandsBalances());
+}
+
 (async () => {
     console.log("\n--- generalMethodsTest ---\n")
     await generalMethodsTest();
@@ -345,4 +372,6 @@ const leverageAllRangesTest = async () => {
     await leverageTest();
     console.log("\n--- leverageAllRangesTest ---\n")
     await leverageAllRangesTest();
+    console.log("\n--- deleverageTest ---\n")
+    await deleverageTest();
 })()
