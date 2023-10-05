@@ -1412,10 +1412,8 @@ export class LlammaTemplate {
         const _userCollateral = parseUnits(userCollateral, this.collateralDecimals);
         const _debt = parseUnits(debt);
         const calls = [];
-        for (let N = this.minBands; N <= this.maxBands; N++) {
-            for (let i = 0; i < 5; i++) {
-                calls.push(crvusd.contracts[this.leverageZap].multicallContract.get_collateral(_debt, i));
-            }
+        for (let i = 0; i < 5; i++) {
+            calls.push(crvusd.contracts[this.leverageZap].multicallContract.get_collateral(_debt, i));
         }
         const _leverageCollateral: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
         const routeIdx = this._getBestIdx(_leverageCollateral);
