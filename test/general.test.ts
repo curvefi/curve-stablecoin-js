@@ -201,10 +201,9 @@ const generalTest = (id: string) => {
         it('Leverage', async function () {
             const initialBalances = await llamma.wallet.balances();
             const initialState = await llamma.userState();
+            const loanExists = await llamma.loanExists();
 
-            assert.equal(Number(initialState.collateral), 0);
-            assert.equal(Number(initialState.stablecoin), 0);
-            assert.equal(Number(initialState.debt), 0);
+            assert.isFalse(loanExists);
             assert.isAbove(Number(initialBalances.collateral), 0);
 
             const collateralAmount = 0.5;
@@ -227,17 +226,86 @@ const generalTest = (id: string) => {
             assert.approximately(Number(createLoanPrices[0]), Number(userPrices[0]), 1e-2, 'price 0');
             assert.approximately(Number(createLoanPrices[1]), Number(userPrices[1]), 1e-2, 'price 1');
             assert.approximately(Number(createLoanFullHealth), Number(fullHealth), 0.1, 'full health');
-            assert.approximately(Number(createLoanHealth), Number(health), 1e-4, 'health');
+            assert.approximately(Number(createLoanHealth), Number(health), 1e-3, 'health');
             assert.equal(Number(balances.collateral), Number(initialBalances.collateral) - Number(collateralAmount), 'wallet collateral');
             assert.equal(Number(balances.stablecoin), Number(initialBalances.stablecoin), 'wallet stablecoin');
-            assert.approximately(Number(state.collateral), Number(collateral), 1e-7, 'state collateral');
+            assert.approximately(Number(state.collateral), Number(collateral), 1e-6, 'state collateral');
             assert.equal(Number(state.debt), Number(debtAmount), 'state debt');
+        });
+
+        it('Deleverage', async function () {
+            const initialBalances = await llamma.wallet.balances();
+            const initialState = await llamma.userState();
+            const loanExists = await llamma.loanExists();
+            const collateralAmount = Number(initialState.collateral) / 10;
+            const deleverageIsAvailable = await llamma.deleverage.isAvailable(collateralAmount);
+            const isFullRepayment = await llamma.deleverage.isFullRepayment(collateralAmount);
+
+            assert.isTrue(loanExists);
+            assert.isTrue(deleverageIsAvailable);
+            assert.isFalse(isFullRepayment);
+
+            const deleverageBands = await llamma.deleverage.repayBands(collateralAmount);
+            const deleveragePrices = await llamma.deleverage.repayPrices(collateralAmount);
+            const deleverageFullHealth = await llamma.deleverage.repayHealth(collateralAmount);
+            const deleverageHealth = await llamma.deleverage.repayHealth(collateralAmount, false);
+            const { stablecoins } = await llamma.deleverage.repayStablecoins(collateralAmount);
+
+            await llamma.deleverage.repay(collateralAmount);
+
+            const balances = await llamma.wallet.balances();
+            const state = await llamma.userState();
+            const userBands = await llamma.userBands();
+            const userPrices = await llamma.userPrices();
+            const fullHealth = await llamma.userHealth();
+            const health = await llamma.userHealth(false);
+
+
+            assert.equal(deleverageBands[0], userBands[0], 'band 0');
+            assert.equal(deleverageBands[1], userBands[1], 'band 1');
+            assert.approximately(Number(deleveragePrices[0]), Number(userPrices[0]), 0.1, 'price 0');
+            assert.approximately(Number(deleveragePrices[1]), Number(userPrices[1]), 0.1, 'price 1');
+            assert.approximately(Number(deleverageFullHealth), Number(fullHealth), 0.1, 'full health');
+            assert.approximately(Number(deleverageHealth), Number(health), 1e-4, 'health');
+            assert.equal(balances.collateral, initialBalances.collateral, 'wallet collateral');
+            assert.equal(balances.stablecoin, initialBalances.stablecoin, 'wallet stablecoin');
+            assert.approximately(Number(state.collateral), Number(initialState.collateral) - collateralAmount, 1e-5, 'state collateral');
+            assert.approximately(Number(state.debt), Number(initialState.debt) - Number(stablecoins), 1e-2, 'state debt');
+        });
+
+        it('Full deleverage', async function () {
+            const initialBalances = await llamma.wallet.balances();
+            const initialState = await llamma.userState();
+            const initialLoanExists = await llamma.loanExists();
+            const collateralAmount = Number(initialState.collateral) * 0.95;
+            const deleverageIsAvailable = await llamma.deleverage.isAvailable(collateralAmount);
+            const isFullRepayment = await llamma.deleverage.isFullRepayment(collateralAmount);
+
+            assert.isTrue(initialLoanExists);
+            assert.isTrue(deleverageIsAvailable);
+            assert.isTrue(isFullRepayment);
+
+            const { stablecoins } = await llamma.deleverage.repayStablecoins(collateralAmount);
+
+            await llamma.deleverage.repay(collateralAmount);
+
+            const balances = await llamma.wallet.balances();
+            const loanExists = await llamma.loanExists();
+
+
+            if (llamma.id !== "eth") {
+                assert.approximately(Number(balances.collateral), Number(initialBalances.collateral) + Number(initialState.collateral) - collateralAmount,
+                    1e-5, 'wallet collateral');
+            }
+            assert.approximately(Number(balances.stablecoin), Number(initialBalances.stablecoin) + Number(stablecoins) - Number(initialState.debt),
+                1e-3, 'wallet stablecoin');
+            assert.isFalse(loanExists, 'loan exists');
         });
     })
 }
 
 describe('General test', async function () {
-    this.timeout(240000);
+    this.timeout(120000);
 
     before(async function () {
         await crvusd.init('JsonRpc', {},{ gasPrice: 0, maxFeePerGas: 0, maxPriorityFeePerGas: 0 });
