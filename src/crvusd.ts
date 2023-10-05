@@ -9,6 +9,7 @@ import controllerABI from "./constants/abis/controller.json";
 import llammaABI from "./constants/abis/llamma.json";
 import HealthCalculatorZapABI from "./constants/abis/HealthCalculatorZap.json";
 import LeverageZapABI from "./constants/abis/LeverageZap.json";
+import DeleverageZapABI from "./constants/abis/DeleverageZap.json";
 import PegKeeper from "./constants/abis/PegKeeper.json";
 import { LLAMMAS } from "./constants/llammas";
 import { COINS } from "./constants/coins";
@@ -147,6 +148,7 @@ class Crvusd implements Icrvusd {
                 this.setContract(llamma.collateral_address, ERC20ABI);
             }
             this.setContract(llamma.leverage_zap, LeverageZapABI);
+            this.setContract(llamma.deleverage_zap, DeleverageZapABI);
             if (llamma.health_calculator_zap) this.setContract(llamma.health_calculator_zap, HealthCalculatorZapABI);
         }
         for (const pegKeeper of this.constants.PEG_KEEPERS) {
@@ -206,6 +208,7 @@ class Crvusd implements Icrvusd {
                     monetary_policy_address,
                     collateral_address: is_eth ? "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee" : collaterals[i],
                     leverage_zap: "0x0000000000000000000000000000000000000000",
+                    deleverage_zap: "0x0000000000000000000000000000000000000000",
                     collateral_symbol: is_eth ? "ETH" : collateral_symbol,
                     collateral_decimals,
                     min_bands: 4,

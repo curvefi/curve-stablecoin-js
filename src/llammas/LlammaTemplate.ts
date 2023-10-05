@@ -28,6 +28,7 @@ export class LlammaTemplate {
     monetaryPolicy: string;
     collateral: string;
     leverageZap: string;
+    deleverageZap: string;
     healthCalculator: string | undefined;
     collateralSymbol: string;
     collateralDecimals: number;
@@ -100,6 +101,20 @@ export class LlammaTemplate {
             createLoan: (collateral: number | string, debt: number | string, range: number, slippage?: number) => Promise<number>,
         }
     }
+    deleverage: {
+        repayStablecoins: (collateral: number | string) => Promise<{ stablecoins: string, routeIdx: number }>,
+        getRouteName: (routeIdx: number) => Promise<string>,
+        isAvailable: (deleverageCollateral: number | string, address?: string) => Promise<boolean>,
+        isFullRepayment: (deleverageCollateral: number | string, address?: string) => Promise<boolean>,
+        repayBands: (collateral: number | string, address?: string) => Promise<[number, number]>,
+        repayPrices: (collateral: number | string, address?: string) => Promise<string[]>,
+        repayHealth: (collateral: number | string, full?: boolean, address?: string) => Promise<string>,
+        repay: (collateral: number | string, slippage?: number) => Promise<string>,
+        priceImpact: (collateral: number | string) => Promise<string>,
+        estimateGas: {
+            repay: (collateral: number | string, slippage?: number) => Promise<number>,
+        }
+    }
 
     constructor(id: string) {
         const llammaData = crvusd.constants.LLAMMAS[id];
@@ -110,6 +125,7 @@ export class LlammaTemplate {
         this.monetaryPolicy = llammaData.monetary_policy_address;
         this.collateral = llammaData.collateral_address;
         this.leverageZap = llammaData.leverage_zap;
+        this.deleverageZap = llammaData.deleverage_zap;
         this.healthCalculator = llammaData.health_calculator_zap;
         this.collateralSymbol = llammaData.collateral_symbol;
         this.collateralDecimals = llammaData.collateral_decimals;
@@ -174,6 +190,20 @@ export class LlammaTemplate {
             estimateGas: {
                 createLoanApprove: this.createLoanApproveEstimateGas.bind(this),
                 createLoan: this.leverageCreateLoanEstimateGas.bind(this),
+            },
+        }
+        this.deleverage = {
+            repayStablecoins: this.deleverageRepayStablecoins.bind(this),
+            getRouteName: this.deleverageGetRouteName.bind(this),
+            isAvailable: this.deleverageIsAvailable.bind(this),
+            isFullRepayment: this.deleverageIsFullRepayment.bind(this),
+            repayBands: this.deleverageRepayBands.bind(this),
+            repayPrices: this.deleverageRepayPrices.bind(this),
+            repayHealth: this.deleverageRepayHealth.bind(this),
+            priceImpact: this.deleveragePriceImpact.bind(this),
+            repay: this.deleverageRepay.bind(this),
+            estimateGas: {
+                repay: this.deleverageRepayEstimateGas.bind(this),
             },
         }
     }
@@ -1589,5 +1619,163 @@ export class LlammaTemplate {
         this._checkLeverageZap();
         await this.createLoanApprove(collateral);
         return await this._leverageCreateLoan(collateral, debt, range, slippage, false) as string;
+    }
+
+    // ---------------- DELEVERAGE REPAY ----------------
+
+    private _checkDeleverageZap(): void {
+        if (this.deleverageZap === "0x0000000000000000000000000000000000000000") throw Error(`There is no deleverage for ${this.id} market`)
+    }
+
+    private deleverageRepayStablecoins = memoize( async (collateral: number | string): Promise<{ stablecoins: string, routeIdx: number }> => {
+        this._checkDeleverageZap();
+        const _collateral = parseUnits(collateral, this.collateralDecimals);
+        const calls = [];
+        for (let i = 0; i < 5; i++) {
+            calls.push(crvusd.contracts[this.deleverageZap].multicallContract.get_stablecoins(_collateral, i));
+        }
+        const _stablecoins_arr: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
+        const routeIdx = this._getBestIdx(_stablecoins_arr);
+        const stablecoins = crvusd.formatUnits(_stablecoins_arr[routeIdx]);
+
+        return { stablecoins, routeIdx };
+    },
+    {
+        promise: true,
+        maxAge: 5 * 60 * 1000, // 5m
+    });
+
+    private async deleverageGetRouteName(routeIdx: number): Promise<string> {
+        this._checkDeleverageZap();
+        return await crvusd.contracts[this.deleverageZap].contract.route_names(routeIdx);
+    }
+
+    private async deleverageIsFullRepayment(deleverageCollateral: number | string, address = ""): Promise<boolean> {
+        address = _getAddress(address);
+        const { stablecoin, debt } = await this.userState(address);
+        const { stablecoins: deleverageStablecoins } = await this.deleverageRepayStablecoins(deleverageCollateral);
+
+        return BN(stablecoin).plus(deleverageStablecoins).gt(debt);
+    }
+
+    private async deleverageIsAvailable(deleverageCollateral: number | string, address = ""): Promise<boolean> {
+        // 0. const { collateral, stablecoin, debt } = await this.userState(address);
+        // 1. maxCollateral for deleverage is collateral from line above (0).
+        // 2. If user is underwater (stablecoin > 0), only full repayment is available:
+        //    await this.deleverageRepayStablecoins(deleverageCollateral) + stablecoin > debt
+
+        // There is no deleverage zap
+        if (this.deleverageZap === "0x0000000000000000000000000000000000000000") return false;
+
+        address = _getAddress(address);
+        const { collateral, stablecoin, debt } = await this.userState(address);
+        // Loan does not exist
+        if (BN(debt).eq(0)) return false;
+        // Can't spend more than user has
+        if (BN(deleverageCollateral).gt(collateral)) return false;
+        // Only full repayment and closing the position is available if user is underwater+
+        if (BN(stablecoin).gt(0)) return await this.deleverageIsFullRepayment(deleverageCollateral, address);
+
+        return true;
+    }
+
+    private _deleverageRepayBands = memoize( async (collateral: number | string, address: string): Promise<[ethers.BigNumber, ethers.BigNumber]> => {
+        address = _getAddress(address);
+        if (!(await this.deleverageIsAvailable(collateral, address))) return [parseUnits(0, 0), parseUnits(0, 0)];
+        const { routeIdx } = await this.deleverageRepayStablecoins(collateral);
+        const { _debt: _currentDebt } = await this._userState(address);
+        if (_currentDebt.eq(0)) throw Error(`Loan for ${address} does not exist`);
+
+        const N = await this.userRange(address);
+        const _collateral = parseUnits(collateral, this.collateralDecimals);
+        let _n1 = parseUnits(0, 0);
+        let _n2 = parseUnits(0, 0);
+        try {
+            _n1 = await crvusd.contracts[this.deleverageZap].contract.calculate_debt_n1(_collateral, routeIdx, address);
+            _n2 = _n1.add(N - 1);
+        } catch (e) {
+            console.log("Full repayment");
+        }
+
+        return [_n2, _n1];
+    },
+    {
+        promise: true,
+        maxAge: 5 * 60 * 1000, // 5m
+    });
+
+    private async deleverageRepayBands(collateral: number | string, address = ""): Promise<[number, number]> {
+        this._checkDeleverageZap();
+        const [_n2, _n1] = await this._deleverageRepayBands(collateral, address);
+
+        return [_n2.toNumber(), _n1.toNumber()];
+    }
+
+    private async deleverageRepayPrices(debt: number | string, address = ""): Promise<string[]> {
+        this._checkDeleverageZap();
+        const [_n2, _n1] = await this._deleverageRepayBands(debt, address);
+
+        return await this._getPrices(_n2, _n1);
+    }
+
+    private async deleverageRepayHealth(collateral: number | string, full = true, address = ""): Promise<string> {
+        this._checkDeleverageZap();
+        address = _getAddress(address);
+        if (!(await this.deleverageIsAvailable(collateral, address))) return "0.0";
+        const { _stablecoin, _debt } = await this._userState(address);
+        const { stablecoins: deleverageStablecoins } = await this.deleverageRepayStablecoins(collateral);
+        const _d_collateral = parseUnits(collateral, this.collateralDecimals).mul(-1);
+        const _d_debt = parseUnits(deleverageStablecoins).add(_stablecoin).mul(-1);
+        const N = await this.userRange(address);
+
+        if (_debt.add(_d_debt).lt(0)) return "0.0";
+        const contract = crvusd.contracts[this.healthCalculator ?? this.controller].contract;
+        let _health = await contract.health_calculator(address, _d_collateral, _d_debt, full, N, crvusd.constantOptions) as ethers.BigNumber;
+        _health = _health.mul(100);
+
+        return ethers.utils.formatUnits(_health);
+    }
+
+    public async deleveragePriceImpact(collateral: number | string): Promise<string> {
+        const x_BN = BN(collateral);
+        const small_x_BN = BN(0.001);
+        const { stablecoins, routeIdx } = await this.deleverageRepayStablecoins(collateral);
+        const _y = parseUnits(stablecoins);
+        const _small_y = await crvusd.contracts[this.deleverageZap].contract.get_stablecoins(fromBN(small_x_BN, this.collateralDecimals), routeIdx);
+        const y_BN = toBN(_y);
+        const small_y_BN = toBN(_small_y);
+        const rateBN = y_BN.div(x_BN);
+        const smallRateBN = small_y_BN.div(small_x_BN);
+        if (rateBN.gt(smallRateBN)) return "0.0";
+
+        return BN(1).minus(rateBN.div(smallRateBN)).times(100).toFixed(4);
+    }
+
+    private async _deleverageRepay(collateral: number | string, slippage: number, estimateGas: boolean): Promise<string | number> {
+        const { debt: currentDebt } = await this.userState(crvusd.signerAddress);
+        if (Number(currentDebt) === 0) throw Error(`Loan for ${crvusd.signerAddress} does not exist`);
+
+        const { stablecoins, routeIdx } = await this.deleverageRepayStablecoins(collateral);
+        const _collateral = parseUnits(collateral, this.collateralDecimals);
+        const _debt = parseUnits(stablecoins);
+        const minRecvBN = toBN(_debt).times(100 - slippage).div(100);
+        const _minRecv = fromBN(minRecvBN);
+        const contract = crvusd.contracts[this.controller].contract;
+        const gas = await contract.estimateGas.repay_extended(this.deleverageZap, [routeIdx, _collateral, _minRecv], crvusd.constantOptions);
+        if (estimateGas) return gas.toNumber();
+
+        await crvusd.updateFeeData();
+        const gasLimit = gas.mul(130).div(100);
+        return (await contract.repay_extended(this.deleverageZap, [routeIdx, _collateral, _minRecv], { ...crvusd.options, gasLimit })).hash
+    }
+
+    private async deleverageRepayEstimateGas(collateral: number | string, slippage = 0.5): Promise<number> {
+        this._checkDeleverageZap();
+        return await this._deleverageRepay(collateral, slippage, true) as number;
+    }
+
+    private async deleverageRepay(collateral: number | string, slippage = 0.5): Promise<string> {
+        this._checkDeleverageZap();
+        return await this._deleverageRepay(collateral, slippage, false) as string;
     }
 }
