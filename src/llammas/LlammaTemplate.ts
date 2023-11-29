@@ -1218,12 +1218,12 @@ export class LlammaTemplate {
         return (await contract.exchange(i, j, _amount, _minRecvAmount, { ...crvusd.options, gasLimit })).hash
     }
 
-    public async swapEstimateGas(i: number, j: number, amount: number | string, slippage = 0.5): Promise<number> {
+    public async swapEstimateGas(i: number, j: number, amount: number | string, slippage = 0.1): Promise<number> {
         if (!(await this.swapIsApproved(i, amount))) throw Error("Approval is needed for gas estimation");
         return await this._swap(i, j, amount, slippage, true) as number;
     }
 
-    public async swap(i: number, j: number, amount: number | string, slippage = 0.5): Promise<string> {
+    public async swap(i: number, j: number, amount: number | string, slippage = 0.1): Promise<string> {
         await this.swapApprove(i, amount);
         return await this._swap(i, j, amount, slippage, false) as string;
     }
@@ -1270,12 +1270,12 @@ export class LlammaTemplate {
         return (await contract.liquidate(address, _minAmount, isEth(this.collateral), { ...crvusd.options, gasLimit })).hash
     }
 
-    public async liquidateEstimateGas(address: string, slippage = 0.5): Promise<number> {
+    public async liquidateEstimateGas(address: string, slippage = 0.1): Promise<number> {
         if (!(await this.liquidateIsApproved(address))) throw Error("Approval is needed for gas estimation");
         return await this._liquidate(address, slippage, true) as number;
     }
 
-    public async liquidate(address: string, slippage = 0.5): Promise<string> {
+    public async liquidate(address: string, slippage = 0.1): Promise<string> {
         await this.liquidateApprove(address);
         return await this._liquidate(address, slippage, false) as string;
     }
@@ -1294,12 +1294,12 @@ export class LlammaTemplate {
         return await this.liquidateApprove()
     }
 
-    public async selfLiquidateEstimateGas(slippage = 0.5): Promise<number> {
+    public async selfLiquidateEstimateGas(slippage = 0.1): Promise<number> {
         if (!(await this.selfLiquidateIsApproved())) throw Error("Approval is needed for gas estimation");
         return await this._liquidate(crvusd.signerAddress, slippage, true) as number;
     }
 
-    public async selfLiquidate(slippage = 0.5): Promise<string> {
+    public async selfLiquidate(slippage = 0.1): Promise<string> {
         await this.selfLiquidateApprove();
         return await this._liquidate(crvusd.signerAddress, slippage, false) as string;
     }
@@ -1607,13 +1607,13 @@ export class LlammaTemplate {
         )).hash
     }
 
-    private async leverageCreateLoanEstimateGas(collateral: number | string, debt: number | string, range: number, slippage = 0.5): Promise<number> {
+    private async leverageCreateLoanEstimateGas(collateral: number | string, debt: number | string, range: number, slippage = 0.1): Promise<number> {
         this._checkLeverageZap();
         if (!(await this.createLoanIsApproved(collateral))) throw Error("Approval is needed for gas estimation");
         return await this._leverageCreateLoan(collateral, debt,  range, slippage,  true) as number;
     }
 
-    private async leverageCreateLoan(collateral: number | string, debt: number | string, range: number, slippage = 0.5): Promise<string> {
+    private async leverageCreateLoan(collateral: number | string, debt: number | string, range: number, slippage = 0.1): Promise<string> {
         this._checkLeverageZap();
         await this.createLoanApprove(collateral);
         return await this._leverageCreateLoan(collateral, debt, range, slippage, false) as string;
@@ -1767,12 +1767,12 @@ export class LlammaTemplate {
         return (await contract.repay_extended(this.deleverageZap, [routeIdx, _collateral, _minRecv], { ...crvusd.options, gasLimit })).hash
     }
 
-    private async deleverageRepayEstimateGas(collateral: number | string, slippage = 0.5): Promise<number> {
+    private async deleverageRepayEstimateGas(collateral: number | string, slippage = 0.1): Promise<number> {
         this._checkDeleverageZap();
         return await this._deleverageRepay(collateral, slippage, true) as number;
     }
 
-    private async deleverageRepay(collateral: number | string, slippage = 0.5): Promise<string> {
+    private async deleverageRepay(collateral: number | string, slippage = 0.1): Promise<string> {
         this._checkDeleverageZap();
         return await this._deleverageRepay(collateral, slippage, false) as string;
     }
