@@ -164,7 +164,11 @@ import crvusd from "@curvefi/stablecoin-api";
     // 1257.43
 
     await crvusd.totalSupply();  // sum(llammasSupply) + sum(pegKeepersDebt)
-    // 1415.12 
+    // {
+    //     total: '1415.12',
+    //     minted: '1415.12',
+    //     pegKeepersDebt: '0'
+    // }
 })()
 ```
 
