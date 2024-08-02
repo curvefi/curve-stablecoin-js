@@ -58,10 +58,10 @@ class Crvusd implements Icrvusd {
             NETWORK_NAME: "ethereum",
             FACTORY: "0xC9332fdCB1C491Dcc683bAe86Fe3cb70360738BC".toLowerCase(),
             PEG_KEEPERS: [
-                '0xaA346781dDD7009caa644A4980f044C50cD2ae22'.toLowerCase(),
-                '0xE7cd2b4EB1d98CD6a4A48B6071D46401Ac7DC5C8'.toLowerCase(),
-                '0x6B765d07cf966c745B340AdCa67749fE75B5c345'.toLowerCase(),
-                '0x1ef89Ed0eDd93D1EC09E4c07373f69C49f4dcCae'.toLowerCase(),
+                '0x9201da0d97caaaff53f01b2fb56767c7072de340'.toLowerCase(),
+                '0xfb726f57d251ab5c731e5c64ed4f5f94351ef9f3'.toLowerCase(),
+                '0x3fa20eaa107de08b38a8734063d605d5842fe09c'.toLowerCase(),
+                '0x0a05ff644878b908ef8eb29542aa88c07d9797d3'.toLowerCase(),
             ],
             WETH: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".toLowerCase(),
         };
