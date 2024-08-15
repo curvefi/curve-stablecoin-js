@@ -4,6 +4,7 @@ import BigNumber from 'bignumber.js';
 import { IDict } from "./interfaces";
 import { _getPoolsFromApi } from "./external-api";
 import { crvusd } from "./crvusd";
+import memoize from "memoizee";
 
 export const MAX_ALLOWANCE = ethers.BigNumber.from(2).pow(ethers.BigNumber.from(256)).sub(ethers.BigNumber.from(1));
 export const MAX_ACTIVE_BAND = ethers.BigNumber.from(2).pow(ethers.BigNumber.from(255)).sub(ethers.BigNumber.from(1));
@@ -289,3 +290,47 @@ export const totalSupply = async (): Promise<{ total: string, minted: string, pe
 
     return { total: mintedBN.plus(pegKeepersBN).toString(), minted: mintedBN.toString(), pegKeepersDebt: pegKeepersBN.toString() };
 }
+
+export const getLsdApy = memoize(async(name: 'wstETH' | 'sfrxETH'): Promise<{
+        apy: number,
+        baseApy: number,
+        apyMean30d: number,
+    }> => {
+    const response = await axios.get('https://yields.llama.fi/pools');
+    const {data} = response.data;
+
+    const params = {
+        'wstETH': {
+            project: 'lido',
+            symbol: 'STETH',
+        },
+        'sfrxETH': {
+            project: 'frax-ether',
+            symbol: 'SFRXETH',
+        },
+    }
+
+    const result = data.find(({
+        chain,
+        project,
+        symbol,
+    }: any) => (
+        chain === 'Ethereum' &&
+        project === params[name].project &&
+        symbol === params[name].symbol
+    ));
+
+    if(result) {
+        return {
+            apy: result.apy,
+            baseApy: result.apyBase,
+            apyMean30d: result.apyMean30d,
+        };
+    }
+
+    throw new Error('Pool not found')
+},
+{
+    promise: true,
+    maxAge: 60 * 1000, // 1m
+});
