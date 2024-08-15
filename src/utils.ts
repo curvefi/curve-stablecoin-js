@@ -292,8 +292,9 @@ export const totalSupply = async (): Promise<{ total: string, minted: string, pe
 }
 
 export const getLsdApy = memoize(async(name: 'wstETH' | 'sfrxETH'): Promise<{
-    apy: number,
-    baseApy: number,
+        apy: number,
+        baseApy: number,
+        apyMean30d: number,
     }> => {
     const response = await axios.get('https://yields.llama.fi/pools');
     const {data} = response.data;
@@ -323,6 +324,7 @@ export const getLsdApy = memoize(async(name: 'wstETH' | 'sfrxETH'): Promise<{
         return {
             apy: result.apy,
             baseApy: result.apyBase,
+            apyMean30d: result.apyMean30d,
         };
     }
 
