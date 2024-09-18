@@ -68,8 +68,8 @@ class Crvusd implements Icrvusd {
     }
 
     async init(
-        providerType: 'JsonRpc' | 'Web3' | 'Infura' | 'Alchemy',
-        providerSettings: { url?: string, privateKey?: string } | { externalProvider: ethers.providers.ExternalProvider } | { network?: Networkish, apiKey?: string },
+        providerType?: 'JsonRpc' | 'Web3' | 'Infura' | 'Alchemy',
+        providerSettings?: { url?: string, privateKey?: string } | { externalProvider: ethers.providers.ExternalProvider } | { network?: Networkish, apiKey?: string },
         options: { gasPrice?: number, maxFeePerGas?: number, maxPriorityFeePerGas?: number, chainId?: number } = {} // gasPrice in Gwei
     ): Promise<void> {
         // @ts-ignore
@@ -84,6 +84,8 @@ class Crvusd implements Icrvusd {
         this.feeData = {}
         this.constantOptions = { gasLimit: 12000000 }
         this.options = {};
+
+        if (!providerType) return;
 
         // JsonRpc provider
         if (providerType.toLowerCase() === 'JsonRpc'.toLowerCase()) {
