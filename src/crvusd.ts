@@ -18,12 +18,12 @@ import { extractDecimals } from "./constants/utils";
 
 class Crvusd implements Icrvusd {
     address: string;
-    provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider;
-    multicallProvider: MulticallProvider;
+    provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider | null;
+    multicallProvider: MulticallProvider | null;
     signer: ethers.Signer | null;
     signerAddress: string;
     chainId: number;
-    contracts: { [index: string]: { contract: Contract, multicallContract: MulticallContract } };
+    contracts: { [index: string]: { contract: Contract, multicallContract: MulticallContract } } | null;
     feeData: { gasPrice?: number, maxFeePerGas?: number, maxPriorityFeePerGas?: number };
     constantOptions: { gasLimit: number };
     options: { gasPrice?: number | ethers.BigNumber, maxFeePerGas?: number | ethers.BigNumber, maxPriorityFeePerGas?: number | ethers.BigNumber };
@@ -39,15 +39,12 @@ class Crvusd implements Icrvusd {
 
     constructor() {
         this.address = COINS.crvusd.toLowerCase();
-        // @ts-ignore
         this.provider = null;
-        // @ts-ignore
         this.signer = null;
         this.signerAddress = "";
         this.chainId = 0;
-        // @ts-ignore
         this.multicallProvider = null;
-        this.contracts = {};
+        this.contracts = null;
         this.feeData = {}
         this.constantOptions = { gasLimit: 12000000 }
         this.options = {};
@@ -68,22 +65,22 @@ class Crvusd implements Icrvusd {
     }
 
     async init(
-        providerType: 'JsonRpc' | 'Web3' | 'Infura' | 'Alchemy',
-        providerSettings: { url?: string, privateKey?: string } | { externalProvider: ethers.providers.ExternalProvider } | { network?: Networkish, apiKey?: string },
+        providerType?: 'JsonRpc' | 'Web3' | 'Infura' | 'Alchemy',
+        providerSettings?: { url?: string, privateKey?: string } | { externalProvider: ethers.providers.ExternalProvider } | { network?: Networkish, apiKey?: string },
         options: { gasPrice?: number, maxFeePerGas?: number, maxPriorityFeePerGas?: number, chainId?: number } = {} // gasPrice in Gwei
     ): Promise<void> {
-        // @ts-ignore
         this.provider = null;
-        // @ts-ignore
         this.signer = null;
         this.signerAddress = "";
         this.chainId = 0;
         // @ts-ignore
         this.multicallProvider = null;
-        this.contracts = {};
         this.feeData = {}
         this.constantOptions = { gasLimit: 12000000 }
         this.options = {};
+
+        if (!providerType) return;
+        this.contracts = {};
 
         // JsonRpc provider
         if (providerType.toLowerCase() === 'JsonRpc'.toLowerCase()) {
@@ -226,6 +223,7 @@ class Crvusd implements Icrvusd {
     }
 
     setContract(address: string, abi: any): void {
+        if (!this.provider || !this.contracts) throw Error('Cannot set contract without provider')
         this.contracts[address] = {
             contract: new Contract(address, abi, this.signer || this.provider),
             multicallContract: new MulticallContract(address, abi),
@@ -247,6 +245,7 @@ class Crvusd implements Icrvusd {
     }
 
     async updateFeeData(): Promise<void> {
+        if (!this.provider) throw Error('Cannot update fee data without provider')
         const feeData = await this.provider.getFeeData();
         if (feeData.maxFeePerGas === null || feeData.maxPriorityFeePerGas === null) {
             delete this.options.maxFeePerGas;

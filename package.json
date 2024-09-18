@@ -14,7 +14,9 @@
     "url": "https://github.com/curvefi/curve-stablecoin-js/issues"
   },
   "scripts": {
-    "build": "rm -rf lib && tsc -p tsconfig.build.json"
+    "build": "rm -rf lib && tsc -p tsconfig.build.json",
+    "typescript": "tsc",
+    "lint": "eslint src --ext .ts"
   },
   "devDependencies": {
     "@types/chai": "^4.2.18",

@@ -85,6 +85,8 @@ export const _getCoinDecimals = (coinAddresses: string[]): number[] => {
 // --- BALANCES ---
 
 export const _getBalances = async (coinAddresses: string[], address = ""): Promise<ethers.BigNumber[]> => {
+    if (!crvusd.provider || !crvusd.contracts || !crvusd.multicallProvider) throw Error('Cannot get balances without provider')
+
     address = _getAddress(address);
     const _coinAddresses = [...coinAddresses];
     const ethIndex = getEthIndex(_coinAddresses);
@@ -117,6 +119,7 @@ export const getBalances = async (coins: string[], address = ""): Promise<string
 // --- ALLOWANCE ---
 
 export const _getAllowance = async (coins: string[], address: string, spender: string): Promise<ethers.BigNumber[]> => {
+    if (!crvusd.contracts || !crvusd.multicallProvider) throw Error('Cannot get allowance without provider')
     const _coins = [...coins]
     const ethIndex = getEthIndex(_coins);
     if (ethIndex !== -1) {
@@ -128,7 +131,7 @@ export const _getAllowance = async (coins: string[], address: string, spender: s
     if (_coins.length === 1) {
         allowance = [await crvusd.contracts[_coins[0]].contract.allowance(address, spender, crvusd.constantOptions)];
     } else {
-        const contractCalls = _coins.map((coinAddr) => crvusd.contracts[coinAddr].multicallContract.allowance(address, spender));
+        const contractCalls = _coins.map((coinAddr) => crvusd.contracts![coinAddr].multicallContract.allowance(address, spender));
         allowance = await crvusd.multicallProvider.all(contractCalls);
     }
 
@@ -160,6 +163,8 @@ export const hasAllowance = async (coins: string[], amounts: (number | string)[]
 }
 
 export const _ensureAllowance = async (coins: string[], amounts: ethers.BigNumber[], spender: string): Promise<string[]> => {
+    if (!crvusd.contracts) throw Error('Cannot ensure allowance without provider')
+
     const address = crvusd.signerAddress;
     const allowance: ethers.BigNumber[] = await _getAllowance(coins, address, spender);
 
@@ -182,6 +187,8 @@ export const _ensureAllowance = async (coins: string[], amounts: ethers.BigNumbe
 
 // coins can be either addresses or symbols
 export const ensureAllowanceEstimateGas = async (coins: string[], amounts: (number | string)[], spender: string): Promise<number> => {
+    if (!crvusd.contracts) throw Error('Cannot ensure allowance without provider')
+
     const coinAddresses = _getCoinAddresses(coins);
     const decimals = _getCoinDecimals(coinAddresses);
     const _amounts = amounts.map((a, i) => parseUnits(a, decimals[i]));
@@ -267,6 +274,8 @@ export const getUsdRate = async (coin: string): Promise<number> => {
 }
 
 export const totalSupply = async (): Promise<{ total: string, minted: string, pegKeepersDebt: string }> => {
+    if (!crvusd.contracts || !crvusd.multicallProvider) throw Error('Cannot get total supply without provider')
+
     const calls = [];
     for (const llammaId of crvusd.getLlammaList()) {
         const controllerAddress = crvusd.constants.LLAMMAS[llammaId].controller_address;
