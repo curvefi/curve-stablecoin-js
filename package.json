@@ -15,6 +15,7 @@
   },
   "scripts": {
     "build": "rm -rf lib && tsc -p tsconfig.build.json",
+    "typescript": "tsc",
     "lint": "eslint src --ext .ts"
   },
   "devDependencies": {
