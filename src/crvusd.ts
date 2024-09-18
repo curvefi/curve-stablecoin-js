@@ -23,7 +23,7 @@ class Crvusd implements Icrvusd {
     signer: ethers.Signer | null;
     signerAddress: string;
     chainId: number;
-    contracts: { [index: string]: { contract: Contract, multicallContract: MulticallContract } };
+    contracts: { [index: string]: { contract: Contract, multicallContract: MulticallContract } } | null;
     feeData: { gasPrice?: number, maxFeePerGas?: number, maxPriorityFeePerGas?: number };
     constantOptions: { gasLimit: number };
     options: { gasPrice?: number | ethers.BigNumber, maxFeePerGas?: number | ethers.BigNumber, maxPriorityFeePerGas?: number | ethers.BigNumber };
@@ -44,7 +44,7 @@ class Crvusd implements Icrvusd {
         this.signerAddress = "";
         this.chainId = 0;
         this.multicallProvider = null;
-        this.contracts = {};
+        this.contracts = null;
         this.feeData = {}
         this.constantOptions = { gasLimit: 12000000 }
         this.options = {};
@@ -75,12 +75,12 @@ class Crvusd implements Icrvusd {
         this.chainId = 0;
         // @ts-ignore
         this.multicallProvider = null;
-        this.contracts = {};
         this.feeData = {}
         this.constantOptions = { gasLimit: 12000000 }
         this.options = {};
 
         if (!providerType) return;
+        this.contracts = {};
 
         // JsonRpc provider
         if (providerType.toLowerCase() === 'JsonRpc'.toLowerCase()) {
@@ -223,7 +223,7 @@ class Crvusd implements Icrvusd {
     }
 
     setContract(address: string, abi: any): void {
-        if (!this.provider) throw Error('Cannot set contract without provider')
+        if (!this.provider || !this.contracts) throw Error('Cannot set contract without provider')
         this.contracts[address] = {
             contract: new Contract(address, abi, this.signer || this.provider),
             multicallContract: new MulticallContract(address, abi),
