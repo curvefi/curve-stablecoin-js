@@ -23,8 +23,8 @@ export interface ILlamma {
 }
 
 export interface Icrvusd {
-    provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider,
-    multicallProvider: MulticallProvider,
+    provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider | null,
+    multicallProvider: MulticallProvider | null,
     signer: ethers.Signer | null,
     signerAddress: string,
     contracts: { [index: string]: { contract: Contract, multicallContract: MulticallContract } },

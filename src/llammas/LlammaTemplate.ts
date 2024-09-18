@@ -218,6 +218,8 @@ export class LlammaTemplate {
         liquidation_discount: string, // %
         loan_discount: string, // %
     }> => {
+        if (!crvusd.multicallProvider) throw Error('Cannot get parameters without provider')
+
         const llammaContract = crvusd.contracts[this.address].multicallContract;
         const controllerContract = crvusd.contracts[this.controller].multicallContract;
         const monetaryPolicyContract = crvusd.contracts[this.monetaryPolicy].multicallContract;
@@ -247,6 +249,8 @@ export class LlammaTemplate {
     });
 
     private async statsBalances(): Promise<[string, string]> {
+        if (!crvusd.multicallProvider) throw Error('Cannot get balances without provider')
+
         const crvusdContract = crvusd.contracts[crvusd.address].multicallContract;
         const collateralContract = crvusd.contracts[isEth(this.collateral) ? crvusd.constants.WETH : this.collateral].multicallContract;
         const contract = crvusd.contracts[this.address].multicallContract;
@@ -265,6 +269,8 @@ export class LlammaTemplate {
     }
 
     private statsMaxMinBands = memoize(async (): Promise<[number, number]> => {
+        if (!crvusd.multicallProvider) throw Error('Cannot get max and min bands without provider')
+
         const llammaContract = crvusd.contracts[this.address].multicallContract;
 
         const calls1 = [
@@ -295,6 +301,8 @@ export class LlammaTemplate {
     }
 
     private async statsBandBalances(n: number): Promise<{ stablecoin: string, collateral: string }> {
+        if (!crvusd.multicallProvider) throw Error('Cannot get band balances without provider')
+
         const llammaContract = crvusd.contracts[this.address].multicallContract;
         const calls = [];
         calls.push(llammaContract.bands_x(n), llammaContract.bands_y(n));
@@ -308,6 +316,8 @@ export class LlammaTemplate {
     }
 
     private async statsBandsBalances(): Promise<{ [index: number]: { stablecoin: string, collateral: string } }> {
+        if (!crvusd.multicallProvider) throw Error('Cannot get bands balances without provider')
+
         const [max_band, min_band]: number[] = await this.statsMaxMinBands();
 
         const llammaContract = crvusd.contracts[this.address].multicallContract;
@@ -334,6 +344,8 @@ export class LlammaTemplate {
     }
 
     private statsTotalSupply = memoize(async (): Promise<string> => {
+        if (!crvusd.multicallProvider) throw Error('Cannot get total supply without provider')
+
         const controllerContract = crvusd.contracts[this.controller].multicallContract;
         const calls = [controllerContract.minted(), controllerContract.redeemed()]
         const [_minted, _redeemed]: ethers.BigNumber[] = await crvusd.multicallProvider.all(calls);
@@ -356,6 +368,8 @@ export class LlammaTemplate {
     });
 
     private statsTotalStablecoin = memoize(async (): Promise<string> => {
+        if (!crvusd.multicallProvider) throw Error('Cannot get total stablecoin without provider')
+
         const stablecoinContract = crvusd.contracts[crvusd.address].multicallContract;
         const ammContract = crvusd.contracts[this.address].multicallContract;
 
@@ -372,6 +386,8 @@ export class LlammaTemplate {
     });
 
     private statsTotalCollateral = memoize(async (): Promise<string> => {
+        if (!crvusd.multicallProvider) throw Error('Cannot get total collateral without provider')
+
         const collateralContract = crvusd.contracts[isEth(this.collateral) ? crvusd.constants.WETH : this.collateral].multicallContract;
         const ammContract = crvusd.contracts[this.address].multicallContract;
 
@@ -388,6 +404,8 @@ export class LlammaTemplate {
     });
 
     private statsCapAndAvailable = memoize(async (): Promise<{ "cap": string, "available": string }> => {
+        if (!crvusd.multicallProvider) throw Error('Cannot get cap and available without provider')
+
         const factoryContract = crvusd.contracts[crvusd.constants.FACTORY].multicallContract;
         const crvusdContract = crvusd.contracts[crvusd.address].multicallContract;
 
@@ -594,6 +612,8 @@ export class LlammaTemplate {
     }
 
     public createLoanMaxRecvAllRanges = memoize(async (collateral: number | string): Promise<{ [index: number]: string }> => {
+        if (!crvusd.multicallProvider) throw Error('Cannot get max borrowable without provider')
+
         const _collateral = parseUnits(collateral, this.collateralDecimals);
 
         const calls = [];
@@ -629,6 +649,8 @@ export class LlammaTemplate {
     }
 
     private async _calcN1AllRanges(_collateral: ethers.BigNumber, _debt: ethers.BigNumber, maxN: number): Promise<ethers.BigNumber[]> {
+        if (!crvusd.multicallProvider) throw Error('Cannot get max borrowable without provider')
+
         const calls = [];
         for (let N = this.minBands; N <= maxN; N++) {
             calls.push(crvusd.contracts[this.controller].multicallContract.calculate_debt_n1(_collateral, _debt, N));
@@ -637,6 +659,8 @@ export class LlammaTemplate {
     }
 
     private async _getPrices(_n2: ethers.BigNumber, _n1: ethers.BigNumber): Promise<string[]> {
+        if (!crvusd.multicallProvider) throw Error('Cannot get prices without provider')
+
         const contract = crvusd.contracts[this.address].multicallContract;
         return (await crvusd.multicallProvider.all([
             contract.p_oracle_down(_n2),
@@ -1321,6 +1345,8 @@ export class LlammaTemplate {
 
     private async leverageCreateLoanMaxRecv(collateral: number | string, range: number):
         Promise<{ maxBorrowable: string, maxCollateral: string, leverage: string, routeIdx: number }> {
+        if (!crvusd.multicallProvider) throw Error('Cannot get max borrowable and collateral without provider')
+
         this._checkLeverageZap();
         this._checkRange(range);
         const _collateral = parseUnits(collateral, this.collateralDecimals);
@@ -1345,6 +1371,8 @@ export class LlammaTemplate {
 
     private leverageCreateLoanMaxRecvAllRanges = memoize(async (collateral: number | string):
         Promise<IDict<{ maxBorrowable: string, maxCollateral: string, leverage: string, routeIdx: number }>> => {
+        if (!crvusd.multicallProvider) throw Error('Cannot get max borrowable and collateral without provider')
+
         this._checkLeverageZap();
         const _collateral = parseUnits(collateral, this.collateralDecimals);
 
@@ -1381,6 +1409,8 @@ export class LlammaTemplate {
 
     private _leverageCreateLoanMaxRecvAllRanges2 = memoize(async (collateral: number | string, routeIdx: number):
         Promise<IDict<{ maxBorrowable: string, maxCollateral: string, leverage: string}>> => {
+        if (!crvusd.multicallProvider) throw Error('Cannot get max borrowable and collateral without provider')
+
         const _collateral = parseUnits(collateral, this.collateralDecimals);
 
         const calls = [];
@@ -1409,6 +1439,8 @@ export class LlammaTemplate {
 
     private _leverageCreateLoanCollateral = memoize(async (userCollateral: number | string, debt: number | string):
     Promise<{ _collateral: ethers.BigNumber, routeIdx: number }> => {
+        if (!crvusd.multicallProvider) throw Error('Cannot get collateral without provider')
+
         const _userCollateral = parseUnits(userCollateral, this.collateralDecimals);
         const _debt = parseUnits(debt);
         const calls = [];
@@ -1465,6 +1497,8 @@ export class LlammaTemplate {
     }
 
     private async _leverageCalcN1AllRanges(collateral: number | string, debt: number | string, maxN: number): Promise<ethers.BigNumber[]> {
+        if (!crvusd.multicallProvider) throw Error('Cannot get max borrowable without provider')
+
         const routeIdx = await this._getRouteIdx(collateral, debt);
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const _debt = parseUnits(debt);
@@ -1626,6 +1660,8 @@ export class LlammaTemplate {
     }
 
     private deleverageRepayStablecoins = memoize( async (collateral: number | string): Promise<{ stablecoins: string, routeIdx: number }> => {
+        if (!crvusd.multicallProvider) throw Error('Cannot get stablecoins without provider')
+
         this._checkDeleverageZap();
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const calls = [];

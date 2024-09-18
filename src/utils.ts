@@ -85,6 +85,8 @@ export const _getCoinDecimals = (coinAddresses: string[]): number[] => {
 // --- BALANCES ---
 
 export const _getBalances = async (coinAddresses: string[], address = ""): Promise<ethers.BigNumber[]> => {
+    if (!crvusd.provider || !crvusd.multicallProvider) throw Error('Cannot get balances without provider')
+
     address = _getAddress(address);
     const _coinAddresses = [...coinAddresses];
     const ethIndex = getEthIndex(_coinAddresses);
@@ -117,6 +119,7 @@ export const getBalances = async (coins: string[], address = ""): Promise<string
 // --- ALLOWANCE ---
 
 export const _getAllowance = async (coins: string[], address: string, spender: string): Promise<ethers.BigNumber[]> => {
+    if (!crvusd.multicallProvider) throw Error('Cannot get allowance without provider')
     const _coins = [...coins]
     const ethIndex = getEthIndex(_coins);
     if (ethIndex !== -1) {
@@ -267,6 +270,8 @@ export const getUsdRate = async (coin: string): Promise<number> => {
 }
 
 export const totalSupply = async (): Promise<{ total: string, minted: string, pegKeepersDebt: string }> => {
+    if (!crvusd.multicallProvider) throw Error('Cannot get total supply without provider')
+
     const calls = [];
     for (const llammaId of crvusd.getLlammaList()) {
         const controllerAddress = crvusd.constants.LLAMMAS[llammaId].controller_address;

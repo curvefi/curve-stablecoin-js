@@ -18,8 +18,8 @@ import { extractDecimals } from "./constants/utils";
 
 class Crvusd implements Icrvusd {
     address: string;
-    provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider;
-    multicallProvider: MulticallProvider;
+    provider: ethers.providers.Web3Provider | ethers.providers.JsonRpcProvider | null;
+    multicallProvider: MulticallProvider | null;
     signer: ethers.Signer | null;
     signerAddress: string;
     chainId: number;
@@ -39,13 +39,10 @@ class Crvusd implements Icrvusd {
 
     constructor() {
         this.address = COINS.crvusd.toLowerCase();
-        // @ts-ignore
         this.provider = null;
-        // @ts-ignore
         this.signer = null;
         this.signerAddress = "";
         this.chainId = 0;
-        // @ts-ignore
         this.multicallProvider = null;
         this.contracts = {};
         this.feeData = {}
@@ -72,9 +69,7 @@ class Crvusd implements Icrvusd {
         providerSettings?: { url?: string, privateKey?: string } | { externalProvider: ethers.providers.ExternalProvider } | { network?: Networkish, apiKey?: string },
         options: { gasPrice?: number, maxFeePerGas?: number, maxPriorityFeePerGas?: number, chainId?: number } = {} // gasPrice in Gwei
     ): Promise<void> {
-        // @ts-ignore
         this.provider = null;
-        // @ts-ignore
         this.signer = null;
         this.signerAddress = "";
         this.chainId = 0;
@@ -228,6 +223,7 @@ class Crvusd implements Icrvusd {
     }
 
     setContract(address: string, abi: any): void {
+        if (!this.provider) throw Error('Cannot set contract without provider')
         this.contracts[address] = {
             contract: new Contract(address, abi, this.signer || this.provider),
             multicallContract: new MulticallContract(address, abi),
@@ -249,6 +245,7 @@ class Crvusd implements Icrvusd {
     }
 
     async updateFeeData(): Promise<void> {
+        if (!this.provider) throw Error('Cannot update fee data without provider')
         const feeData = await this.provider.getFeeData();
         if (feeData.maxFeePerGas === null || feeData.maxPriorityFeePerGas === null) {
             delete this.options.maxFeePerGas;
