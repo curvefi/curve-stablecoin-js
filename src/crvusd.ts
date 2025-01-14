@@ -61,7 +61,6 @@ class Crvusd implements Icrvusd {
                 '0x9201da0d97caaaff53f01b2fb56767c7072de340'.toLowerCase(),
                 '0xfb726f57d251ab5c731e5c64ed4f5f94351ef9f3'.toLowerCase(),
                 '0x3fa20eaa107de08b38a8734063d605d5842fe09c'.toLowerCase(),
-                '0x0a05ff644878b908ef8eb29542aa88c07d9797d3'.toLowerCase(),
                 '0x503E1Bf274e7a6c64152395aE8eB57ec391F91F8'.toLowerCase(),
             ],
             WETH: "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2".toLowerCase(),
