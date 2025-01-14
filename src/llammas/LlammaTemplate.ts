@@ -1002,12 +1002,12 @@ export class LlammaTemplate {
     // ---------------- REPAY ----------------
 
     private async _repayBands(debt: number | string, address: string): Promise<[ethers.BigNumber, ethers.BigNumber]> {
-        const { _collateral: _currentCollateral, _debt: _currentDebt } = await this._userState(address);
+        const { _collateral: _currentCollateral, _debt: _currentDebt, _stablecoin: _currentStablecoin } = await this._userState(address);
         if (_currentDebt.eq(0)) throw Error(`Loan for ${address} does not exist`);
 
         const N = await this.userRange(address);
         const _debt = _currentDebt.sub(parseUnits(debt));
-        const _n1 = await this._calcN1(_currentCollateral, _debt, N);
+        const _n1 = _currentStablecoin.eq(0) ? await this._calcN1(_currentCollateral, _debt, N) : (await crvusd.contracts[this.address].contract.read_user_tick_numbers(address, crvusd.constantOptions) as ethers.BigNumber[])[0];
         const _n2 = _n1.add(N - 1);
 
         return [_n2, _n1];
