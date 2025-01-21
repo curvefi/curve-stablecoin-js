@@ -1,13 +1,12 @@
-import axios from "axios";
 import memoize from "memoizee";
-import { crvusd } from "./crvusd.js";
 import { IExtendedPoolDataFromApi, INetworkName } from "./interfaces";
 
 export const _getPoolsFromApi = memoize(
     async (network: INetworkName, poolType: "main" | "crypto" | "factory" | "factory-crvusd" | "factory-crypto"): Promise<IExtendedPoolDataFromApi> => {
         const url = `https://api.curve.fi/api/getPools/${network}/${poolType}`;
-        const response = await axios.get(url, { validateStatus: () => true });
-        return response.data.data ?? { poolData: [], tvl: 0, tvlAll: 0 };
+        const response = await fetch(url);
+        const {data} = await response.json() as { data: IExtendedPoolDataFromApi };
+        return data ?? { poolData: [], tvl: 0, tvlAll: 0 };
     },
     {
         promise: true,
@@ -18,8 +17,9 @@ export const _getPoolsFromApi = memoize(
 export const _getUserCollateral = memoize(
     async (network: INetworkName, controller: string, user: string): Promise<string> => {
         const url = `https://prices.curve.fi/v1/crvusd/collateral_events/${network}/${controller}/${user}`;
-        const response = await axios.get(url, { validateStatus: () => true });
-        return response.data.total_deposit;
+        const response = await fetch(url);
+        const {total_deposit} = await response.json() as { total_deposit: string };
+        return total_deposit;
     },
     {
         promise: true,
