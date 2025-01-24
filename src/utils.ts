@@ -1,4 +1,3 @@
-import axios from "axios";
 import { ethers } from "ethers";
 import BigNumber from 'bignumber.js';
 import { IDict } from "./interfaces";
@@ -255,9 +254,10 @@ export const getUsdRate = async (coin: string): Promise<number> => {
         const url = coinAddress === nativeTokenName ?
             `https://api.coingecko.com/api/v3/simple/price?ids=${coinAddress}&vs_currencies=usd` :
             `https://api.coingecko.com/api/v3/simple/token_price/${chainName}?contract_addresses=${coinAddress}&vs_currencies=usd`
-        const response = await axios.get(url);
+        const response = await fetch(url);
+        const data = await response.json() as IDict<{ usd?: number }>;
         try {
-            _usdRatesCache[coinAddress] = {'rate': response.data[coinAddress]['usd'] ?? 0, 'time': Date.now()};
+            _usdRatesCache[coinAddress] = {'rate': data[coinAddress].usd ?? 0, 'time': Date.now()};
         } catch (err) { // TODO pay attention!
             _usdRatesCache[coinAddress] = {'rate': 0, 'time': Date.now()};
         }
@@ -296,8 +296,8 @@ export const getLsdApy = memoize(async(name: 'wstETH' | 'sfrxETH'): Promise<{
         baseApy: number,
         apyMean30d: number,
     }> => {
-    const response = await axios.get('https://yields.llama.fi/pools');
-    const {data} = response.data;
+    const response = await fetch('https://yields.llama.fi/pools');
+    const {data} = await response.json() as { data: { chain: string, project: string, symbol: string, apy: number, apyBase: number, apyMean30d: number }[] };
 
     const params = {
         'wstETH': {
@@ -314,7 +314,7 @@ export const getLsdApy = memoize(async(name: 'wstETH' | 'sfrxETH'): Promise<{
         chain,
         project,
         symbol,
-    }: any) => (
+    }) => (
         chain === 'Ethereum' &&
         project === params[name].project &&
         symbol === params[name].symbol

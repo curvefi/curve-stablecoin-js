@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: get-npm-version
         id: package-version
         uses: martinbeentjes/npm-get-version-action@main
@@ -38,15 +38,18 @@ jobs:
 
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
-      - uses: actions/checkout@v2
-      - name: Setup .npmrc file to publish to npm
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v4
+      - name: Setup node version
+        uses: actions/setup-node@v4
         with:
-          node-version: '12.x'
+          node-version: '22'
           registry-url: 'https://registry.npmjs.org'
       - name: Install modules
-        run: npm install
+        run: npm ci
       - name: Build
         run: npm run build
       - name: Publish to npm
