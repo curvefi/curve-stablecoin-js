@@ -1,234 +1,181 @@
 [
   {
-    "name": "UserState",
+    "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
         "name": "user",
-        "type": "address",
-        "indexed": true
+        "type": "address"
       },
       {
+        "indexed": false,
         "name": "collateral",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       },
       {
+        "indexed": false,
         "name": "debt",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       },
       {
+        "indexed": false,
         "name": "n1",
-        "type": "int256",
-        "indexed": false
+        "type": "int256"
       },
       {
+        "indexed": false,
         "name": "n2",
-        "type": "int256",
-        "indexed": false
+        "type": "int256"
       },
       {
+        "indexed": false,
         "name": "liquidation_discount",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       }
     ],
-    "anonymous": false,
+    "name": "UserState",
     "type": "event"
   },
   {
-    "name": "Borrow",
+    "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
         "name": "user",
-        "type": "address",
-        "indexed": true
+        "type": "address"
       },
       {
+        "indexed": false,
         "name": "collateral_increase",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       },
       {
+        "indexed": false,
         "name": "loan_increase",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       }
     ],
-    "anonymous": false,
+    "name": "Borrow",
     "type": "event"
   },
   {
-    "name": "Repay",
+    "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
         "name": "user",
-        "type": "address",
-        "indexed": true
+        "type": "address"
       },
       {
+        "indexed": false,
         "name": "collateral_decrease",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       },
       {
+        "indexed": false,
         "name": "loan_decrease",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       }
     ],
-    "anonymous": false,
+    "name": "Repay",
     "type": "event"
   },
   {
-    "name": "RemoveCollateral",
+    "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
         "name": "user",
-        "type": "address",
-        "indexed": true
+        "type": "address"
       },
       {
+        "indexed": false,
         "name": "collateral_decrease",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       }
     ],
-    "anonymous": false,
+    "name": "RemoveCollateral",
     "type": "event"
   },
   {
-    "name": "Liquidate",
+    "anonymous": false,
     "inputs": [
       {
+        "indexed": true,
         "name": "liquidator",
-        "type": "address",
-        "indexed": true
+        "type": "address"
       },
       {
+        "indexed": true,
         "name": "user",
-        "type": "address",
-        "indexed": true
+        "type": "address"
       },
       {
+        "indexed": false,
         "name": "collateral_received",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       },
       {
+        "indexed": false,
         "name": "stablecoin_received",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       },
       {
+        "indexed": false,
         "name": "debt",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       }
     ],
-    "anonymous": false,
+    "name": "Liquidate",
     "type": "event"
   },
   {
-    "name": "SetMonetaryPolicy",
+    "anonymous": false,
     "inputs": [
       {
+        "indexed": false,
         "name": "monetary_policy",
-        "type": "address",
-        "indexed": false
+        "type": "address"
       }
     ],
-    "anonymous": false,
+    "name": "SetMonetaryPolicy",
     "type": "event"
   },
   {
-    "name": "SetBorrowingDiscounts",
+    "anonymous": false,
     "inputs": [
       {
+        "indexed": false,
         "name": "loan_discount",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       },
       {
+        "indexed": false,
         "name": "liquidation_discount",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       }
     ],
-    "anonymous": false,
+    "name": "SetBorrowingDiscounts",
     "type": "event"
   },
   {
-    "name": "SetExtraHealth",
-    "inputs": [
-      {
-        "name": "user",
-        "type": "address",
-        "indexed": true
-      },
-      {
-        "name": "health",
-        "type": "uint256",
-        "indexed": false
-      }
-    ],
     "anonymous": false,
-    "type": "event"
-  },
-  {
-    "name": "CollectFees",
     "inputs": [
       {
+        "indexed": false,
         "name": "amount",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       },
       {
+        "indexed": false,
         "name": "new_supply",
-        "type": "uint256",
-        "indexed": false
+        "type": "uint256"
       }
     ],
-    "anonymous": false,
+    "name": "CollectFees",
     "type": "event"
   },
   {
-    "name": "SetLMCallback",
-    "inputs": [
-      {
-        "name": "callback",
-        "type": "address",
-        "indexed": false
-      }
-    ],
-    "anonymous": false,
-    "type": "event"
-  },
-  {
-    "name": "Approval",
-    "inputs": [
-      {
-        "name": "owner",
-        "type": "address",
-        "indexed": true
-      },
-      {
-        "name": "spender",
-        "type": "address",
-        "indexed": true
-      },
-      {
-        "name": "allow",
-        "type": "bool",
-        "indexed": false
-      }
-    ],
-    "anonymous": false,
-    "type": "event"
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "constructor",
     "inputs": [
       {
         "name": "collateral_token",
@@ -251,113 +198,98 @@
         "type": "address"
       }
     ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "pure",
-    "type": "function",
-    "name": "factory",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ]
-  },
-  {
-    "stateMutability": "pure",
-    "type": "function",
-    "name": "amm",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ]
-  },
-  {
-    "stateMutability": "pure",
-    "type": "function",
-    "name": "collateral_token",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ]
-  },
-  {
-    "stateMutability": "pure",
-    "type": "function",
-    "name": "borrowed_token",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "address"
-      }
-    ]
-  },
-  {
+    "name": "constructor",
+    "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "save_rate",
-    "inputs": [],
-    "outputs": []
+    "type": "constructor"
   },
   {
+    "stateMutability": "payable",
+    "type": "fallback"
+  },
+  {
+    "inputs": [],
+    "name": "factory",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
     "stateMutability": "view",
-    "type": "function",
-    "name": "debt",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "amm",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "collateral_token",
+    "outputs": [
+      {
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "name": "user",
         "type": "address"
       }
     ],
+    "name": "debt",
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "loan_exists",
     "inputs": [
       {
         "name": "user",
         "type": "address"
       }
     ],
+    "name": "loan_exists",
     "outputs": [
       {
         "name": "",
         "type": "bool"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "total_debt",
     "inputs": [],
+    "name": "total_debt",
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "max_borrowable",
     "inputs": [
       {
         "name": "collateral",
@@ -368,71 +300,17 @@
         "type": "uint256"
       }
     ],
+    "name": "max_borrowable",
     "outputs": [
       {
         "name": "",
-        "type": "uint256"
-      }
-    ]
-  },
-  {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "max_borrowable",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "N",
-        "type": "uint256"
-      },
-      {
-        "name": "current_debt",
         "type": "uint256"
       }
     ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ]
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "max_borrowable",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "N",
-        "type": "uint256"
-      },
-      {
-        "name": "current_debt",
-        "type": "uint256"
-      },
-      {
-        "name": "user",
-        "type": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ]
-  },
-  {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "min_collateral",
     "inputs": [
       {
         "name": "debt",
@@ -443,18 +321,22 @@
         "type": "uint256"
       }
     ],
+    "name": "min_collateral",
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "min_collateral",
     "inputs": [
+      {
+        "name": "collateral",
+        "type": "uint256"
+      },
       {
         "name": "debt",
         "type": "uint256"
@@ -462,48 +344,19 @@
       {
         "name": "N",
         "type": "uint256"
-      },
-      {
-        "name": "user",
-        "type": "address"
       }
     ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ]
-  },
-  {
-    "stateMutability": "view",
-    "type": "function",
     "name": "calculate_debt_n1",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "debt",
-        "type": "uint256"
-      },
-      {
-        "name": "N",
-        "type": "uint256"
-      }
-    ],
     "outputs": [
       {
         "name": "",
         "type": "int256"
       }
-    ]
-  },
-  {
+    ],
     "stateMutability": "view",
-    "type": "function",
-    "name": "calculate_debt_n1",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "name": "collateral",
@@ -516,43 +369,14 @@
       {
         "name": "N",
         "type": "uint256"
-      },
-      {
-        "name": "user",
-        "type": "address"
       }
     ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "int256"
-      }
-    ]
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
     "name": "create_loan",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "debt",
-        "type": "uint256"
-      },
-      {
-        "name": "N",
-        "type": "uint256"
-      }
-    ],
-    "outputs": []
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "create_loan",
     "inputs": [
       {
         "name": "collateral",
@@ -564,6 +388,26 @@
       },
       {
         "name": "N",
+        "type": "uint256"
+      },
+      {
+        "name": "callbacker",
+        "type": "address"
+      },
+      {
+        "name": "callback_args",
+        "type": "uint256[]"
+      }
+    ],
+    "name": "create_loan_extended",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "name": "collateral",
         "type": "uint256"
       },
       {
@@ -571,284 +415,44 @@
         "type": "address"
       }
     ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "create_loan_extended",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "debt",
-        "type": "uint256"
-      },
-      {
-        "name": "N",
-        "type": "uint256"
-      },
-      {
-        "name": "callbacker",
-        "type": "address"
-      },
-      {
-        "name": "callback_args",
-        "type": "uint256[]"
-      }
-    ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "create_loan_extended",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "debt",
-        "type": "uint256"
-      },
-      {
-        "name": "N",
-        "type": "uint256"
-      },
-      {
-        "name": "callbacker",
-        "type": "address"
-      },
-      {
-        "name": "callback_args",
-        "type": "uint256[]"
-      },
-      {
-        "name": "callback_bytes",
-        "type": "bytes"
-      }
-    ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "create_loan_extended",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "debt",
-        "type": "uint256"
-      },
-      {
-        "name": "N",
-        "type": "uint256"
-      },
-      {
-        "name": "callbacker",
-        "type": "address"
-      },
-      {
-        "name": "callback_args",
-        "type": "uint256[]"
-      },
-      {
-        "name": "callback_bytes",
-        "type": "bytes"
-      },
-      {
-        "name": "_for",
-        "type": "address"
-      }
-    ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
     "name": "add_collateral",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      }
-    ],
-    "outputs": []
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "add_collateral",
     "inputs": [
       {
         "name": "collateral",
         "type": "uint256"
       },
       {
-        "name": "_for",
-        "type": "address"
+        "name": "use_eth",
+        "type": "bool"
       }
     ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
     "name": "remove_collateral",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      }
-    ],
-    "outputs": []
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "remove_collateral",
     "inputs": [
       {
         "name": "collateral",
         "type": "uint256"
       },
       {
-        "name": "_for",
-        "type": "address"
+        "name": "debt",
+        "type": "uint256"
       }
     ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
     "name": "borrow_more",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "debt",
-        "type": "uint256"
-      }
-    ],
-    "outputs": []
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "borrow_more",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "debt",
-        "type": "uint256"
-      },
-      {
-        "name": "_for",
-        "type": "address"
-      }
-    ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "borrow_more_extended",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "debt",
-        "type": "uint256"
-      },
-      {
-        "name": "callbacker",
-        "type": "address"
-      },
-      {
-        "name": "callback_args",
-        "type": "uint256[]"
-      }
-    ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "borrow_more_extended",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "debt",
-        "type": "uint256"
-      },
-      {
-        "name": "callbacker",
-        "type": "address"
-      },
-      {
-        "name": "callback_args",
-        "type": "uint256[]"
-      },
-      {
-        "name": "callback_bytes",
-        "type": "bytes"
-      }
-    ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "borrow_more_extended",
-    "inputs": [
-      {
-        "name": "collateral",
-        "type": "uint256"
-      },
-      {
-        "name": "debt",
-        "type": "uint256"
-      },
-      {
-        "name": "callbacker",
-        "type": "address"
-      },
-      {
-        "name": "callback_args",
-        "type": "uint256[]"
-      },
-      {
-        "name": "callback_bytes",
-        "type": "bytes"
-      },
-      {
-        "name": "_for",
-        "type": "address"
-      }
-    ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "repay",
     "inputs": [
       {
         "name": "_d_debt",
@@ -863,12 +467,12 @@
         "type": "int256"
       }
     ],
-    "outputs": []
+    "name": "repay",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "repay_extended",
     "inputs": [
       {
         "name": "callbacker",
@@ -879,56 +483,12 @@
         "type": "uint256[]"
       }
     ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
     "name": "repay_extended",
-    "inputs": [
-      {
-        "name": "callbacker",
-        "type": "address"
-      },
-      {
-        "name": "callback_args",
-        "type": "uint256[]"
-      },
-      {
-        "name": "callback_bytes",
-        "type": "bytes"
-      }
-    ],
-    "outputs": []
-  },
-  {
+    "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "repay_extended",
-    "inputs": [
-      {
-        "name": "callbacker",
-        "type": "address"
-      },
-      {
-        "name": "callback_args",
-        "type": "uint256[]"
-      },
-      {
-        "name": "callback_bytes",
-        "type": "bytes"
-      },
-      {
-        "name": "_for",
-        "type": "address"
-      }
-    ],
-    "outputs": []
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "health_calculator",
     "inputs": [
       {
         "name": "user",
@@ -951,33 +511,37 @@
         "type": "uint256"
       }
     ],
+    "name": "health_calculator",
     "outputs": [
       {
         "name": "",
         "type": "int256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
+    "inputs": [
+      {
+        "name": "user",
+        "type": "address"
+      },
+      {
+        "name": "min_x",
+        "type": "uint256"
+      },
+      {
+        "name": "use_eth",
+        "type": "bool"
+      }
+    ],
     "name": "liquidate",
-    "inputs": [
-      {
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "name": "min_x",
-        "type": "uint256"
-      }
-    ],
-    "outputs": []
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "liquidate_extended",
     "inputs": [
       {
         "name": "user",
@@ -990,6 +554,10 @@
       {
         "name": "frac",
         "type": "uint256"
+      },
+      {
+        "name": "use_eth",
+        "type": "bool"
       },
       {
         "name": "callbacker",
@@ -1000,82 +568,29 @@
         "type": "uint256[]"
       }
     ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
     "name": "liquidate_extended",
-    "inputs": [
-      {
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "name": "min_x",
-        "type": "uint256"
-      },
-      {
-        "name": "frac",
-        "type": "uint256"
-      },
-      {
-        "name": "callbacker",
-        "type": "address"
-      },
-      {
-        "name": "callback_args",
-        "type": "uint256[]"
-      },
-      {
-        "name": "callback_bytes",
-        "type": "bytes"
-      }
-    ],
-    "outputs": []
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "tokens_to_liquidate",
     "inputs": [
       {
         "name": "user",
         "type": "address"
       }
     ],
+    "name": "tokens_to_liquidate",
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
-  },
-  {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "tokens_to_liquidate",
-    "inputs": [
-      {
-        "name": "user",
-        "type": "address"
-      },
-      {
-        "name": "frac",
-        "type": "uint256"
-      }
     ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ]
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "health",
     "inputs": [
       {
         "name": "user",
@@ -1086,22 +601,21 @@
         "type": "bool"
       }
     ],
+    "name": "health",
     "outputs": [
       {
         "name": "",
         "type": "int256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "users_to_liquidate",
     "inputs": [],
+    "name": "users_to_liquidate",
     "outputs": [
       {
-        "name": "",
-        "type": "tuple[]",
         "components": [
           {
             "name": "user",
@@ -1123,24 +637,24 @@
             "name": "health",
             "type": "int256"
           }
-        ]
+        ],
+        "name": "",
+        "type": "tuple[]"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "users_to_liquidate",
     "inputs": [
       {
         "name": "_from",
         "type": "uint256"
       }
     ],
+    "name": "users_to_liquidate",
     "outputs": [
       {
-        "name": "",
-        "type": "tuple[]",
         "components": [
           {
             "name": "user",
@@ -1162,14 +676,15 @@
             "name": "health",
             "type": "int256"
           }
-        ]
+        ],
+        "name": "",
+        "type": "tuple[]"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "users_to_liquidate",
     "inputs": [
       {
         "name": "_from",
@@ -1180,10 +695,9 @@
         "type": "uint256"
       }
     ],
+    "name": "users_to_liquidate",
     "outputs": [
       {
-        "name": "",
-        "type": "tuple[]",
         "components": [
           {
             "name": "user",
@@ -1205,84 +719,97 @@
             "name": "health",
             "type": "int256"
           }
-        ]
+        ],
+        "name": "",
+        "type": "tuple[]"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "amm_price",
     "inputs": [],
+    "name": "amm_price",
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "user_prices",
     "inputs": [
       {
         "name": "user",
         "type": "address"
       }
     ],
+    "name": "user_prices",
     "outputs": [
       {
         "name": "",
         "type": "uint256[2]"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "user_state",
     "inputs": [
       {
         "name": "user",
         "type": "address"
       }
     ],
+    "name": "user_state",
     "outputs": [
       {
         "name": "",
         "type": "uint256[4]"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "set_amm_fee",
     "inputs": [
       {
         "name": "fee",
         "type": "uint256"
       }
     ],
-    "outputs": []
+    "name": "set_amm_fee",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
+    "inputs": [
+      {
+        "name": "fee",
+        "type": "uint256"
+      }
+    ],
+    "name": "set_amm_admin_fee",
+    "outputs": [],
     "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "set_monetary_policy",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
         "name": "monetary_policy",
         "type": "address"
       }
     ],
-    "outputs": []
+    "name": "set_monetary_policy",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "set_borrowing_discounts",
     "inputs": [
       {
         "name": "loan_discount",
@@ -1293,243 +820,168 @@
         "type": "uint256"
       }
     ],
-    "outputs": []
+    "name": "set_borrowing_discounts",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "set_callback",
     "inputs": [
       {
         "name": "cb",
         "type": "address"
       }
     ],
-    "outputs": []
+    "name": "set_callback",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
+    "inputs": [],
     "name": "admin_fees",
-    "inputs": [],
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "nonpayable",
-    "type": "function",
+    "inputs": [],
     "name": "collect_fees",
-    "inputs": [],
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
-  },
-  {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "check_lock",
-    "inputs": [],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ]
-  },
-  {
+    ],
     "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "approve",
+    "type": "function"
+  },
+  {
     "inputs": [
       {
-        "name": "_spender",
+        "name": "arg0",
         "type": "address"
-      },
-      {
-        "name": "_allow",
-        "type": "bool"
       }
     ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "set_extra_health",
-    "inputs": [
-      {
-        "name": "_value",
-        "type": "uint256"
-      }
-    ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "view",
-    "type": "function",
     "name": "liquidation_discounts",
-    "inputs": [
-      {
-        "name": "arg0",
-        "type": "address"
-      }
-    ],
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
+    "inputs": [
+      {
+        "name": "arg0",
+        "type": "uint256"
+      }
+    ],
     "name": "loans",
-    "inputs": [
-      {
-        "name": "arg0",
-        "type": "uint256"
-      }
-    ],
     "outputs": [
       {
         "name": "",
         "type": "address"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
+    "inputs": [
+      {
+        "name": "arg0",
+        "type": "address"
+      }
+    ],
     "name": "loan_ix",
-    "inputs": [
-      {
-        "name": "arg0",
-        "type": "address"
-      }
-    ],
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
+    "inputs": [],
     "name": "n_loans",
-    "inputs": [],
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
+    "inputs": [],
     "name": "minted",
-    "inputs": [],
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
+    "inputs": [],
     "name": "redeemed",
-    "inputs": [],
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
+    "inputs": [],
     "name": "monetary_policy",
-    "inputs": [],
     "outputs": [
       {
         "name": "",
         "type": "address"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
+    "inputs": [],
     "name": "liquidation_discount",
-    "inputs": [],
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
+    ],
+    "stateMutability": "view",
+    "type": "function"
   },
   {
-    "stateMutability": "view",
-    "type": "function",
+    "inputs": [],
     "name": "loan_discount",
-    "inputs": [],
     "outputs": [
       {
         "name": "",
         "type": "uint256"
       }
-    ]
-  },
-  {
-    "stateMutability": "view",
-    "type": "function",
-    "name": "approval",
-    "inputs": [
-      {
-        "name": "arg0",
-        "type": "address"
-      },
-      {
-        "name": "arg1",
-        "type": "address"
-      }
     ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "bool"
-      }
-    ]
-  },
-  {
     "stateMutability": "view",
-    "type": "function",
-    "name": "extra_health",
-    "inputs": [
-      {
-        "name": "arg0",
-        "type": "address"
-      }
-    ],
-    "outputs": [
-      {
-        "name": "",
-        "type": "uint256"
-      }
-    ]
+    "type": "function"
   }
 ]
