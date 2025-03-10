@@ -49,7 +49,7 @@ class Crvusd implements Icrvusd {
         this.multicallProvider = null;
         this.contracts = {};
         this.feeData = {}
-        this.constantOptions = { gasLimit: 12000000 }
+        this.constantOptions = { gasLimit: 35000000 }
         this.options = {};
         this.constants = {
             LLAMMAS,
