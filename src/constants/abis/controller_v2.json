@@ -853,34 +853,6 @@
       {
         "name": "_d_debt",
         "type": "uint256"
-      }
-    ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "repay",
-    "inputs": [
-      {
-        "name": "_d_debt",
-        "type": "uint256"
-      },
-      {
-        "name": "_for",
-        "type": "address"
-      }
-    ],
-    "outputs": []
-  },
-  {
-    "stateMutability": "nonpayable",
-    "type": "function",
-    "name": "repay",
-    "inputs": [
-      {
-        "name": "_d_debt",
-        "type": "uint256"
       },
       {
         "name": "_for",
