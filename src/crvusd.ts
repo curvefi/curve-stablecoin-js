@@ -224,6 +224,7 @@ class Crvusd implements Icrvusd {
                     default_bands: 10,
                     A: 100,
                     monetary_policy_abi: MonetaryPolicy2ABI,
+                    isNewMarket: i >= collaterals.length - 3,
                 }
             }
         }

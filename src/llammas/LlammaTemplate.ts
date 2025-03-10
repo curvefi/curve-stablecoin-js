@@ -23,6 +23,7 @@ import { _getUserCollateral } from "../external-api.js";
 
 export class LlammaTemplate {
     id: string;
+    isNewMarket: boolean;
     address: string;
     controller: string;
     monetaryPolicy: string;
@@ -120,6 +121,7 @@ export class LlammaTemplate {
         const llammaData = crvusd.constants.LLAMMAS[id];
 
         this.id = id;
+        this.isNewMarket = llammaData.isNewMarket || false;
         this.address = llammaData.amm_address;
         this.controller = llammaData.controller_address;
         this.monetaryPolicy = llammaData.monetary_policy_address;
@@ -1058,12 +1060,12 @@ export class LlammaTemplate {
         const [_, n1] = await this.userBands(address);
         const { stablecoin } = await this.userState(address);
         const n = (BN(stablecoin).gt(0)) ? MAX_ACTIVE_BAND : n1 - 1;  // In liquidation mode it doesn't matter if active band moves
-        const gas = await contract.estimateGas.repay(_debt, address, n, isEth(this.collateral), crvusd.constantOptions);
+        const gas = this.isNewMarket ? await contract.estimateGas.repay(_debt, address, n, crvusd.constantOptions) : await contract.estimateGas.repay(_debt, address, n, isEth(this.collateral), crvusd.constantOptions);
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.repay(_debt, address, n, isEth(this.collateral), { ...crvusd.options, gasLimit })).hash
+        return (this.isNewMarket ? await contract.repay(_debt, address, n, { ...crvusd.options, gasLimit }) : await contract.repay(_debt, address, n, isEth(this.collateral), { ...crvusd.options, gasLimit })).hash
     }
 
     public async repayEstimateGas(debt: number | string, address = ""): Promise<number> {

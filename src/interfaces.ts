@@ -20,6 +20,7 @@ export interface ILlamma {
     default_bands: number,
     A: number,
     monetary_policy_abi: any
+    isNewMarket?: boolean
 }
 
 export interface Icrvusd {
