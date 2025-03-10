@@ -6,6 +6,7 @@ import ERC20ABI from "./constants/abis/ERC20.json";
 import MonetaryPolicy2ABI from "./constants/abis/MonetaryPolicy2.json";
 import FactoryABI from "./constants/abis/Factory.json";
 import controllerABI from "./constants/abis/controller.json";
+import controllerV2ABI from "./constants/abis/controller_v2.json";
 import llammaABI from "./constants/abis/llamma.json";
 import HealthCalculatorZapABI from "./constants/abis/HealthCalculatorZap.json";
 import LeverageZapABI from "./constants/abis/LeverageZap.json";
@@ -196,11 +197,17 @@ class Crvusd implements Icrvusd {
                 const is_eth = collaterals[i] === this.constants.WETH;
                 const [collateral_symbol, collateral_decimals] = res.splice(0, 2) as [string, number];
                 this.setContract(amms[i], llammaABI);
-                this.setContract(controllers[i], controllerABI);
+                // TODO Should be refactor later
+                if (i >= collaterals.length - 3) {
+                    this.setContract(controllers[i], controllerV2ABI);
+                } else {
+                    this.setContract(controllers[i], controllerABI);
+                }
+
                 const monetary_policy_address = (await this.contracts[controllers[i]].contract.monetary_policy(this.constantOptions)).toLowerCase();
                 this.setContract(monetary_policy_address, MonetaryPolicy2ABI);
                 const _llammaId: string = is_eth ? "eth" : collateral_symbol.toLowerCase();
-                let llammaId = _llammaId
+                let llammaId = _llammaId;
                 let j = 2;
                 while (llammaId in this.constants.LLAMMAS) llammaId = _llammaId + j++;
                 this.constants.LLAMMAS[llammaId] = {
