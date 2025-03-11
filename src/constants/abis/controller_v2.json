@@ -425,10 +425,6 @@
       {
         "name": "collateral",
         "type": "uint256"
-      },
-      {
-        "name": "use_eth",
-        "type": "bool"
       }
     ],
     "name": "remove_collateral",
