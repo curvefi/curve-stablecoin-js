@@ -526,7 +526,7 @@
       {
         "name": "min_x",
         "type": "uint256"
-      },
+      }
     ],
     "name": "liquidate",
     "outputs": [],
