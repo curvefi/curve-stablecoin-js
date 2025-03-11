@@ -985,12 +985,12 @@ export class LlammaTemplate {
 
         const _collateral = parseUnits(collateral, this.collateralDecimals);
         const contract = crvusd.contracts[this.controller].contract;
-        const gas = await contract.estimateGas.remove_collateral(_collateral, isEth(this.collateral), crvusd.constantOptions);
+        const gas = this.isNewMarket ? await contract.estimateGas.remove_collateral(_collateral, crvusd.constantOptions) : await contract.estimateGas.remove_collateral(_collateral, isEth(this.collateral), crvusd.constantOptions);
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.remove_collateral(_collateral, isEth(this.collateral), { ...crvusd.options, gasLimit })).hash
+        return (this.isNewMarket ? await contract.remove_collateral(_collateral, { ...crvusd.options, gasLimit }) : await contract.remove_collateral(_collateral, isEth(this.collateral), { ...crvusd.options, gasLimit })).hash
     }
 
     public async removeCollateralEstimateGas(collateral: number | string): Promise<number> {
@@ -1264,12 +1264,12 @@ export class LlammaTemplate {
         const minAmountBN: BigNumber = BN(stablecoin).times(100 - slippage).div(100);
         const _minAmount = fromBN(minAmountBN);
         const contract = crvusd.contracts[this.controller].contract;
-        const gas = (await contract.estimateGas.liquidate(address, _minAmount, isEth(this.collateral), crvusd.constantOptions))
+        const gas = this.isNewMarket ? (await contract.estimateGas.liquidate(address, _minAmount, crvusd.constantOptions)) : (await contract.estimateGas.liquidate(address, _minAmount, isEth(this.collateral), crvusd.constantOptions))
         if (estimateGas) return gas.toNumber();
 
         await crvusd.updateFeeData();
         const gasLimit = gas.mul(130).div(100);
-        return (await contract.liquidate(address, _minAmount, isEth(this.collateral), { ...crvusd.options, gasLimit })).hash
+        return (this.isNewMarket ? await contract.liquidate(address, _minAmount, { ...crvusd.options, gasLimit }) : await contract.liquidate(address, _minAmount, isEth(this.collateral), { ...crvusd.options, gasLimit })).hash
     }
 
     public async liquidateEstimateGas(address: string, slippage = 0.1): Promise<number> {
