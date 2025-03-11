@@ -527,10 +527,6 @@
         "name": "min_x",
         "type": "uint256"
       },
-      {
-        "name": "use_eth",
-        "type": "bool"
-      }
     ],
     "name": "liquidate",
     "outputs": [],
