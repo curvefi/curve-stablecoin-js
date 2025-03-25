@@ -282,7 +282,7 @@ export class LlammaTemplate {
     });
 
     private statsActiveBand = memoize(async (): Promise<number> => {
-        return (await crvusd.contracts[this.address].contract.active_band()).toNumber()
+        return (await crvusd.contracts[this.address].contract.active_band_with_skip()).toNumber()
     },
     {
         promise: true,
