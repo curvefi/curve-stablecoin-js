@@ -193,10 +193,22 @@ class Crvusd implements Icrvusd {
                 return x;
             });
 
+            calls = [];
+
+            for(const amm of amms) {
+                this.setContract(amm, llammaABI);
+                calls.push(
+                    this.contracts[amm].multicallContract.A()
+                )
+            }
+
+            const AParams = (await this.multicallProvider.all(calls)).map((x) => {
+                return (x as ethers.BigNumber).toNumber();
+            });
+
             for (let i = 0; i < collaterals.length; i++) {
                 const is_eth = collaterals[i] === this.constants.WETH;
                 const [collateral_symbol, collateral_decimals] = res.splice(0, 2) as [string, number];
-                this.setContract(amms[i], llammaABI);
                 // TODO Should be refactor later
                 if (i >= collaterals.length - 3) {
                     this.setContract(controllers[i], controllerV2ABI);
@@ -222,7 +234,7 @@ class Crvusd implements Icrvusd {
                     min_bands: 4,
                     max_bands: 50,
                     default_bands: 10,
-                    A: 100,
+                    A: AParams[i],
                     monetary_policy_abi: MonetaryPolicy2ABI,
                     isNewMarket: i >= collaterals.length - 3,
                 }
