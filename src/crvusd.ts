@@ -53,7 +53,7 @@ class Crvusd implements Icrvusd {
         this.constantOptions = { gasLimit: 35000000 }
         this.options = {};
         this.constants = {
-            LLAMMAS,
+            LLAMMAS: {},
             COINS: {},
             DECIMALS: {},
             NETWORK_NAME: "ethereum",
@@ -86,6 +86,7 @@ class Crvusd implements Icrvusd {
         this.feeData = {}
         this.constantOptions = { gasLimit: 12000000 }
         this.options = {};
+        this.constants.LLAMMAS = {...LLAMMAS}
 
         // JsonRpc provider
         if (providerType.toLowerCase() === 'JsonRpc'.toLowerCase()) {
@@ -211,8 +212,10 @@ class Crvusd implements Icrvusd {
                 const [collateral_symbol, collateral_decimals] = res.splice(0, 2) as [string, number];
                 // TODO Should be refactor later
                 if (i >= collaterals.length - 3) {
+                    console.log('new market',collateral_symbol)
                     this.setContract(controllers[i], controllerV2ABI);
                 } else {
+                    console.log('old market',collateral_symbol)
                     this.setContract(controllers[i], controllerABI);
                 }
 
