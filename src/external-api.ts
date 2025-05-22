@@ -3,7 +3,7 @@ import { IExtendedPoolDataFromApi, INetworkName } from "./interfaces";
 
 export const _getPoolsFromApi = memoize(
     async (network: INetworkName, poolType: "main" | "crypto" | "factory" | "factory-crvusd" | "factory-crypto"): Promise<IExtendedPoolDataFromApi> => {
-        const url = `https://api.curve.fi/api/getPools/${network}/${poolType}`;
+        const url = `https://api.curve.finance/api/getPools/${network}/${poolType}`;
         const response = await fetch(url);
         const {data} = await response.json() as { data: IExtendedPoolDataFromApi };
         return data ?? { poolData: [], tvl: 0, tvlAll: 0 };
@@ -16,7 +16,7 @@ export const _getPoolsFromApi = memoize(
 
 export const _getUserCollateral = memoize(
     async (network: INetworkName, controller: string, user: string): Promise<string> => {
-        const url = `https://prices.curve.fi/v1/crvusd/collateral_events/${network}/${controller}/${user}`;
+        const url = `https://prices.curve.finance/v1/crvusd/collateral_events/${network}/${controller}/${user}`;
         const response = await fetch(url);
         const {total_deposit} = await response.json() as { total_deposit: string };
         return total_deposit;
