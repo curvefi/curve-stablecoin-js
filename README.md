@@ -6,6 +6,10 @@ Install from npm:
 
 `npm install @curvefi/stablecoin-api`
 
+# ⚠️ DEPRECATED
+
+This library is no longer maintained. Please switch to [curve-llamalend.js](https://github.com/curvefi/curve-llamalend.js) instead.
+
 ## Init
 ```ts
 import crvusd from "@curvefi/stablecoin-api";
